@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { When, Then } from '../fixtures/world';
 
 // ---------------------------------------------------------------------------
@@ -8,13 +9,16 @@ import { When, Then } from '../fixtures/world';
 //   When I switch to tab {int}
 //   When I close the current tab
 //   Then {int} tabs are open
+//
+// After "I switch to tab N" all subsequent steps (navigation, click, fill, etc.)
+// automatically target that tab via world.getPage() / world.locator().
 // ---------------------------------------------------------------------------
 
 When('I open a new tab', async ({ page }) => {
   await page.context().newPage();
 });
 
-When('I switch to tab {int}', async ({ page }, tabNumber: number) => {
+When('I switch to tab {int}', async ({ page, world }, tabNumber: number) => {
   const pages = page.context().pages();
   const index = tabNumber - 1;
   if (index < 0 || index >= pages.length) {
@@ -22,18 +26,23 @@ When('I switch to tab {int}', async ({ page }, tabNumber: number) => {
       `[playwright-bdd-steps] Cannot switch to tab ${tabNumber}: only ${pages.length} tab(s) open.`,
     );
   }
+  world.setActivePage(pages[index]);
   await pages[index].bringToFront();
 });
 
-When('I close the current tab', async ({ page }) => {
-  await page.close();
+When('I close the current tab', async ({ page, world }) => {
+  const currentPage = world.getPage(page);
+  await currentPage.close();
+  // If we closed a non-primary tab, reset back to the fixture page
+  if (currentPage !== page) {
+    world.setActivePage(page);
+  }
 });
 
 Then('{int} tabs are open', async ({ page }, count: number) => {
-  const actual = page.context().pages().length;
-  if (actual !== count) {
-    throw new Error(
-      `[playwright-bdd-steps] Expected ${count} tab(s) to be open but found ${actual}.`,
-    );
-  }
+  // expect.poll() retries until the condition is met (or timeout), important
+  // because a new tab may not be registered in the context immediately.
+  await expect.poll(() => page.context().pages().length, {
+    message: `Expected ${count} tab(s) to be open`,
+  }).toBe(count);
 });

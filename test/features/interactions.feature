@@ -47,4 +47,37 @@ Feature: Interactions
 
   Scenario: Element visibility and count assertions
     Then I see the "[data-testid='hover-target']"
-    Then I not see the "[data-testid='double-click-result']"
+    Then I do not see the "[data-testid='double-click-result']"
+
+  # Bug 1 fix: wait for element to be enabled uses toBeEnabled() not waitFor(visible)
+  Scenario: Wait for element to be enabled
+    When I wait for the element "hover target" to be enabled
+    Then the "hover target" is enabled
+
+  # Bug 3 fix: dialog steps have proper async/await in event handlers
+  Scenario: Accept alert dialog
+    When I accept the dialog
+    When I click the "btn alert"
+    Then I see the text "alert accepted"
+
+  Scenario: Dismiss confirm dialog
+    When I dismiss the dialog
+    When I click the "btn confirm"
+    Then I see the text "dismissed"
+
+  # Bug 5 fix: tab switching updates the active page in world so subsequent steps target the correct tab
+  Scenario: Switch to new tab and interact
+    When I click the "link new tab"
+    When I wait 1 seconds
+    Then 2 tabs are open
+    When I switch to tab 2
+    Then the url contains "dashboard.html"
+    When I close the current tab
+    Then 1 tabs are open
+
+  # Bug 4 fix: I switch to frame properly sets the FrameLocator context in world
+  Scenario: Switch to iframe and interact with its content
+    When I switch to frame "iframe demo"
+    Then I see the text "Hello from iframe!"
+    When I switch to the main frame
+    Then I see the "hover target"

@@ -7,7 +7,7 @@ Feature: Login
   Scenario: Cookie banner is visible and can be dismissed
     Then I see the "[data-testid='btn-accept-cookies']"
     When I click the "btn accept cookies"
-    Then I not see the "btn accept cookies"
+    Then I do not see the "btn accept cookies"
 
   Scenario: Submit button is disabled until valid credentials are entered
     Then the "btn submit" is disabled
@@ -33,7 +33,7 @@ Feature: Login
     When I fill "wrongpassword" in the "input password"
     When I click the "btn submit"
     Then I see the text "Username and password are incorrect."
-    Then I not see the "btn close modal"
+    Then I do not see the "btn close modal"
 
   Scenario: Forgot password link is visible
     Then I see the "link forgot password"
@@ -45,4 +45,4 @@ Feature: Login
     When I click the "btn submit"
     Then I see the "btn close modal"
     When I click the "btn close modal"
-    Then I not see the "btn close modal"
+    Then I do not see the "btn close modal"

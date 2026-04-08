@@ -15,37 +15,37 @@ import { When } from '../fixtures/world';
 
 When('I click the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).click();
+  await world.locator(page, selector).click();
 });
 
 When('I double click the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).dblclick();
+  await world.locator(page, selector).dblclick();
 });
 
 When('I right click the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).click({ button: 'right' });
+  await world.locator(page, selector).click({ button: 'right' });
 });
 
 When('I hover over {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).hover();
+  await world.locator(page, selector).hover();
 });
 
 When('I focus on {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).focus();
+  await world.locator(page, selector).focus();
 });
 
-When('I click the text {string}', async ({ page }, text: string) => {
-  await page.getByText(text).click();
+When('I click the text {string}', async ({ page, world }, text: string) => {
+  await world.getContext(page).getByText(text).click();
 });
 
-When('I click the button {string}', async ({ page }, name: string) => {
-  await page.getByRole('button', { name }).click();
+When('I click the button {string}', async ({ page, world }, name: string) => {
+  await world.getContext(page).getByRole('button', { name }).click();
 });
 
-When('I click the link {string}', async ({ page }, name: string) => {
-  await page.getByRole('link', { name }).click();
+When('I click the link {string}', async ({ page, world }, name: string) => {
+  await world.getContext(page).getByRole('link', { name }).click();
 });

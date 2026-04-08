@@ -4,11 +4,13 @@ Feature: Forms
     Given I use the page object "forms"
     And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/forms.html"
 
+  # Round-2 API fix: the value of X contains Y uses expect().toHaveValue(regex) with auto-retry
   Scenario: Fill text inputs
     When I fill "Jane Doe" in the "input full name"
     When I fill "jane@example.com" in the "input email"
     Then the value of "input full name" equals "Jane Doe"
     Then the value of "input email" contains "example"
+    Then the value of "input email" contains "@"
 
   Scenario: Type alias works like fill
     When I type "John Doe" in the "input full name"
@@ -60,3 +62,8 @@ Feature: Forms
   Scenario: Focus on input field
     When I focus on "input full name"
     Then the "input full name" is focused
+
+  # Bug 1 fix: wait for element to be enabled uses toBeEnabled() not waitFor(visible)
+  Scenario: Wait for enabled element passes immediately for an active input
+    When I wait for the element "input full name" to be enabled
+    Then the "input full name" is enabled

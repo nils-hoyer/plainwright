@@ -1,1 +1,1 @@
-export { LoginPage, DashboardPage, FormsPage, InteractionsPage } from './pages';
+export { LoginPage, DashboardPage, FormsPage, InteractionsPage, AssertionsPage } from './pages';

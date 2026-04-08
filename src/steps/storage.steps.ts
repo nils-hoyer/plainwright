@@ -18,6 +18,11 @@ import { When, Then } from '../fixtures/world';
 
 When('I set the cookie {string} to {string}', async ({ page }, name: string, value: string) => {
   const url = page.url();
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    throw new Error(
+      `[playwright-bdd-steps] Cannot set cookie: current URL is not HTTP(s): "${url}". Navigate to a page first.`,
+    );
+  }
   await page.context().addCookies([{ name, value, url }]);
 });
 
@@ -34,12 +39,12 @@ When('I clear all cookies', async ({ page }) => {
   await page.context().clearCookies();
 });
 
-When('I set local storage {string} to {string}', async ({ page }, key: string, value: string) => {
-  await page.evaluate(([k, v]) => localStorage.setItem(k, v), [key, value]);
+When('I set local storage {string} to {string}', async ({ page, world }, key: string, value: string) => {
+  await world.getPage(page).evaluate(([k, v]) => localStorage.setItem(k, v), [key, value]);
 });
 
-When('I clear local storage', async ({ page }) => {
-  await page.evaluate(() => localStorage.clear());
+When('I clear local storage', async ({ page, world }) => {
+  await world.getPage(page).evaluate(() => localStorage.clear());
 });
 
 Then('the cookie {string} exists', async ({ page }, name: string) => {

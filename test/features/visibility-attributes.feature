@@ -17,7 +17,7 @@ Feature: Visibility and Attributes
     Then the "btn transfer" is enabled
 
   Scenario: Not see hidden element
-    Then I not see the "[data-testid='nonexistent-element-xyz']"
+    Then I do not see the "[data-testid='nonexistent-element-xyz']"
 
   Scenario: Text content in element  
     Then I see the text "Account Overview" in the "section overview"
@@ -26,8 +26,13 @@ Feature: Visibility and Attributes
     Then 3 elements of ".account-item" are visible
 
   Scenario: Not see text that does not exist
-    Then I not see the text "This text does not exist on the page at all"
+    Then I do not see the text "This text does not exist on the page at all"
 
+  # Round-2 API fix: I not see the attribute uses expect().not.toHaveAttribute() with auto-retry
+  Scenario: Active button does not have disabled attribute
+    Then I not see the attribute "disabled" in element "btn transfer"
+
+  # Round-2 API fix: the attribute X contains Y uses expect().toHaveAttribute(attr, regex) with auto-retry
   Scenario: Link attributes
     Then I see the "link forms"
     Then the attribute "href" of "link forms" contains "forms.html"

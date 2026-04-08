@@ -62,4 +62,22 @@ export class InteractionsPage extends BasePage {
   dialogResult = '[data-testid="dialog-result"]';
   inputKeyboard = '[data-testid="input-keyboard"]';
   linkNewTab = '[data-testid="link-new-tab"]';
+  iframeDemo = '[data-testid="iframe-demo"]';
+}
+
+export class AssertionsPage extends BasePage {
+  textExact = '[data-testid="text-exact"]';
+  textPartial = '[data-testid="text-partial"]';
+  divEmpty = '[data-testid="div-empty"]';
+  hiddenAttached = '[data-testid="hidden-attached"]';
+  classedElement = '[data-testid="classed-element"]';
+  inputWithId = '[data-testid="input-with-id"]';
+  btnRole = '[data-testid="btn-role"]';
+  btnAriaLabel = '[data-testid="btn-aria-label"]';
+  inputAriaDescribed = '[data-testid="input-aria-described"]';
+  inputAriaError = '[data-testid="input-aria-error"]';
+  divVisibleJs = '[data-testid="div-visible-js"]';
+  selectMulti = '[data-testid="select-multi"]';
+  inViewport = '[data-testid="in-viewport"]';
+  belowViewport = '[data-testid="below-viewport"]';
 }

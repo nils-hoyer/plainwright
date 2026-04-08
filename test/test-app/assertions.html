@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assertions Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Assertions Demo</h1>
+
+      <!-- Text content (toHaveText, toContainText, toBeEmpty, toBeAttached) -->
+      <p data-testid="text-exact" class="content active">Hello World</p>
+      <p data-testid="text-partial">This contains some text.</p>
+      <div data-testid="div-empty"></div>
+      <p data-testid="hidden-attached" hidden>I am hidden but attached to the DOM.</p>
+
+      <!-- Class tests (toHaveClass, toContainClass) -->
+      <div data-testid="classed-element" class="foo bar baz">Classed element</div>
+
+      <!-- Count test (toHaveCount) -->
+      <ul>
+        <li data-testid="list-item" class="list-item">Item 1</li>
+        <li data-testid="list-item" class="list-item">Item 2</li>
+        <li data-testid="list-item" class="list-item">Item 3</li>
+      </ul>
+
+      <!-- ID test (toHaveId) -->
+      <input id="my-special-id" data-testid="input-with-id" type="text" />
+
+      <!-- Role test (toHaveRole) -->
+      <button data-testid="btn-role">I am a button</button>
+
+      <!-- Accessible name (toHaveAccessibleName) -->
+      <button data-testid="btn-aria-label" aria-label="Close dialog">×</button>
+
+      <!-- Accessible description (toHaveAccessibleDescription) -->
+      <span id="hint-text">This is a hint for the input below.</span>
+      <input
+        data-testid="input-aria-described"
+        type="text"
+        aria-label="Name input"
+        aria-describedby="hint-text"
+      />
+
+      <!-- Accessible error message (toHaveAccessibleErrorMessage) -->
+      <span id="error-msg">This field is required.</span>
+      <input
+        data-testid="input-aria-error"
+        type="text"
+        aria-label="Required field"
+        aria-invalid="true"
+        aria-errormessage="error-msg"
+      />
+
+      <!-- JS property (toHaveJSProperty) – hidden=false by default -->
+      <div data-testid="div-visible-js">Visible div</div>
+
+      <!-- Multi-select (toHaveValues) -->
+      <select data-testid="select-multi" multiple size="3">
+        <option value="red">Red</option>
+        <option value="green" selected>Green</option>
+        <option value="blue" selected>Blue</option>
+      </select>
+
+      <!-- Viewport test (toBeInViewport) – this element is visible immediately -->
+      <div data-testid="in-viewport">I am in the viewport</div>
+
+      <!-- Spacer to push next element below viewport -->
+      <div style="height: 3000px;"></div>
+
+      <!-- Below viewport (toBeInViewport – negative) -->
+      <div data-testid="below-viewport">Way below the viewport</div>
+    </main>
+  </body>
+</html>

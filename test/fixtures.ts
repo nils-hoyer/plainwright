@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
 import { test as bddBase } from '../src/fixtures/world';
-import { LoginPage, DashboardPage, FormsPage, InteractionsPage } from './pages';
+import { LoginPage, DashboardPage, FormsPage, InteractionsPage, AssertionsPage } from './pages';
 
 /**
  * Extend the BDD world fixture to pre-register all page objects.
@@ -12,6 +12,7 @@ export const test = bddBase.extend<{}>({
     world.registerPageObject('dashboard', new DashboardPage());
     world.registerPageObject('forms', new FormsPage());
     world.registerPageObject('interactions', new InteractionsPage());
+    world.registerPageObject('assertions', new AssertionsPage());
     await use(world);
   },
 });

@@ -94,9 +94,9 @@ Every step that interacts with an element takes a `{string}` parameter called **
 | Pattern | Example |
 |---|---|
 | `Then I see the {string}` | `Then I see the "button login"` |
-| `Then I not see the {string}` | |
+| `Then I do not see the {string}` | |
 | `Then I see the text {string}` | `Then I see the text "Welcome"` |
-| `Then I not see the text {string}` | |
+| `Then I do not see the text {string}` | |
 | `Then I see the text {string} in the {string}` | |
 | `Then {int} elements of {string} are visible` | `Then 3 elements of ".item" are visible` |
 

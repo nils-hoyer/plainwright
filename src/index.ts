@@ -23,3 +23,4 @@ import './steps/screenshot.steps';
 import './steps/keyboard.steps';
 import './steps/frames.steps';
 import './steps/storage.steps';
+import './steps/assertions.steps';

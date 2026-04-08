@@ -1,3 +1,4 @@
+import { expect } from '@playwright/test';
 import { Given, When, Then } from '../fixtures/world';
 
 // ---------------------------------------------------------------------------
@@ -15,51 +16,49 @@ import { Given, When, Then } from '../fixtures/world';
 //   Then the url does not contain "/login"
 // ---------------------------------------------------------------------------
 
-Given('I navigate to {string}', async ({ page }, url: string) => {
-  await page.goto(url);
+Given('I navigate to {string}', async ({ page, world }, url: string) => {
+  await world.getPage(page).goto(url);
 });
 
-When('I visit the url {string}', async ({ page }, url: string) => {
-  await page.goto(url);
+// Alias for "I navigate to" — both patterns are equivalent.
+When('I visit the url {string}', async ({ page, world }, url: string) => {
+  await world.getPage(page).goto(url);
 });
 
-When('I go back', async ({ page }) => {
-  await page.goBack();
+When('I go back', async ({ page, world }) => {
+  await world.getPage(page).goBack();
 });
 
-When('I go forward', async ({ page }) => {
-  await page.goForward();
+When('I go forward', async ({ page, world }) => {
+  await world.getPage(page).goForward();
 });
 
-When('I reload the page', async ({ page }) => {
-  await page.reload();
+When('I reload the page', async ({ page, world }) => {
+  await world.getPage(page).reload();
 });
 
-When('I wait for the page to load', async ({ page }) => {
-  await page.waitForLoadState('load');
+When('I wait for the page to load', async ({ page, world }) => {
+  await world.getPage(page).waitForLoadState('load');
 });
 
-When('I wait for network idle', async ({ page }) => {
-  await page.waitForLoadState('networkidle');
+When('I wait for network idle', async ({ page, world }) => {
+  await world.getPage(page).waitForLoadState('networkidle');
 });
 
-When('I wait for the url {string}', async ({ page }, url: string) => {
-  await page.waitForURL(url);
+When('I wait for the url {string}', async ({ page, world }, url: string) => {
+  await world.getPage(page).waitForURL(url);
 });
 
-Then('I see the url {string}', async ({ page }, url: string) => {
-  await page.waitForURL(url);
+Then('I see the url {string}', async ({ page, world }, url: string) => {
+  await expect(world.getPage(page)).toHaveURL(url);
 });
 
-Then('the url contains {string}', async ({ page }, substring: string) => {
-  await page.waitForURL((u) => u.href.includes(substring));
+Then('the url contains {string}', async ({ page, world }, substring: string) => {
+  await expect(world.getPage(page)).toHaveURL(new RegExp(substring.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
 });
 
-Then('the url does not contain {string}', async ({ page }, substring: string) => {
-  const current = page.url();
-  if (current.includes(substring)) {
-    throw new Error(
-      `[playwright-bdd-steps] Expected URL to NOT contain "${substring}" but got: ${current}`,
-    );
-  }
+Then('the url does not contain {string}', async ({ page, world }, substring: string) => {
+  await expect(world.getPage(page)).not.toHaveURL(
+    new RegExp(substring.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+  );
 });

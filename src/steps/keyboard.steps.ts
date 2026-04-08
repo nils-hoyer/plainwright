@@ -1,5 +1,4 @@
-import { expect } from '@playwright/test';
-import { When, Then } from '../fixtures/world';
+import { When } from '../fixtures/world';
 
 // ---------------------------------------------------------------------------
 // Keyboard steps
@@ -10,10 +9,10 @@ import { When, Then } from '../fixtures/world';
 //   When I press "Control+A"
 // ---------------------------------------------------------------------------
 
-When('I type the text {string}', async ({ page }, text: string) => {
-  await page.keyboard.type(text);
+When('I type the text {string}', async ({ page, world }, text: string) => {
+  await world.getPage(page).keyboard.type(text);
 });
 
-When('I press the key {string}', async ({ page }, key: string) => {
-  await page.keyboard.press(key);
+When('I press the key {string}', async ({ page, world }, key: string) => {
+  await world.getPage(page).keyboard.press(key);
 });

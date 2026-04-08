@@ -6,21 +6,17 @@ import { When } from '../fixtures/world';
 // Supported step patterns:
 //   When I switch to frame "iframe#my-frame"
 //   When I switch to the main frame
+//
+// After switching to a frame, all subsequent element steps (click, fill, etc.)
+// automatically operate inside that frame via world.locator() / world.getContext().
+// Call "I switch to the main frame" to leave the frame context.
 // ---------------------------------------------------------------------------
 
 When('I switch to frame {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  const frameLocator = page.frameLocator(selector);
-  // Store the frame reference in page context via evaluate so subsequent steps
-  // can still use page.locator(). For complex multi-frame scenarios users should
-  // use Playwright's frameLocator() API directly in custom steps.
-  const frame = page.frame({ url: /./ }) ?? page.mainFrame();
-  if (!frame) {
-    throw new Error(`[playwright-bdd-steps] Could not locate frame matching "${reference}".`);
-  }
+  world.setFrameLocator(world.getPage(page).frameLocator(selector));
 });
 
-When('I switch to the main frame', async ({ page }) => {
-  // Playwright always operates on the main frame by default when using page.locator()
-  // This step is a no-op but kept for readability / symmetry with "switch to frame"
+When('I switch to the main frame', async ({ world }) => {
+  world.setFrameLocator(null);
 });

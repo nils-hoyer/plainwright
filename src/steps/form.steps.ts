@@ -21,7 +21,7 @@ When(
   'I fill {string} in the {string}',
   async ({ page, world }, text: string, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).fill(text);
+    await world.locator(page, selector).fill(text);
   },
 );
 
@@ -30,39 +30,43 @@ When(
   'I type {string} in the {string}',
   async ({ page, world }, text: string, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).fill(text);
+    await world.locator(page, selector).fill(text);
   },
 );
 
 When('I clear the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).clear();
+  await world.locator(page, selector).clear();
 });
 
 When(
   'I clear and fill {string} in the {string}',
   async ({ page, world }, text: string, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).clear();
-    await page.locator(selector).fill(text);
+    // fill() clears the field internally before typing, but this step exists
+    // as an explicit two-phase alternative that also fires a separate 'input' event
+    // on clear — useful for fields that react to explicit clearing.
+    const locator = world.locator(page, selector);
+    await locator.clear();
+    await locator.fill(text);
   },
 );
 
 When('I check the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).check();
+  await world.locator(page, selector).check();
 });
 
 When('I uncheck the {string}', async ({ page, world }, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).uncheck();
+  await world.locator(page, selector).uncheck();
 });
 
 When(
   'I select {string} in the {string}',
   async ({ page, world }, option: string, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).selectOption({ label: option });
+    await world.locator(page, selector).selectOption({ label: option });
   },
 );
 
@@ -70,7 +74,7 @@ When(
   'I select the option at index {int} in the {string}',
   async ({ page, world }, index: number, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).selectOption({ index });
+    await world.locator(page, selector).selectOption({ index });
   },
 );
 
@@ -78,15 +82,15 @@ When(
   'I upload the file {string} to {string}',
   async ({ page, world }, filePath: string, reference: string) => {
     const selector = world.resolve(reference);
-    await page.locator(selector).setInputFiles(filePath);
+    await world.locator(page, selector).setInputFiles(filePath);
   },
 );
 
-When('I press {string}', async ({ page }, key: string) => {
-  await page.keyboard.press(key);
+When('I press {string}', async ({ page, world }, key: string) => {
+  await world.getPage(page).keyboard.press(key);
 });
 
 When('I press {string} on {string}', async ({ page, world }, key: string, reference: string) => {
   const selector = world.resolve(reference);
-  await page.locator(selector).press(key);
+  await world.locator(page, selector).press(key);
 });
