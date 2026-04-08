@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="login.html" data-testid="link-logout">Logout</a>
+        <a href="forms.html" data-testid="link-forms">Forms Demo</a>
+        <a href="interactions.html" data-testid="link-interactions">Interactions Demo</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1 data-testid="heading-welcome">Welcome to your Dashboard</h1>
+
+      <section data-testid="section-overview">
+        <h2>Account Overview</h2>
+        <ul>
+          <li class="account-item" data-testid="item-savings">Savings: $1,234.56</li>
+          <li class="account-item" data-testid="item-checking">Checking: $987.32</li>
+          <li class="account-item" data-testid="item-investments">Investments: $45,678.90</li>
+        </ul>
+      </section>
+
+      <section data-testid="section-actions">
+        <h2>Quick Actions</h2>
+        <button data-testid="btn-transfer">Transfer Money</button>
+        <button data-testid="btn-statement">Download Statement</button>
+        <button data-testid="btn-disabled" disabled>Coming Soon</button>
+      </section>
+    </main>
+  </body>
+</html>

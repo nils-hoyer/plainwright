@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Cookie Banner -->
+    <div id="cookie-banner" role="dialog" aria-label="Cookie consent">
+      <p>We use cookies to improve your experience.</p>
+      <button id="btn-accept-cookies" data-testid="btn-accept-cookies">Accept Cookies</button>
+    </div>
+
+    <!-- Login Form -->
+    <main>
+      <h1>Sign In</h1>
+      <form id="login-form" novalidate>
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            data-testid="input-username"
+            type="text"
+            maxlength="10"
+            placeholder="10-digit ID"
+            autocomplete="username"
+          />
+          <p class="hint" data-testid="hint-username" hidden>
+            Your username consists of 10 digits.
+          </p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            data-testid="input-password"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <p class="error" data-testid="error-message" hidden></p>
+
+        <button
+          id="btn-submit"
+          data-testid="btn-submit"
+          type="submit"
+          disabled
+        >
+          Sign In
+        </button>
+      </form>
+
+      <a href="#" data-testid="link-forgot-password">Forgot password?</a>
+    </main>
+
+    <!-- Success Modal (shown after login) -->
+    <div id="modal" role="dialog" aria-label="Welcome modal" hidden>
+      <div class="modal-content">
+        <h2>Welcome back!</h2>
+        <p>You have successfully signed in.</p>
+        <button id="btn-close-modal" data-testid="btn-close-modal">Close</button>
+      </div>
+    </div>
+
+    <script>
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const submitBtn = document.getElementById('btn-submit');
+      const hintUsername = document.querySelector('[data-testid="hint-username"]');
+      const errorMsg = document.querySelector('[data-testid="error-message"]');
+      const form = document.getElementById('login-form');
+      const modal = document.getElementById('modal');
+      const btnCloseModal = document.getElementById('btn-close-modal');
+      const cookieBanner = document.getElementById('cookie-banner');
+      const btnAcceptCookies = document.getElementById('btn-accept-cookies');
+
+      // Cookie banner
+      btnAcceptCookies.addEventListener('click', () => {
+        cookieBanner.hidden = true;
+        document.cookie = 'cookies_accepted=true';
+      });
+
+      // Username validation
+      usernameInput.addEventListener('input', () => {
+        const val = usernameInput.value;
+        const valid = /^\d{10}$/.test(val);
+        if (val.length > 0 && !valid) {
+          hintUsername.hidden = false;
+          submitBtn.disabled = true;
+        } else {
+          hintUsername.hidden = true;
+          submitBtn.disabled = val.length === 0;
+        }
+      });
+
+      // Password enables submit (if username is valid)
+      passwordInput.addEventListener('input', () => {
+        const usernameValid = /^\d{10}$/.test(usernameInput.value);
+        submitBtn.disabled = !usernameValid || passwordInput.value.length === 0;
+      });
+
+      // Credentials store (demo only – never do this in production!)
+      const USERS = { '1234567890': 'password123' };
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = usernameInput.value;
+        const pass = passwordInput.value;
+
+        if (USERS[user] === pass) {
+          errorMsg.hidden = true;
+          // Show welcome modal, then redirect to dashboard
+          modal.hidden = false;
+        } else {
+          errorMsg.textContent = 'Username and password are incorrect.';
+          errorMsg.hidden = false;
+        }
+      });
+
+      btnCloseModal.addEventListener('click', () => {
+        modal.hidden = true;
+        window.location.href = 'dashboard.html';
+      });
+    </script>
+  </body>
+</html>

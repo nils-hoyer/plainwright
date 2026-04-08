@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Forms Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="dashboard.html" data-testid="link-dashboard">Dashboard</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Forms Demo</h1>
+
+      <form id="demo-form">
+        <!-- Text input -->
+        <div class="field">
+          <label for="full-name">Full Name</label>
+          <input id="full-name" data-testid="input-full-name" type="text" placeholder="Your name" />
+        </div>
+
+        <!-- Email input -->
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" data-testid="input-email" type="email" placeholder="you@example.com" />
+        </div>
+
+        <!-- Read-only input -->
+        <div class="field">
+          <label for="readonly-field">Read-only Field</label>
+          <input
+            id="readonly-field"
+            data-testid="input-readonly"
+            type="text"
+            value="Cannot edit this"
+            readonly
+          />
+        </div>
+
+        <!-- Disabled input -->
+        <div class="field">
+          <label for="disabled-field">Disabled Field</label>
+          <input
+            id="disabled-field"
+            data-testid="input-disabled"
+            type="text"
+            placeholder="Disabled"
+            disabled
+          />
+        </div>
+
+        <!-- Select -->
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country" data-testid="select-country">
+            <option value="">-- Select country --</option>
+            <option value="de">Germany</option>
+            <option value="at">Austria</option>
+            <option value="ch">Switzerland</option>
+          </select>
+        </div>
+
+        <!-- Checkbox -->
+        <div class="field">
+          <label>
+            <input id="checkbox-terms" data-testid="checkbox-terms" type="checkbox" />
+            I accept the terms and conditions
+          </label>
+        </div>
+
+        <!-- Checkbox newsletter  -->
+        <div class="field">
+          <label>
+            <input
+              id="checkbox-newsletter"
+              data-testid="checkbox-newsletter"
+              type="checkbox"
+              checked
+            />
+            Subscribe to newsletter
+          </label>
+        </div>
+
+        <!-- File input -->
+        <div class="field">
+          <label for="file-upload">Upload file</label>
+          <input id="file-upload" data-testid="input-file" type="file" />
+          <p data-testid="file-name" class="hint"></p>
+        </div>
+
+        <!-- Submit -->
+        <button id="btn-submit-form" data-testid="btn-submit-form" type="submit">
+          Submit Form
+        </button>
+      </form>
+
+      <!-- Result banner -->
+      <p data-testid="form-result" hidden>Form submitted successfully!</p>
+
+      <!-- Local storage demo -->
+      <section style="margin-top: 2rem">
+        <h2>Local Storage Demo</h2>
+        <button data-testid="btn-set-storage" type="button">Set Storage Value</button>
+        <button data-testid="btn-clear-storage" type="button">Clear Storage</button>
+        <p data-testid="storage-display"></p>
+      </section>
+
+      <!-- Cookie demo -->
+      <section style="margin-top: 2rem">
+        <h2>Cookie Demo</h2>
+        <button data-testid="btn-set-cookie" type="button">Set Cookie</button>
+        <button data-testid="btn-delete-cookie" type="button">Delete Cookie</button>
+      </section>
+    </main>
+
+    <script>
+      // File input display
+      const fileInput = document.getElementById('file-upload');
+      const fileNameDisplay = document.querySelector('[data-testid="file-name"]');
+      fileInput.addEventListener('change', () => {
+        fileNameDisplay.textContent = fileInput.files[0]?.name ?? '';
+      });
+
+      // Form submit
+      const form = document.getElementById('demo-form');
+      const result = document.querySelector('[data-testid="form-result"]');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        result.hidden = false;
+      });
+
+      // Local storage
+      document.querySelector('[data-testid="btn-set-storage"]').addEventListener('click', () => {
+        localStorage.setItem('demo_key', 'demo_value');
+        document.querySelector('[data-testid="storage-display"]').textContent =
+          'demo_key = ' + localStorage.getItem('demo_key');
+      });
+      document.querySelector('[data-testid="btn-clear-storage"]').addEventListener('click', () => {
+        localStorage.clear();
+        document.querySelector('[data-testid="storage-display"]').textContent = '(cleared)';
+      });
+
+      // Cookies
+      document.querySelector('[data-testid="btn-set-cookie"]').addEventListener('click', () => {
+        document.cookie = 'demo_cookie=hello; path=/';
+      });
+      document.querySelector('[data-testid="btn-delete-cookie"]').addEventListener('click', () => {
+        document.cookie = 'demo_cookie=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+      });
+    </script>
+  </body>
+</html>

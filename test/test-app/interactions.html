@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactions Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="dashboard.html" data-testid="link-dashboard">Dashboard</a>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Interactions Demo</h1>
+
+      <!-- Hover target -->
+      <section>
+        <h2>Hover</h2>
+        <div data-testid="hover-target" class="hover-box">
+          Hover over me
+          <span data-testid="hover-tooltip" class="tooltip" hidden>Tooltip appeared!</span>
+        </div>
+      </section>
+
+      <!-- Scroll target -->
+      <section>
+        <h2>Scroll</h2>
+        <div style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 8px;">
+          <p>Scroll the page down to find the scroll target element.</p>
+        </div>
+      </section>
+
+      <!-- Tall content to make page scrollable -->
+      <div style="height: 1500px; display: flex; align-items: flex-end;">
+        <div data-testid="scroll-target" style="background: #e0ffe0; padding: 16px; width: 100%;">
+          You scrolled all the way down! ✓
+        </div>
+      </div>
+
+      <!-- Double-click target -->
+      <section style="margin-top: 2rem;">
+        <h2>Double Click</h2>
+        <button data-testid="btn-double-click">Double click me</button>
+        <p data-testid="double-click-result" hidden>Double clicked!</p>
+      </section>
+
+      <!-- Right-click / context menu trigger -->
+      <section>
+        <h2>Context Menu</h2>
+        <div data-testid="right-click-target" class="hover-box" style="cursor: context-menu;">
+          Right click me
+        </div>
+        <p data-testid="right-click-result" hidden>Right clicked!</p>
+      </section>
+
+      <!-- Alert / Confirm / Prompt dialog triggers -->
+      <section>
+        <h2>Dialogs</h2>
+        <button data-testid="btn-alert" type="button">Show Alert</button>
+        <button data-testid="btn-confirm" type="button">Show Confirm</button>
+        <button data-testid="btn-prompt" type="button">Show Prompt</button>
+        <p data-testid="dialog-result"></p>
+      </section>
+
+      <!-- Keyboard input target -->
+      <section>
+        <h2>Keyboard</h2>
+        <input
+          data-testid="input-keyboard"
+          type="text"
+          placeholder="Type here using keyboard steps"
+        />
+        <p data-testid="keyboard-value"></p>
+      </section>
+
+      <!-- Tab links (open new tab) -->
+      <section>
+        <h2>New Tab</h2>
+        <a data-testid="link-new-tab" href="dashboard.html" target="_blank" rel="noopener">
+          Open Dashboard in new tab
+        </a>
+      </section>
+    </main>
+
+    <script>
+      // Hover tooltip
+      const hoverTarget = document.querySelector('[data-testid="hover-target"]');
+      const tooltip = document.querySelector('[data-testid="hover-tooltip"]');
+      hoverTarget.addEventListener('mouseenter', () => (tooltip.hidden = false));
+      hoverTarget.addEventListener('mouseleave', () => (tooltip.hidden = true));
+
+      // Double click
+      const dblBtn = document.querySelector('[data-testid="btn-double-click"]');
+      const dblResult = document.querySelector('[data-testid="double-click-result"]');
+      dblBtn.addEventListener('dblclick', () => (dblResult.hidden = false));
+
+      // Right click
+      const rcTarget = document.querySelector('[data-testid="right-click-target"]');
+      const rcResult = document.querySelector('[data-testid="right-click-result"]');
+      rcTarget.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        rcResult.hidden = false;
+      });
+
+      // Dialogs
+      const dialogResult = document.querySelector('[data-testid="dialog-result"]');
+      document.querySelector('[data-testid="btn-alert"]').addEventListener('click', () => {
+        alert('This is an alert message');
+        dialogResult.textContent = 'alert accepted';
+      });
+      document.querySelector('[data-testid="btn-confirm"]').addEventListener('click', () => {
+        const ok = confirm('Do you confirm?');
+        dialogResult.textContent = ok ? 'confirmed' : 'dismissed';
+      });
+      document.querySelector('[data-testid="btn-prompt"]').addEventListener('click', () => {
+        const val = prompt('Enter something:');
+        dialogResult.textContent = val !== null ? 'prompt: ' + val : 'prompt dismissed';
+      });
+
+      // Keyboard
+      const kbInput = document.querySelector('[data-testid="input-keyboard"]');
+      const kbValue = document.querySelector('[data-testid="keyboard-value"]');
+      kbInput.addEventListener('input', () => (kbValue.textContent = kbInput.value));
+    </script>
+  </body>
+</html>
