@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drag and Drop Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      .drag-container {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+        margin: 40px 0;
+      }
+      .draggable {
+        padding: 16px 28px;
+        background: #4a90e2;
+        color: #fff;
+        border-radius: 8px;
+        cursor: grab;
+        user-select: none;
+        font-weight: bold;
+      }
+      .dropzone {
+        width: 180px;
+        min-height: 80px;
+        border: 2px dashed #999;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        padding: 12px;
+      }
+      .dropzone.over {
+        border-color: #4a90e2;
+        background: #eaf2ff;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Drag and Drop Demo</h1>
+
+      <div class="drag-container">
+        <div id="drag-source" data-testid="drag-source" class="draggable">
+          Drag Me
+        </div>
+        <div id="drop-target" data-testid="drop-target" class="dropzone">
+          Drop Here
+        </div>
+      </div>
+
+      <p id="drag-result" data-testid="drag-result"></p>
+    </main>
+
+    <script>
+      /*
+       * Playwright's locator.dragTo() dispatches mouse events (mousedown →
+       * mousemove → mouseup), so we listen for those rather than HTML5 drag
+       * events which require `draggable="true"`.
+       */
+      const source = document.getElementById('drag-source');
+      const target = document.getElementById('drop-target');
+      const result = document.getElementById('drag-result');
+
+      let dragging = false;
+
+      source.addEventListener('mousedown', () => {
+        dragging = true;
+        target.classList.add('over');
+      });
+
+      // mouseup bubbles, so the target's handler fires before document's
+      target.addEventListener('mouseup', () => {
+        if (dragging) {
+          result.textContent = 'Dropped!';
+          target.classList.remove('over');
+          dragging = false;
+        }
+      });
+
+      // Safety reset in case mouseup happens outside the target
+      document.addEventListener('mouseup', () => {
+        dragging = false;
+        target.classList.remove('over');
+      });
+    </script>
+  </body>
+</html>

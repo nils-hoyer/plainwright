@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Download Demo</h1>
+
+      <!--
+        Uses a Blob URL so the download reliably fires the Playwright
+        download event regardless of the serving protocol (file://).
+      -->
+      <button data-testid="btn-download" id="btn-download">Download Test File</button>
+    </main>
+
+    <script>
+      document.getElementById('btn-download').addEventListener('click', () => {
+        const blob = new Blob(['Hello from playwright-bdd-steps!'], { type: 'text/plain' });
+        const link = document.createElement('a');
+        link.download = 'test-download.txt';
+        link.href = URL.createObjectURL(blob);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    </script>
+  </body>
+</html>

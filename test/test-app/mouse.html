@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mouse Events Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      #mouse-target {
+        width: 400px;
+        height: 250px;
+        background: #e8ecf0;
+        border: 2px solid #b0b8c2;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 40px auto;
+        font-size: 1.1rem;
+        color: #555;
+        cursor: crosshair;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Mouse Events Demo</h1>
+
+      <div id="mouse-target" data-testid="mouse-target">Mouse Target Area</div>
+
+      <!-- Updated by every mouse event so tests can assert the event type -->
+      <p id="last-event" data-testid="last-event">no-event</p>
+      <!-- Dedicated trackers: not overwritten by subsequent events like click -->
+      <p id="last-mousedown" data-testid="last-mousedown">-</p>
+      <p id="last-mouseup" data-testid="last-mouseup">-</p>
+    </main>
+
+    <script>
+      const log = document.getElementById('last-event');
+
+      // Use capture phase (third arg = true) so the log is always updated
+      // even when a child element absorbs the event.
+      document.addEventListener('click', (e) => {
+        log.textContent = 'click:' + e.clientX + ',' + e.clientY;
+      });
+
+      document.addEventListener('dblclick', (e) => {
+        log.textContent = 'dblclick:' + e.clientX + ',' + e.clientY;
+      });
+
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        log.textContent = 'contextmenu:' + e.clientX + ',' + e.clientY;
+      });
+
+      document.addEventListener('mousemove', (e) => {
+        log.textContent = 'mousemove:' + e.clientX + ',' + e.clientY;
+      });
+
+      const lastMousedown = document.getElementById('last-mousedown');
+      const lastMouseup    = document.getElementById('last-mouseup');
+
+      document.addEventListener('mousedown', (e) => {
+        log.textContent          = 'mousedown:' + e.button;
+        lastMousedown.textContent = 'mousedown:' + e.button;
+      });
+
+      document.addEventListener('mouseup', (e) => {
+        log.textContent       = 'mouseup:' + e.button;
+        lastMouseup.textContent = 'mouseup:' + e.button;
+      });
+
+      document.addEventListener('wheel', (e) => {
+        log.textContent = 'wheel:' + Math.round(e.deltaX) + ',' + Math.round(e.deltaY);
+      }, { passive: true });
+    </script>
+  </body>
+</html>

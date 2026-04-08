@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Touch Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      #tap-target {
+        padding: 20px 48px;
+        font-size: 1.2rem;
+        margin: 60px auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Touch Demo</h1>
+
+      <button data-testid="tap-target" id="tap-target">Tap me</button>
+
+      <!-- Shown when tap-target is tapped -->
+      <p data-testid="tap-result" id="tap-result" hidden>Tapped!</p>
+
+      <!-- Shown when anywhere on the page is tapped (for coordinate tap test) -->
+      <p data-testid="anywhere-result" id="anywhere-result" hidden>Tapped anywhere!</p>
+    </main>
+
+    <script>
+      document.getElementById('tap-target').addEventListener('click', () => {
+        document.getElementById('tap-result').hidden = false;
+      });
+
+      // Any click/tap anywhere on the page reveals this element
+      document.addEventListener('click', () => {
+        document.getElementById('anywhere-result').hidden = false;
+      });
+    </script>
+  </body>
+</html>

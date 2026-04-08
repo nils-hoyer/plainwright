@@ -24,3 +24,8 @@ import './steps/keyboard.steps';
 import './steps/frames.steps';
 import './steps/storage.steps';
 import './steps/assertions.steps';
+import './steps/download.steps';
+import './steps/mouse.steps';
+import './steps/drag.steps';
+import './steps/filechooser.steps';
+import './steps/touchscreen.steps';

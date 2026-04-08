@@ -232,6 +232,13 @@ Feature: My Feature
 
 4. **Run tests**: `npm run test`
 
+   Other available scripts:
+   | Script | Description |
+   |---|---|
+   | `npm run build` | Compile TypeScript to `dist/` |
+   | `npm run format` | Format all `.ts`, `.json`, `.md` files with Prettier |
+   | `npm run format:check` | Check formatting without writing |
+
 ## Key conventions
 
 - Step pattern strings are **exact matches** – use the patterns from the table above.

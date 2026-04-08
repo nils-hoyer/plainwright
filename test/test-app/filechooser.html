@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Chooser Demo</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>File Chooser Demo</h1>
+
+      <!-- Hidden real file input – the button below triggers it -->
+      <input
+        type="file"
+        id="file-input"
+        data-testid="file-input"
+        style="display: none"
+        accept="*/*"
+      />
+
+      <button
+        data-testid="btn-upload"
+        id="btn-upload"
+      >
+        Choose File
+      </button>
+
+      <!-- Shows the name of the selected file -->
+      <p data-testid="file-result" id="file-result"></p>
+
+      <!-- Multiple-file input triggered by a separate button -->
+      <input
+        type="file"
+        id="file-input-multi"
+        data-testid="file-input-multi"
+        style="display: none"
+        accept="*/*"
+        multiple
+      />
+
+      <button data-testid="btn-upload-multi" id="btn-upload-multi">
+        Choose Multiple Files
+      </button>
+
+      <p data-testid="file-result-multi" id="file-result-multi"></p>
+    </main>
+
+    <script>
+      document.getElementById('btn-upload').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+      });
+
+      document.getElementById('file-input').addEventListener('change', function () {
+        document.getElementById('file-result').textContent =
+          this.files[0] ? this.files[0].name : '';
+      });
+
+      document.getElementById('btn-upload-multi').addEventListener('click', () => {
+        document.getElementById('file-input-multi').click();
+      });
+
+      document.getElementById('file-input-multi').addEventListener('change', function () {
+        const names = Array.from(this.files).map((f) => f.name).join(', ');
+        document.getElementById('file-result-multi').textContent = names;
+      });
+    </script>
+  </body>
+</html>

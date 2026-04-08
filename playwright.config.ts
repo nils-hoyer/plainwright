@@ -20,6 +20,13 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      // Exclude touch scenarios – they need hasTouch: true (chromium-touch project)
+      grepInvert: /@touch/,
+    },
+    {
+      name: 'chromium-touch',
+      use: { ...devices['Desktop Chrome'], hasTouch: true },
+      grep: /@touch/,
     },
   ],
 });

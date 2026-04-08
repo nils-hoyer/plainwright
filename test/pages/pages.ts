@@ -65,6 +65,37 @@ export class InteractionsPage extends BasePage {
   iframeDemo = '[data-testid="iframe-demo"]';
 }
 
+export class DownloadPage extends BasePage {
+  btnDownload = '[data-testid="btn-download"]';
+}
+
+export class DragPage extends BasePage {
+  dragSource = '[data-testid="drag-source"]';
+  dropTarget = '[data-testid="drop-target"]';
+  dragResult  = '[data-testid="drag-result"]';
+}
+
+export class FileChooserPage extends BasePage {
+  btnUpload       = '[data-testid="btn-upload"]';
+  fileInput       = '[data-testid="file-input"]';
+  fileResult      = '[data-testid="file-result"]';
+  btnUploadMulti  = '[data-testid="btn-upload-multi"]';
+  fileResultMulti = '[data-testid="file-result-multi"]';
+}
+
+export class MousePage extends BasePage {
+  mouseTarget   = '[data-testid="mouse-target"]';
+  lastEvent     = '[data-testid="last-event"]';
+  lastMousedown = '[data-testid="last-mousedown"]';
+  lastMouseup   = '[data-testid="last-mouseup"]';
+}
+
+export class TouchPage extends BasePage {
+  tapTarget      = '[data-testid="tap-target"]';
+  tapResult      = '[data-testid="tap-result"]';
+  anywhereResult = '[data-testid="anywhere-result"]';
+}
+
 export class AssertionsPage extends BasePage {
   textExact = '[data-testid="text-exact"]';
   textPartial = '[data-testid="text-partial"]';
