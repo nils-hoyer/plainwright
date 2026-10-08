@@ -1,44 +1,54 @@
-import { When, Then } from '../fixtures/world';
 import { expect } from '@playwright/test';
+import { category } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Dialog (alert / confirm / prompt) steps
-//
-// Supported step patterns:
-//   When I accept the dialog
-//   When I dismiss the dialog
-//   When I accept the dialog with text "my prompt answer"
-//   Then a dialog with message "Are you sure?" is shown
-// ---------------------------------------------------------------------------
+const step = category('Dialogs');
 
-When('I accept the dialog', async ({ page, world }) => {
-  world.getPage(page).once('dialog', async (dialog) => {
-    await dialog.accept();
-  });
+// Browser dialogs (alert, confirm, prompt) block the page until they are answered.
+// Say how to answer the next one *before* the step that opens it. Unannounced dialogs are dismissed.
+
+step({
+  pattern: 'I accept the next dialog',
+  level: 'core',
+  description:
+    'Clicks OK in the next alert, confirm or prompt dialog. Use it before the step that opens the dialog.',
+  example: 'I accept the next dialog',
+  fn: ({ world }) => {
+    world.setNextDialogAction({ accept: true });
+  },
 });
 
-When('I dismiss the dialog', async ({ page, world }) => {
-  world.getPage(page).once('dialog', async (dialog) => {
-    await dialog.dismiss();
-  });
+step({
+  pattern: 'I accept the next dialog with {string}',
+  level: 'advanced',
+  description:
+    'Types the text into the next prompt dialog and clicks OK. Use it before the step that opens the dialog.',
+  example: 'I accept the next dialog with "My answer"',
+  fn: ({ world }, text: string) => {
+    world.setNextDialogAction({ accept: true, promptText: text });
+  },
 });
 
-When('I accept the dialog with text {string}', async ({ page, world }, promptText: string) => {
-  world.getPage(page).once('dialog', async (dialog) => {
-    await dialog.accept(promptText);
-  });
+step({
+  pattern: 'I dismiss the next dialog',
+  level: 'core',
+  description:
+    'Clicks Cancel in the next confirm or prompt dialog. Use it before the step that opens the dialog.',
+  example: 'I dismiss the next dialog',
+  fn: ({ world }) => {
+    world.setNextDialogAction({ accept: false });
+  },
 });
 
-Then('a dialog with message {string} is shown', async ({ page, world }, expectedMessage: string) => {
-  await new Promise<void>((resolve, reject) => {
-    world.getPage(page).once('dialog', async (dialog) => {
-      try {
-        expect(dialog.message()).toBe(expectedMessage);
-        await dialog.dismiss();
-        resolve();
-      } catch (e) {
-        reject(e);
-      }
-    });
-  });
+step({
+  pattern: 'I see a dialog with the message {string}',
+  level: 'core',
+  description: 'Checks that a dialog with exactly this message was shown during the test.',
+  example: 'I see a dialog with the message "Do you confirm?"',
+  fn: async ({ world }, message: string) => {
+    await expect
+      .poll(() => world.dialogs.map((dialog) => dialog.message), {
+        message: `Expected a dialog with the message "${message}"`,
+      })
+      .toContain(message);
+  },
 });

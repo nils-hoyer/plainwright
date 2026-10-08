@@ -1,31 +1,39 @@
-// Re-export the extended test fixture so consumers can use the same world
-export { test, Given, When, Then } from './fixtures/world';
-export type { World } from './fixtures/world';
+// Public API of playwright-keywords.
 
-// Re-export BasePage so consumers can extend it
-export { BasePage } from './pages/BasePage';
+export { test } from './fixtures';
+export type { KeywordsFixtures, KeywordsOptions } from './fixtures';
+export { World } from './world';
+export type { DialogRecord, WorldOptions } from './world';
+export { definePage, getPageDefinition, getPageDefinitions } from './pages';
+export type { PageDefinition, PageOptions } from './pages';
+export { ElementRef, ELEMENT_TYPES, locate } from './elements';
+export type { ElementAlias, ElementType, Scope } from './elements';
+export { defineStep, findStep, findSteps, getSteps } from './registry';
+export type {
+  StepDefinition,
+  StepFixtures,
+  StepFn,
+  StepLevel,
+  StepLocation,
+  StepMatch,
+  StepOptions,
+  StepSource,
+} from './registry';
+export { defineParameterType } from './params';
+export type { ParameterTypeOptions } from './params';
+export { defineKeywords, getKeywords, validateKeywords } from './keywords';
+export type { KeywordDefinition, KeywordStep } from './keywords';
+export { aiFixPromptTemplate } from './ai';
 
-// Re-export utilities
-export { resolveSelector, labelToPropertyName } from './utils/selector';
-
-// Import all step definitions so they are registered when this package is imported
+// Registers the built-in steps.
 import './steps/navigation.steps';
-import './steps/pageobject.steps';
-import './steps/click.steps';
-import './steps/form.steps';
-import './steps/visibility.steps';
-import './steps/attributes.steps';
+import './steps/actions.steps';
+import './steps/assertions.steps';
+import './steps/dialogs.steps';
+import './steps/tabs.steps';
+import './steps/input.steps';
 import './steps/scroll.steps';
 import './steps/wait.steps';
-import './steps/tabs.steps';
-import './steps/dialogs.steps';
-import './steps/screenshot.steps';
-import './steps/keyboard.steps';
-import './steps/frames.steps';
 import './steps/storage.steps';
-import './steps/assertions.steps';
+import './steps/screenshot.steps';
 import './steps/download.steps';
-import './steps/mouse.steps';
-import './steps/drag.steps';
-import './steps/filechooser.steps';
-import './steps/touchscreen.steps';

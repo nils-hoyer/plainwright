@@ -15,7 +15,7 @@
 
     <!-- Login Form -->
     <main>
-      <h1>Sign In</h1>
+      <h1>Log in</h1>
       <form id="login-form" novalidate>
         <div class="field">
           <label for="username">Username</label>
@@ -43,7 +43,7 @@
           />
         </div>
 
-        <p class="error" data-testid="error-message" hidden></p>
+        <p class="error" data-testid="error-message" role="alert" hidden></p>
 
         <button
           id="btn-submit"
@@ -51,7 +51,7 @@
           type="submit"
           disabled
         >
-          Sign In
+          Log in
         </button>
       </form>
 
@@ -59,9 +59,9 @@
     </main>
 
     <!-- Success Modal (shown after login) -->
-    <div id="modal" role="dialog" aria-label="Welcome modal" hidden>
+    <div id="modal" role="dialog" aria-labelledby="modal-title" hidden>
       <div class="modal-content">
-        <h2>Welcome back!</h2>
+        <h2 id="modal-title">Welcome back!</h2>
         <p>You have successfully signed in.</p>
         <button id="btn-close-modal" data-testid="btn-close-modal">Close</button>
       </div>

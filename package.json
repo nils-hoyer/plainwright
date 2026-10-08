@@ -1,55 +1,77 @@
 {
-  "name": "playwright-bdd-steps",
-  "version": "1.0.0",
-  "description": "Pre-built BDD step definitions for Playwright covering all common browser interactions.",
+  "name": "playwright-keywords",
+  "version": "0.1.0",
+  "description": "Readable, keyword-driven tests for Playwright.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "playwright-keywords": "dist/cli.js"
+  },
   "files": [
-    "dist/"
+    "dist/",
+    "templates/",
+    "CHANGELOG.md",
+    "!dist/**/*.map"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    }
+    },
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "format": "prettier --write '**/*.{ts,json,md}'",
     "format:check": "prettier --check '**/*.{ts,json,md}'",
-    "test": "tsc --noEmit -p test/tsconfig.json && vitest run test/e2e.test.ts --test-timeout 120000",
+    "typecheck": "tsc --noEmit",
+    "docs": "jiti scripts/docs.ts",
+    "docs:check": "jiti scripts/docs.ts --check",
+    "lint:features": "jiti src/cli.ts lint --features 'test/features/**/*.feature' --steps 'test/steps/**/*.ts' --quiet",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "bddgen && playwright test",
+    "verify": "npm run format:check && npm run typecheck && npm run docs:check && npm run lint:features && npm test",
     "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nils-hoyer/playwright-bdd-steps.git"
+    "url": "git+https://github.com/nils-hoyer/playwright-keywords.git"
   },
   "keywords": [
     "playwright",
+    "keyword-driven",
     "bdd",
     "gherkin",
     "cucumber",
-    "test",
-    "e2e",
-    "page-object",
-    "steps"
+    "robot-framework",
+    "gauge"
   ],
   "author": "Nils Hoyer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nils-hoyer/playwright-bdd-steps/issues"
+    "url": "https://github.com/nils-hoyer/playwright-keywords/issues"
   },
-  "homepage": "https://github.com/nils-hoyer/playwright-bdd-steps#readme",
+  "homepage": "https://github.com/nils-hoyer/playwright-keywords#readme",
   "peerDependencies": {
-    "@playwright/test": ">=1.40.0",
-    "playwright-bdd": ">=7.0.0"
+    "@playwright/test": ">=1.53.0",
+    "playwright-bdd": "^9.0.0"
+  },
+  "dependencies": {
+    "@cucumber/cucumber-expressions": "19.0.0",
+    "@cucumber/gherkin": "^39.1.0",
+    "@cucumber/messages": "^32.3.1",
+    "jiti": "^2.7.0",
+    "tinyglobby": "^0.2.17"
   },
   "devDependencies": {
-    "@playwright/test": "^1.59.1",
+    "@playwright/test": "^1.63.0",
     "@types/node": "^25.5.2",
-    "playwright-bdd": "^8.5.0",
+    "playwright-bdd": "^9.2.1",
     "prettier": "^3.8.1",
-    "ts-node": "^10.9.2",
     "typescript": "^6.0.2",
     "vitest": "^4.1.3"
   }

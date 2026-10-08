@@ -10,32 +10,26 @@
     <main>
       <h1>Assertions Demo</h1>
 
-      <!-- Text content (toHaveText, toContainText, toBeEmpty, toBeAttached) -->
-      <p data-testid="text-exact" class="content active">Hello World</p>
-      <p data-testid="text-partial">This contains some text.</p>
-      <div data-testid="div-empty"></div>
-      <p data-testid="hidden-attached" hidden>I am hidden but attached to the DOM.</p>
+      <!-- Text content (exact and partial text, empty element) -->
+      <section aria-label="Greeting">
+        <p data-testid="text-exact" class="content active">Hello World</p>
+      </section>
+      <section aria-label="Notes">
+        <p data-testid="text-partial">This contains some text.</p>
+      </section>
+      <section aria-label="Empty box" data-testid="div-empty"></section>
 
-      <!-- Class tests (toHaveClass, toContainClass) -->
+      <!-- CSS classes -->
       <div data-testid="classed-element" class="foo bar baz">Classed element</div>
 
-      <!-- Count test (toHaveCount) -->
-      <ul>
-        <li data-testid="list-item" class="list-item">Item 1</li>
-        <li data-testid="list-item" class="list-item">Item 2</li>
-        <li data-testid="list-item" class="list-item">Item 3</li>
+      <!-- Counting list items -->
+      <ul aria-label="Fruits">
+        <li class="list-item">Apple</li>
+        <li class="list-item">Banana</li>
+        <li class="list-item">Cherry</li>
       </ul>
 
-      <!-- ID test (toHaveId) -->
-      <input id="my-special-id" data-testid="input-with-id" type="text" />
-
-      <!-- Role test (toHaveRole) -->
-      <button data-testid="btn-role">I am a button</button>
-
-      <!-- Accessible name (toHaveAccessibleName) -->
-      <button data-testid="btn-aria-label" aria-label="Close dialog">×</button>
-
-      <!-- Accessible description (toHaveAccessibleDescription) -->
+      <!-- Accessible description -->
       <span id="hint-text">This is a hint for the input below.</span>
       <input
         data-testid="input-aria-described"
@@ -44,7 +38,7 @@
         aria-describedby="hint-text"
       />
 
-      <!-- Accessible error message (toHaveAccessibleErrorMessage) -->
+      <!-- Accessible error message -->
       <span id="error-msg">This field is required.</span>
       <input
         data-testid="input-aria-error"
@@ -54,24 +48,21 @@
         aria-errormessage="error-msg"
       />
 
-      <!-- JS property (toHaveJSProperty) – hidden=false by default -->
-      <div data-testid="div-visible-js">Visible div</div>
-
-      <!-- Multi-select (toHaveValues) -->
-      <select data-testid="select-multi" multiple size="3">
+      <!-- Multi-select -->
+      <label for="colors">Colors</label>
+      <select id="colors" data-testid="select-multi" multiple size="3">
         <option value="red">Red</option>
         <option value="green" selected>Green</option>
         <option value="blue" selected>Blue</option>
       </select>
 
-      <!-- Viewport test (toBeInViewport) – this element is visible immediately -->
-      <div data-testid="in-viewport">I am in the viewport</div>
+      <!-- Viewport: visible immediately -->
+      <p data-testid="in-viewport">I am in the viewport</p>
 
-      <!-- Spacer to push next element below viewport -->
-      <div style="height: 3000px;"></div>
+      <!-- Spacer to push the next element below the viewport -->
+      <div style="height: 3000px"></div>
 
-      <!-- Below viewport (toBeInViewport – negative) -->
-      <div data-testid="below-viewport">Way below the viewport</div>
+      <p data-testid="below-viewport">Way below the viewport</p>
     </main>
   </body>
 </html>

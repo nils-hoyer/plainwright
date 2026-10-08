@@ -3,3 +3,7 @@ dist/
 .features-gen/
 test-results/
 playwright-report/
+steps.json
+*.tgz
+.DS_Store
+plan.md

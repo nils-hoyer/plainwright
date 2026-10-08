@@ -1,0 +1,18 @@
+{
+  "name": "playwright-keywords-starter",
+  "private": true,
+  "description": "Starter project for readable, keyword-driven Playwright tests.",
+  "scripts": {
+    "test": "bddgen && playwright test",
+    "report": "playwright show-report",
+    "lint": "playwright-keywords lint --features 'features/**/*.feature' --steps 'steps/**/*.ts' --quiet",
+    "catalog": "playwright-keywords catalog --steps 'steps/**/*.ts' --out steps.json",
+    "inspect": "playwright-keywords inspect --steps 'steps/**/*.ts' --base-url https://demo.playwright.dev",
+    "stubs": "playwright-keywords stubs --steps 'steps/**/*.ts' --out .vscode/playwright-keywords.steps.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "playwright-bdd": "^9.2.1",
+    "playwright-keywords": "^0.1.0"
+  }
+}

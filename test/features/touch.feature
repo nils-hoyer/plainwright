@@ -1,14 +1,15 @@
 @touch
-Feature: Touchscreen API (touchscreen.steps.ts)
+Feature: Touch
+
+  Runs in the chromium-touch project, which enables touch (hasTouch).
 
   Background:
-    Given I use the page object "touch"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/touch.html"
+    * I open the "Touch" page
 
-  Scenario: Tap on element by page object reference
-    When I tap on "tap target"
-    Then I see the "tap result"
+  Scenario: Tap an element
+    * I tap the "Tap me" button
+    * I see the text "Tapped!"
 
-  Scenario: Tap at absolute coordinates triggers click event
-    When I tap at 300 200
-    Then I see the "anywhere result"
+  Scenario: Tap at a position
+    * I tap at x "300" y "200"
+    * I see the text "Tapped anywhere!"

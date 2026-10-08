@@ -1,353 +1,307 @@
 import { expect } from '@playwright/test';
-import { Then } from '../fixtures/world';
+import type { ElementRef } from '../elements';
+import { category, escapeRegExp } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Extended LocatorAssertions & PageAssertions steps
-//
-// Already covered elsewhere (not duplicated here):
-//   toBeVisible / toBeHidden       → visibility.steps.ts
-//   toBeDisabled / toBeEnabled     → attributes.steps.ts
-//   toBeChecked / not.toBeChecked  → attributes.steps.ts
-//   toBeFocused                    → attributes.steps.ts
-//   toBeEditable / not.toBeEditable → attributes.steps.ts
-//   toHaveAttribute                → attributes.steps.ts
-//   toHaveValue                    → attributes.steps.ts
-//   toHaveURL                      → navigation.steps.ts
-//   toContainText (in element)     → visibility.steps.ts ("I see the text X in the Y")
-//   toHaveCount (visible only)     → visibility.steps.ts ("{int} elements of X are visible")
-//
-// LocatorAssertions – new steps:
-//   Then the {string} is attached to the DOM
-//   Then the {string} is not attached to the DOM
-//   Then the {string} is empty
-//   Then the {string} is not empty
-//   Then the {string} is in the viewport
-//   Then the {string} is not in the viewport
-//   Then the text of {string} is {string}
-//   Then the text of {string} is not {string}
-//   Then the {string} contains the text {string}
-//   Then the {string} does not contain the text {string}
-//   Then the {string} has the class {string}
-//   Then the {string} does not have the class {string}
-//   Then the {string} contains the class {string}
-//   Then the {string} does not contain the class {string}
-//   Then the {string} has {int} elements
-//   Then the CSS property {string} of {string} equals {string}
-//   Then the {string} has the ID {string}
-//   Then the {string} has the role {string}
-//   Then the {string} does not have the role {string}
-//   Then the {string} has the accessible name {string}
-//   Then the {string} does not have the accessible name {string}
-//   Then the {string} has the accessible description {string}
-//   Then the {string} does not have the accessible description {string}
-//   Then the {string} has the accessible error message {string}
-//   Then the {string} does not have the accessible error message {string}
-//   Then the {string} has the JS property {string} with value {string}
-//   Then the selected values of {string} include {string}
-//   Then the {string} matches the screenshot {string}
-//   Then the {string} matches the snapshot
-//
-// PageAssertions – new steps:
-//   Then the page title is {string}
-//   Then the page title is not {string}
-//   Then the page title contains {string}
-//   Then the page matches the screenshot {string}
-//   Then the page matches the snapshot
-// ---------------------------------------------------------------------------
+const step = category('Checking what you see');
 
-// ─── toBeAttached ─────────────────────────────────────────────────────────────
+// All checks wait until they pass or the expect timeout (5 seconds by default) runs out.
 
-Then('the {string} is attached to the DOM', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).toBeAttached();
+step({
+  pattern: 'I see the {element}',
+  level: 'core',
+  description: 'Checks that the element is visible.',
+  example: 'I see the "Welcome to your Dashboard" heading',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeVisible());
+  },
 });
 
-Then('the {string} is not attached to the DOM', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).not.toBeAttached();
+step({
+  pattern: 'I do not see the {element}',
+  level: 'core',
+  description: 'Checks that the element is hidden or not on the page.',
+  example: 'I do not see the "Close" button',
+  fn: async ({ world }, element: ElementRef) => {
+    await expect(world.element(element)).toBeHidden();
+  },
 });
 
-// ─── toBeEmpty ────────────────────────────────────────────────────────────────
-// Note: "the value of X is empty" (for inputs) is in attributes.steps.ts.
-// These steps check that any element (including non-input) has no text / is empty.
-
-Then('the {string} is empty', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).toBeEmpty();
+step({
+  pattern: 'I see the text {string}',
+  level: 'core',
+  description: 'Checks that some visible element on the page contains this text.',
+  example: 'I see the text "Welcome back!"',
+  fn: async ({ world }, text: string) => {
+    await expect(world.scope.getByText(text).filter({ visible: true }).first()).toBeVisible();
+  },
 });
 
-Then('the {string} is not empty', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).not.toBeEmpty();
+step({
+  pattern: 'I do not see the text {string}',
+  level: 'core',
+  description: 'Checks that no visible element on the page contains this text.',
+  example: 'I do not see the text "Username and password are incorrect."',
+  fn: async ({ world }, text: string) => {
+    await expect(world.scope.getByText(text).filter({ visible: true })).toHaveCount(0);
+  },
 });
 
-// ─── toBeInViewport ───────────────────────────────────────────────────────────
-
-Then('the {string} is in the viewport', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).toBeInViewport();
+step({
+  pattern: 'I see the text {string} in the {element}',
+  level: 'core',
+  description: 'Checks that the element contains this text.',
+  example: 'I see the text "Savings" in the "Account Overview" section',
+  fn: async ({ world }, text: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toContainText(text));
+  },
 });
 
-Then('the {string} is not in the viewport', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).not.toBeInViewport();
+step({
+  pattern: 'I do not see the text {string} in the {element}',
+  level: 'core',
+  description: 'Checks that the element does not contain this text.',
+  example: 'I do not see the text "Loans" in the "Account Overview" section',
+  fn: async ({ world }, text: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toContainText(text));
+  },
 });
 
-// ─── toHaveText / toContainText ───────────────────────────────────────────────
-// "text of X is Y" → exact full-text match (toHaveText)
-// "X contains the text Y" → substring match (toContainText)
-// Note: "I see the text X in the Y" in visibility.steps.ts also uses toContainText,
-// but uses a different sentence structure (text-first vs. element-first).
-
-Then(
-  'the text of {string} is {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveText(expected);
+step({
+  pattern: 'I see exactly the text {string} in the {element}',
+  level: 'advanced',
+  description: 'Checks that the whole text of the element is exactly this text.',
+  example: 'I see exactly the text "Hello World" in the "Greeting" element',
+  fn: async ({ world }, text: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toHaveText(text));
   },
-);
-
-Then(
-  'the text of {string} is not {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveText(expected);
-  },
-);
-
-Then(
-  'the {string} contains the text {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toContainText(expected);
-  },
-);
-
-Then(
-  'the {string} does not contain the text {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toContainText(expected);
-  },
-);
-
-// ─── toHaveClass / toContainClass ─────────────────────────────────────────────
-// "has the class X" → toHaveClass – the full class attribute must match exactly
-// "contains the class X" → toContainClass – element must have X among its classes
-
-Then(
-  'the {string} has the class {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveClass(expected);
-  },
-);
-
-Then(
-  'the {string} does not have the class {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveClass(expected);
-  },
-);
-
-Then(
-  'the {string} contains the class {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toContainClass(expected);
-  },
-);
-
-Then(
-  'the {string} does not contain the class {string}',
-  async ({ page, world }, reference: string, expected: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toContainClass(expected);
-  },
-);
-
-// ─── toHaveCount ──────────────────────────────────────────────────────────────
-// Counts all matching DOM nodes (visible or not).
-// Note: "{int} elements of X are visible" in visibility.steps.ts filters by visibility.
-
-Then(
-  'the {string} has {int} elements',
-  async ({ page, world }, reference: string, count: number) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveCount(count);
-  },
-);
-
-// ─── toHaveCSS ────────────────────────────────────────────────────────────────
-
-Then(
-  'the CSS property {string} of {string} equals {string}',
-  async ({ page, world }, property: string, reference: string, value: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveCSS(property, value);
-  },
-);
-
-// ─── toHaveId ─────────────────────────────────────────────────────────────────
-
-Then(
-  'the {string} has the ID {string}',
-  async ({ page, world }, reference: string, id: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveId(id);
-  },
-);
-
-// ─── toHaveRole ───────────────────────────────────────────────────────────────
-
-Then(
-  'the {string} has the role {string}',
-  async ({ page, world }, reference: string, role: string) => {
-    const selector = world.resolve(reference);
-    // toHaveRole expects a specific ARIA role union type; cast needed for string parameter
-    await expect(world.locator(page, selector)).toHaveRole(role as any);
-  },
-);
-
-Then(
-  'the {string} does not have the role {string}',
-  async ({ page, world }, reference: string, role: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveRole(role as any);
-  },
-);
-
-// ─── toHaveAccessibleName ─────────────────────────────────────────────────────
-
-Then(
-  'the {string} has the accessible name {string}',
-  async ({ page, world }, reference: string, name: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveAccessibleName(name);
-  },
-);
-
-Then(
-  'the {string} does not have the accessible name {string}',
-  async ({ page, world }, reference: string, name: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveAccessibleName(name);
-  },
-);
-
-// ─── toHaveAccessibleDescription ─────────────────────────────────────────────
-
-Then(
-  'the {string} has the accessible description {string}',
-  async ({ page, world }, reference: string, description: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveAccessibleDescription(description);
-  },
-);
-
-Then(
-  'the {string} does not have the accessible description {string}',
-  async ({ page, world }, reference: string, description: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveAccessibleDescription(description);
-  },
-);
-
-// ─── toHaveAccessibleErrorMessage ─────────────────────────────────────────────
-
-Then(
-  'the {string} has the accessible error message {string}',
-  async ({ page, world }, reference: string, errorMessage: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveAccessibleErrorMessage(errorMessage);
-  },
-);
-
-Then(
-  'the {string} does not have the accessible error message {string}',
-  async ({ page, world }, reference: string, errorMessage: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).not.toHaveAccessibleErrorMessage(errorMessage);
-  },
-);
-
-// ─── toHaveJSProperty ─────────────────────────────────────────────────────────
-// The value parameter is provided as a string and auto-cast:
-//   "true" / "false" → boolean, numeric strings → number, everything else → string.
-
-Then(
-  'the {string} has the JS property {string} with value {string}',
-  async ({ page, world }, reference: string, property: string, rawValue: string) => {
-    const selector = world.resolve(reference);
-    let value: unknown = rawValue;
-    if (rawValue === 'true') value = true;
-    else if (rawValue === 'false') value = false;
-    else if (!isNaN(Number(rawValue)) && rawValue.trim() !== '') value = Number(rawValue);
-    await expect(world.locator(page, selector)).toHaveJSProperty(property, value);
-  },
-);
-
-// ─── toHaveValues (multi-select) ──────────────────────────────────────────────
-// Values are provided as a comma-separated string, e.g. "Red, Green"
-
-Then(
-  'the selected values of {string} include {string}',
-  async ({ page, world }, reference: string, valuesRaw: string) => {
-    const selector = world.resolve(reference);
-    const values = valuesRaw.split(',').map((v) => v.trim());
-    await expect(world.locator(page, selector)).toHaveValues(values);
-  },
-);
-
-// ─── toHaveScreenshot (visual regression, locator) ────────────────────────────
-
-Then(
-  'the {string} matches the screenshot {string}',
-  async ({ page, world }, reference: string, name: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toHaveScreenshot(name);
-  },
-);
-
-Then('the {string} matches the snapshot', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await expect(world.locator(page, selector)).toHaveScreenshot();
 });
 
-// ─── PageAssertions ───────────────────────────────────────────────────────────
-
-Then(
-  'the page title equals {string}',
-  async ({ page, world }, expected: string) => {
-    await expect(world.getPage(page)).toHaveTitle(expected);
+step({
+  pattern: 'I see the value {string} in the {element}',
+  level: 'core',
+  description: 'Checks that the field contains exactly this value.',
+  example: 'I see the value "Jane Doe" in the "Full Name" field',
+  fn: async ({ world }, value: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toHaveValue(value));
   },
-);
+});
 
-Then(
-  'the page title is not {string}',
-  async ({ page, world }, expected: string) => {
-    await expect(world.getPage(page)).not.toHaveTitle(expected);
+step({
+  pattern: 'I see {string} selected in the {element}',
+  level: 'core',
+  description: 'Checks that the option with this visible text is selected in the dropdown.',
+  example: 'I see "Germany" selected in the "Country" dropdown',
+  fn: async ({ world }, option: string, element: ElementRef) => {
+    await world.withElement(element, (el) =>
+      expect
+        .poll(
+          () =>
+            el.evaluate(
+              (node) =>
+                Array.from((node as HTMLSelectElement).selectedOptions ?? [], (o) =>
+                  o.label.trim(),
+                ),
+              undefined,
+              { timeout: 1000 },
+            ),
+          { message: `Expected "${option}" to be selected in the ${element}` },
+        )
+        .toContain(option),
+    );
   },
-);
+});
 
-Then(
-  'the page title contains {string}',
-  async ({ page, world }, substring: string) => {
-    const escapedPattern = substring.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    await expect(world.getPage(page)).toHaveTitle(new RegExp(escapedPattern));
+step({
+  pattern: 'I see the {element} is empty',
+  level: 'core',
+  description: 'Checks that the field has no value, or that the element has no text.',
+  example: 'I see the "Full Name" field is empty',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeEmpty());
   },
-);
+});
 
-// ─── toHaveScreenshot (visual regression, page) ───────────────────────────────
-
-Then(
-  'the page matches the screenshot {string}',
-  async ({ page, world }, name: string) => {
-    await expect(world.getPage(page)).toHaveScreenshot(name);
+step({
+  pattern: 'I see the {element} is enabled',
+  level: 'core',
+  description: 'Checks that the element can be used (it is not disabled).',
+  example: 'I see the "Log in" button is enabled',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeEnabled());
   },
-);
+});
 
-Then('the page matches the snapshot', async ({ page, world }) => {
-  await expect(world.getPage(page)).toHaveScreenshot();
+step({
+  pattern: 'I see the {element} is disabled',
+  level: 'core',
+  description: 'Checks that the element is disabled and cannot be used.',
+  example: 'I see the "Log in" button is disabled',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeDisabled());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is checked',
+  level: 'core',
+  description: 'Checks that the checkbox is ticked or the radio button is selected.',
+  example: 'I see the "I accept the terms and conditions" checkbox is checked',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeChecked());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is not checked',
+  level: 'core',
+  description: 'Checks that the checkbox is not ticked or the radio button is not selected.',
+  example: 'I see the "Subscribe to newsletter" checkbox is not checked',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toBeChecked());
+  },
+});
+
+step({
+  pattern: 'I see {number} item(s) in the {element}',
+  level: 'core',
+  description: 'Checks how many visible items the list has.',
+  example: 'I see "3" items in the "Accounts" list',
+  fn: async ({ world }, count: number, element: ElementRef) => {
+    await world.withElement(element, (el) =>
+      expect(el.getByRole('listitem').filter({ visible: true })).toHaveCount(count),
+    );
+  },
+});
+
+step({
+  pattern: 'I see the {element} is focused',
+  level: 'advanced',
+  description: 'Checks that the element has the keyboard focus.',
+  example: 'I see the "Full Name" field is focused',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeFocused());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is editable',
+  level: 'advanced',
+  description: 'Checks that the field accepts input (it is neither disabled nor read-only).',
+  example: 'I see the "Full Name" field is editable',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeEditable());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is read-only',
+  level: 'advanced',
+  description: 'Checks that the field shows a value but does not accept input.',
+  example: 'I see the "Read-only Field" field is read-only',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toBeEditable());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is in the viewport',
+  level: 'advanced',
+  description: 'Checks that the element is inside the visible part of the page, without scrolling.',
+  example: 'I see the "Top of the page" element is in the viewport',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toBeInViewport());
+  },
+});
+
+step({
+  pattern: 'I see the {element} is not in the viewport',
+  level: 'advanced',
+  description: 'Checks that the element is outside the visible part of the page.',
+  example: 'I see the "Bottom of the page" element is not in the viewport',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toBeInViewport());
+  },
+});
+
+step({
+  pattern: 'I see the {element} with the description {string}',
+  level: 'advanced',
+  description: 'Checks the description screen readers announce for the element (aria-describedby).',
+  example: 'I see the "Name" field with the description "This is a hint for the input below."',
+  fn: async ({ world }, element: ElementRef, description: string) => {
+    await world.withElement(element, (el) => expect(el).toHaveAccessibleDescription(description));
+  },
+});
+
+step({
+  pattern: 'I see the {element} with the error message {string}',
+  level: 'advanced',
+  description:
+    'Checks the error message screen readers announce for the element (aria-errormessage).',
+  example: 'I see the "Required field" field with the error message "This field is required."',
+  fn: async ({ world }, element: ElementRef, message: string) => {
+    await world.withElement(element, (el) => expect(el).toHaveAccessibleErrorMessage(message));
+  },
+});
+
+step({
+  pattern: 'I see the attribute {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the element has this HTML attribute, with any value.',
+  example: 'I see the attribute "disabled" on the "Coming Soon" button',
+  fn: async ({ world }, attribute: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toHaveAttribute(attribute));
+  },
+});
+
+step({
+  pattern: 'I do not see the attribute {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the element does not have this HTML attribute.',
+  example: 'I do not see the attribute "disabled" on the "Transfer Money" button',
+  fn: async ({ world }, attribute: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toHaveAttribute(attribute));
+  },
+});
+
+step({
+  pattern: 'I see the attribute {string} with the value {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the HTML attribute of the element has exactly this value.',
+  example: 'I see the attribute "href" with the value "forms.html" on the "Forms Demo" link',
+  fn: async ({ world }, attribute: string, value: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toHaveAttribute(attribute, value));
+  },
+});
+
+step({
+  pattern: 'I see the attribute {string} containing {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the HTML attribute of the element contains this text.',
+  example: 'I see the attribute "href" containing "forms" on the "Forms Demo" link',
+  fn: async ({ world }, attribute: string, text: string, element: ElementRef) => {
+    await world.withElement(element, (el) =>
+      expect(el).toHaveAttribute(attribute, new RegExp(escapeRegExp(text))),
+    );
+  },
+});
+
+step({
+  pattern: 'I see the class {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the element has this CSS class (among others).',
+  example: 'I see the class "highlighted" on the "Styled box" element',
+  fn: async ({ world }, className: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).toContainClass(className));
+  },
+});
+
+step({
+  pattern: 'I do not see the class {string} on the {element}',
+  level: 'advanced',
+  description: 'Checks that the element does not have this CSS class.',
+  example: 'I do not see the class "hidden" on the "Styled box" element',
+  fn: async ({ world }, className: string, element: ElementRef) => {
+    await world.withElement(element, (el) => expect(el).not.toContainClass(className));
+  },
 });

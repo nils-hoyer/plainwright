@@ -1,32 +1,27 @@
-Feature: Extended Keyboard API (keyboard.steps.ts)
+Feature: Keyboard
 
   Background:
-    Given I use the page object "interactions"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/interactions.html"
+    * I open the "Interactions" page
+    * I focus on the "Keyboard input" field
 
-  Scenario: keyboard.down and keyboard.up type characters
-    When I focus on "input keyboard"
-    When I hold down the key "H"
-    When I release the key "H"
-    When I hold down the key "i"
-    When I release the key "i"
-    Then the value of "input keyboard" equals "Hi"
+  Scenario: Hold down and release keys
+    * I hold down the key "H"
+    * I release the key "H"
+    * I hold down the key "i"
+    * I release the key "i"
+    * I see the value "Hi" in the "Keyboard input" field
 
-  Scenario: Sequential keyboard.down and keyboard.up build a word
-    When I focus on "input keyboard"
-    When I hold down the key "A"
-    When I release the key "A"
-    When I hold down the key "b"
-    When I release the key "b"
-    Then the value of "input keyboard" equals "Ab"
+  Scenario: Insert text without key presses
+    * I insert the text "hello"
+    * I see the value "hello" in the "Keyboard input" field
 
-  Scenario: Insert text fires only input event (no clear)
-    When I focus on "input keyboard"
-    When I insert the text "hello"
-    Then the value of "input keyboard" equals "hello"
+  Scenario: Inserted text is added to the value
+    * I fill "world" in the "Keyboard input" field
+    * I insert the text "!"
+    * I see the value "world!" in the "Keyboard input" field
 
-  Scenario: Insert text appends to existing value
-    When I fill "world" in the "input keyboard"
-    When I focus on "input keyboard"
-    When I insert the text "!"
-    Then the value of "input keyboard" equals "world!"
+  Scenario: Press a key combination
+    * I fill "hello" in the "Keyboard input" field
+    * I press "ControlOrMeta+A"
+    * I press "Backspace"
+    * I see the "Keyboard input" field is empty

@@ -1,48 +1,91 @@
 import { expect } from '@playwright/test';
-import { When, Then } from '../fixtures/world';
+import { category } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Browser tab & window steps
-//
-// Supported step patterns:
-//   When I open a new tab
-//   When I switch to tab {int}
-//   When I close the current tab
-//   Then {int} tabs are open
-//
-// After "I switch to tab N" all subsequent steps (navigation, click, fill, etc.)
-// automatically target that tab via world.getPage() / world.locator().
-// ---------------------------------------------------------------------------
+const step = category('Tabs and frames');
 
-When('I open a new tab', async ({ page }) => {
-  await page.context().newPage();
+step({
+  pattern: 'I switch to tab {number}',
+  level: 'advanced',
+  description: 'Continues in the browser tab at this position, counting from 1.',
+  example: 'I switch to tab "2"',
+  fn: async ({ world }, position: number) => {
+    const context = world.page.context();
+    await expect
+      .poll(() => context.pages().length, { message: `Expected tab ${position} to be open` })
+      .toBeGreaterThanOrEqual(position);
+    const tab = context.pages()[position - 1];
+    world.switchToTab(tab);
+    await tab.bringToFront();
+    await tab.waitForLoadState();
+  },
 });
 
-When('I switch to tab {int}', async ({ page, world }, tabNumber: number) => {
-  const pages = page.context().pages();
-  const index = tabNumber - 1;
-  if (index < 0 || index >= pages.length) {
-    throw new Error(
-      `[playwright-bdd-steps] Cannot switch to tab ${tabNumber}: only ${pages.length} tab(s) open.`,
-    );
-  }
-  world.setActivePage(pages[index]);
-  await pages[index].bringToFront();
+step({
+  pattern: 'I open a new tab',
+  level: 'advanced',
+  description: 'Opens an empty browser tab and continues in it.',
+  example: 'I open a new tab',
+  fn: async ({ world }) => {
+    world.switchToTab(await world.page.context().newPage());
+  },
 });
 
-When('I close the current tab', async ({ page, world }) => {
-  const currentPage = world.getPage(page);
-  await currentPage.close();
-  // If we closed a non-primary tab, reset back to the fixture page
-  if (currentPage !== page) {
-    world.setActivePage(page);
-  }
+step({
+  pattern: 'I close the current tab',
+  level: 'advanced',
+  description: 'Closes the current browser tab and continues in the last remaining one.',
+  example: 'I close the current tab',
+  fn: async ({ world }) => {
+    const context = world.page.context();
+    await world.page.close();
+    const remaining = context.pages();
+    if (remaining.length) world.switchToTab(remaining[remaining.length - 1]);
+  },
 });
 
-Then('{int} tabs are open', async ({ page }, count: number) => {
-  // expect.poll() retries until the condition is met (or timeout), important
-  // because a new tab may not be registered in the context immediately.
-  await expect.poll(() => page.context().pages().length, {
-    message: `Expected ${count} tab(s) to be open`,
-  }).toBe(count);
+step({
+  pattern: 'I see {number} tab(s)',
+  level: 'advanced',
+  description: 'Checks how many browser tabs are open.',
+  example: 'I see "2" tabs',
+  fn: async ({ world }, count: number) => {
+    const context = world.page.context();
+    await expect
+      .poll(() => context.pages().length, { message: `Expected ${count} open tab(s)` })
+      .toBe(count);
+  },
+});
+
+step({
+  pattern: 'I switch to the {string} frame',
+  level: 'advanced',
+  description:
+    'Continues inside the embedded frame (iframe) with this title or name, or with this alias.',
+  example: 'I switch to the "Greeting" frame',
+  fn: async ({ world }, name: string) => {
+    const aliases = world.currentPage?.elements ?? {};
+    const alias = aliases[`"${name}" frame`] ?? aliases[name];
+    const scope = world.scope;
+    const frame =
+      alias === undefined
+        ? scope
+            .locator('iframe, frame')
+            .and(scope.getByTitle(name, { exact: world.exactNames }))
+            .or(scope.locator(`iframe[name=${JSON.stringify(name)}]`))
+        : typeof alias === 'string'
+          ? scope.locator(alias)
+          : alias(scope);
+    await expect(frame, `Expected a frame named "${name}"`).toBeAttached();
+    world.switchToFrame(frame.contentFrame());
+  },
+});
+
+step({
+  pattern: 'I switch to the main frame',
+  level: 'advanced',
+  description: 'Leaves the embedded frame and continues on the page itself.',
+  example: 'I switch to the main frame',
+  fn: ({ world }) => {
+    world.switchToFrame(null);
+  },
 });

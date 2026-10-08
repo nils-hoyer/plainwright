@@ -1,21 +1,12 @@
-Feature: Download API (download.steps.ts)
+Feature: Downloads
 
   Background:
-    Given I use the page object "download"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/download.html"
+    * I open the "Download" page
 
-  Scenario: Click triggers a successful download
-    When I click "btn download" and wait for the download
-    Then the download succeeds
+  Scenario: Download a file
+    * I download the file with the "Download Test File" button
+    * I see the downloaded file "test-download.txt"
 
-  Scenario: Download has the expected suggested filename
-    When I click "btn download" and wait for the download
-    Then the download filename is "test-download.txt"
-
-  Scenario: Download filename contains partial string
-    When I click "btn download" and wait for the download
-    Then the download filename contains "test-download"
-
-  Scenario: Download url contains expected scheme
-    When I click "btn download" and wait for the download
-    Then the download url contains "blob:"
+  Scenario: Save the downloaded file
+    * I download the file with the "Download Test File" button
+    * I save the downloaded file to "test-results/downloads/test-download.txt"

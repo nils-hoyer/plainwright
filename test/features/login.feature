@@ -1,48 +1,46 @@
 Feature: Login
 
   Background:
-    Given I use the page object "login"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/login.html"
+    * I open the "Login" page
 
-  Scenario: Cookie banner is visible and can be dismissed
-    Then I see the "[data-testid='btn-accept-cookies']"
-    When I click the "btn accept cookies"
-    Then I do not see the "btn accept cookies"
+  Scenario: Successful login
+    * I fill "1234567890" in the "Username" field
+    * I fill "password123" in the "Password" field
+    * I click the "Log in" button
+    * I see the text "Welcome back!"
 
-  Scenario: Submit button is disabled until valid credentials are entered
-    Then the "btn submit" is disabled
-    When I fill "1234567890" in the "input username"
-    When I fill "password123" in the "input password"
-    Then the "btn submit" is enabled
+  Scenario: The cookie banner can be accepted
+    * I see the "Cookie consent" dialog
+    * I click the "Accept Cookies" button
+    * I do not see the "Cookie consent" dialog
+    * I see the cookie "cookies_accepted"
 
-  Scenario: Username hint appears for invalid username format
-    When I fill "abc" in the "input username"
-    Then I see the "hint username"
-    Then I see the text "Your username consists of 10 digits."
-    Then the "btn submit" is disabled
+  Scenario: The log in button is enabled once both fields are valid
+    * I see the "Log in" button is disabled
+    * I fill "1234567890" in the "Username" field
+    * I fill "password123" in the "Password" field
+    * I see the "Log in" button is enabled
 
-  Scenario: Successful login shows welcome modal
-    When I fill "1234567890" in the "input username"
-    When I fill "password123" in the "input password"
-    When I click the "btn submit"
-    Then I see the "btn close modal"
-    Then I see the text "Welcome back!"
+  Scenario: A short username shows a hint
+    * I fill "abc" in the "Username" field
+    * I see the text "Your username consists of 10 digits."
+    * I see the "Log in" button is disabled
 
-  Scenario: Failed login shows error message
-    When I fill "1234567890" in the "input username"
-    When I fill "wrongpassword" in the "input password"
-    When I click the "btn submit"
-    Then I see the text "Username and password are incorrect."
-    Then I do not see the "btn close modal"
+  Scenario: A wrong password shows an error
+    * I fill "1234567890" in the "Username" field
+    * I fill "wrongpassword" in the "Password" field
+    * I click the "Log in" button
+    * I see the text "Username and password are incorrect."
+    * I do not see the "Welcome back!" dialog
 
-  Scenario: Forgot password link is visible
-    Then I see the "link forgot password"
-    Then the attribute "href" of "link forgot password" contains "#"
+  Scenario: Closing the welcome dialog opens the dashboard
+    * I fill "1234567890" in the "Username" field
+    * I fill "password123" in the "Password" field
+    * I click the "Log in" button
+    * I see the "Welcome back!" dialog
+    * I click the "Close" button
+    * I am on the "Dashboard" page
+    * I see the "Welcome to your Dashboard" heading
 
-  Scenario: Login and navigate to dashboard
-    When I fill "1234567890" in the "input username"
-    When I fill "password123" in the "input password"
-    When I click the "btn submit"
-    Then I see the "btn close modal"
-    When I click the "btn close modal"
-    Then I do not see the "btn close modal"
+  Scenario: There is help for a forgotten password
+    * I see the "Forgot password?" link

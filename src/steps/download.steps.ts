@@ -1,61 +1,50 @@
-import { When, Then } from '../fixtures/world';
+import path from 'node:path';
 import { expect } from '@playwright/test';
-import type { Download } from '@playwright/test';
+import type { ElementRef } from '../elements';
+import type { World } from '../world';
+import { category } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Download steps
-//
-// Pattern: click a trigger → capture download → assert properties / save file.
-// The download object is kept in a module-level variable which is safe because
-// Playwright workers execute tests sequentially within a single worker process.
-//
-// Supported step patterns:
-//   When I click "link download" and wait for the download
-//   When I save the download to "/tmp/result.txt"
-//   Then the download filename is "report.csv"
-//   Then the download filename contains "report"
-//   Then the download url contains "files/"
-//   Then the download succeeds
-// ---------------------------------------------------------------------------
+const step = category('Downloads');
 
-let lastDownload: Download | null = null;
-
-When(
-  'I click {string} and wait for the download',
-  async ({ page, world }, reference: string) => {
-    const selector = world.resolve(reference);
-    const downloadPromise = world.getPage(page).waitForEvent('download');
-    await world.locator(page, selector).click();
-    lastDownload = await downloadPromise;
+step({
+  pattern: 'I download the file with the {element}',
+  level: 'advanced',
+  description: 'Clicks the element and waits until the file it offers has downloaded.',
+  example: 'I download the file with the "Download Test File" button',
+  fn: async ({ world }, element: ElementRef) => {
+    const download = world.page.waitForEvent('download');
+    await world.withElement(element, (el) => el.click());
+    world.download = await download;
+    const failure = await world.download.failure();
+    if (failure) throw new Error(`[playwright-keywords] The download failed: ${failure}`);
   },
-);
+});
 
-When('I save the download to {string}', async ({}, savePath: string) => {
-  if (!lastDownload) {
+step({
+  pattern: 'I see the downloaded file {string}',
+  level: 'advanced',
+  description: 'Checks the file name of the last download.',
+  example: 'I see the downloaded file "test-download.txt"',
+  fn: ({ world }, fileName: string) => {
+    expect(lastDownload(world).suggestedFilename()).toBe(fileName);
+  },
+});
+
+step({
+  pattern: 'I save the downloaded file to {string}',
+  level: 'advanced',
+  description: 'Saves the last download at this path, relative to the project folder.',
+  example: 'I save the downloaded file to "test-results/report.csv"',
+  fn: async ({ world }, filePath: string) => {
+    await lastDownload(world).saveAs(path.resolve(process.cwd(), filePath));
+  },
+});
+
+function lastDownload(world: World) {
+  if (!world.download) {
     throw new Error(
-      '[playwright-bdd-steps] No download available. Use "I click ... and wait for the download" first.',
+      '[playwright-keywords] Nothing was downloaded yet. Use I download the file with the ... first.',
     );
   }
-  await lastDownload.saveAs(savePath);
-});
-
-Then('the download filename is {string}', async ({}, expected: string) => {
-  if (!lastDownload) throw new Error('[playwright-bdd-steps] No download available.');
-  expect(lastDownload.suggestedFilename()).toBe(expected);
-});
-
-Then('the download filename contains {string}', async ({}, partial: string) => {
-  if (!lastDownload) throw new Error('[playwright-bdd-steps] No download available.');
-  expect(lastDownload.suggestedFilename()).toContain(partial);
-});
-
-Then('the download url contains {string}', async ({}, partial: string) => {
-  if (!lastDownload) throw new Error('[playwright-bdd-steps] No download available.');
-  expect(lastDownload.url()).toContain(partial);
-});
-
-Then('the download succeeds', async ({}) => {
-  if (!lastDownload) throw new Error('[playwright-bdd-steps] No download available.');
-  const failure = await lastDownload.failure();
-  expect(failure).toBeNull();
-});
+  return world.download;
+}

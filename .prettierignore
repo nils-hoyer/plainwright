@@ -1,4 +1,8 @@
 node_modules/
 dist/
+.features-gen/
+test-results/
+playwright-report/
+package-lock.json
 *.js.map
 .DS_Store

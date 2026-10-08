@@ -29,10 +29,10 @@
       <div id="mouse-target" data-testid="mouse-target">Mouse Target Area</div>
 
       <!-- Updated by every mouse event so tests can assert the event type -->
-      <p id="last-event" data-testid="last-event">no-event</p>
+      <section aria-label="Last event"><p id="last-event" data-testid="last-event">no-event</p></section>
       <!-- Dedicated trackers: not overwritten by subsequent events like click -->
-      <p id="last-mousedown" data-testid="last-mousedown">-</p>
-      <p id="last-mouseup" data-testid="last-mouseup">-</p>
+      <section aria-label="Last mouse down"><p id="last-mousedown" data-testid="last-mousedown">-</p></section>
+      <section aria-label="Last mouse up"><p id="last-mouseup" data-testid="last-mouseup">-</p></section>
     </main>
 
     <script>

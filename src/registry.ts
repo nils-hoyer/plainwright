@@ -1,0 +1,230 @@
+import { CucumberExpression } from '@cucumber/cucumber-expressions';
+import type {
+  PlaywrightTestArgs,
+  PlaywrightTestOptions,
+  PlaywrightWorkerArgs,
+  PlaywrightWorkerOptions,
+} from '@playwright/test';
+import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
+import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
+import { parameterTypes } from './params';
+
+export type StepLevel = 'core' | 'advanced';
+export type StepSource = 'built-in' | 'project' | 'keyword';
+export type StepLocation = { file: string; line: number; column: number };
+
+/** Fixtures a step function can destructure from its first argument. */
+export type StepFixtures = PlaywrightTestArgs &
+  PlaywrightTestOptions &
+  PlaywrightWorkerArgs &
+  PlaywrightWorkerOptions &
+  BddTestFixtures &
+  BddWorkerFixtures &
+  KeywordsFixtures &
+  KeywordsOptions;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type StepFn<F = StepFixtures> = (this: unknown, fixtures: F, ...args: any[]) => unknown;
+
+export type StepOptions<F = StepFixtures> = {
+  /** Cucumber expression, e.g. `I click the {element}`. This text is public API. */
+  pattern: string;
+  /** One sentence that says exactly what the step does. */
+  description: string;
+  /** A complete step text that matches this pattern and no other. */
+  example: string;
+  /** Section in the docs, e.g. "Forms". */
+  category?: string;
+  /** `core` steps are the recommended vocabulary; `advanced` steps are for special cases. */
+  level?: StepLevel;
+  /** When set, lint warns wherever the step is used, with this explanation. */
+  discouraged?: string;
+  fn: StepFn<F>;
+};
+
+export type StepDefinition = {
+  readonly pattern: string;
+  readonly description: string;
+  readonly example: string;
+  readonly category: string;
+  readonly level: StepLevel;
+  readonly source: StepSource;
+  readonly discouraged?: string;
+  readonly location?: StepLocation;
+  /** Parameter types in order of appearance, e.g. `['string', 'element']`. */
+  readonly parameters: string[];
+  /** Fixture names the step function destructures, e.g. `['world']`. */
+  readonly fixtures: string[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  readonly fn: StepFn<any>;
+};
+
+export type StepMatch = { step: StepDefinition; args: unknown[] };
+
+type RegisterMeta = { source: StepSource; location?: StepLocation; arityCheck?: boolean };
+
+const steps: StepDefinition[] = [];
+const expressions = new WeakMap<StepDefinition, CucumberExpression>();
+
+/**
+ * Defines a step for feature files and registers it with playwright-bdd.
+ * Steps defined this way also appear in docs, the AI catalog, keywords and lint.
+ *
+ *   defineStep({
+ *     pattern: 'I add {string} to the cart',
+ *     description: 'Searches for the product and adds it to the shopping cart.',
+ *     example: 'I add "Coffee" to the cart',
+ *     fn: async ({ world }, product: string) => { ... },
+ *   });
+ */
+export function defineStep<F = StepFixtures>(options: StepOptions<F>): StepDefinition {
+  return registerStep(options, { source: 'project', location: callerLocation() });
+}
+
+/** Internal: registers a step with explicit source metadata. */
+export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): StepDefinition {
+  for (const key of ['pattern', 'description', 'example'] as const) {
+    if (typeof options[key] !== 'string' || !options[key].trim()) {
+      throw new Error(`[playwright-keywords] defineStep() needs a non-empty "${key}".`);
+    }
+  }
+  if (typeof options.fn !== 'function') {
+    throw new Error(
+      `[playwright-keywords] defineStep("${options.pattern}") needs a function "fn".`,
+    );
+  }
+  if (steps.some((step) => step.pattern === options.pattern)) {
+    throw new Error(`[playwright-keywords] The step "${options.pattern}" is defined twice.`);
+  }
+  const step: StepDefinition = Object.freeze({
+    pattern: options.pattern,
+    description: options.description,
+    example: options.example,
+    category: options.category ?? 'Project steps',
+    level: options.level ?? 'core',
+    source: meta.source,
+    discouraged: options.discouraged,
+    location: meta.location,
+    parameters: parameterNames(options.pattern),
+    fixtures: fixtureNames(options.fn),
+    fn: options.fn,
+  });
+  steps.push(step);
+  const providedOptions = meta.arityCheck === false ? { arityCheck: false } : {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (Step as any)(step.pattern, providedOptions, step.fn);
+  return step;
+}
+
+/** All registered steps in registration order. */
+export function getSteps(): readonly StepDefinition[] {
+  return steps;
+}
+
+/** All steps whose pattern matches the step text (without the Given/When/Then keyword). */
+export function findSteps(text: string): StepMatch[] {
+  const matches: StepMatch[] = [];
+  for (const step of steps) {
+    const result = expressionOf(step).match(text);
+    if (result) matches.push({ step, args: result.map((arg) => arg.getValue(null)) });
+  }
+  return matches;
+}
+
+/** The single step matching the text. Throws a readable error when none or several match. */
+export function findStep(text: string): StepMatch {
+  const matches = findSteps(text);
+  if (matches.length === 1) return matches[0];
+  if (matches.length === 0) {
+    const suggestions = suggestSteps(text);
+    throw new Error(
+      `No step matches "${text}".` +
+        (suggestions.length
+          ? `\nDid you mean:\n${suggestions.map((s) => `  - ${s.example}`).join('\n')}`
+          : ''),
+    );
+  }
+  throw new Error(
+    `"${text}" matches ${matches.length} steps:\n` +
+      matches.map(({ step }) => `  - ${step.pattern}${formatLocation(step.location)}`).join('\n'),
+  );
+}
+
+/** Steps whose example is closest to the given text. */
+export function suggestSteps(text: string, limit = 3): StepDefinition[] {
+  const normalized = normalizeForSuggestion(text);
+  return steps
+    .map((step) => ({
+      step,
+      distance:
+        levenshtein(normalized, normalizeForSuggestion(step.example)) /
+        Math.max(normalized.length, 1),
+    }))
+    .filter(({ distance }) => distance < 0.5)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, limit)
+    .map(({ step }) => step);
+}
+
+export function formatLocation(location?: StepLocation) {
+  return location ? ` (${location.file}:${location.line})` : '';
+}
+
+function expressionOf(step: StepDefinition): CucumberExpression {
+  let expression = expressions.get(step);
+  if (!expression) {
+    expression = new CucumberExpression(step.pattern, parameterTypes);
+    expressions.set(step, expression);
+  }
+  return expression;
+}
+
+function parameterNames(pattern: string): string[] {
+  return [...pattern.matchAll(/(?<!\\)\{([^}]*)\}/g)].map((m) => m[1] || 'anonymous');
+}
+
+/** Fixture names from the destructured first parameter, e.g. `async ({ page, world }, x) => …`. */
+export function fixtureNames(fn: Function): string[] {
+  const source = fn.toString().replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+  const match = /^[^(]*\(\s*\{([^}]*)\}/.exec(source);
+  if (!match) return [];
+  return match[1]
+    .split(',')
+    .map((part) => part.split(':')[0].trim())
+    .filter(Boolean);
+}
+
+function callerLocation(): StepLocation | undefined {
+  const lines = new Error().stack?.split('\n') ?? [];
+  // [0] "Error", [1] callerLocation, [2] defineStep, [3] the caller
+  const frame = lines[3] ?? '';
+  const match = /\(?((?:file:\/\/)?[^\s()]+):(\d+):(\d+)\)?$/.exec(frame.trim());
+  if (!match) return undefined;
+  return {
+    file: match[1].replace(/^file:\/\//, ''),
+    line: Number(match[2]),
+    column: Number(match[3]),
+  };
+}
+
+function normalizeForSuggestion(text: string) {
+  return text.toLowerCase().replace(/"[^"]*"/g, '""');
+}
+
+function levenshtein(a: string, b: string): number {
+  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let diagonal = previous[0];
+    previous[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const above = previous[j];
+      previous[j] = Math.min(
+        previous[j] + 1,
+        previous[j - 1] + 1,
+        diagonal + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+      diagonal = above;
+    }
+  }
+  return previous[b.length];
+}

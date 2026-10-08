@@ -1,36 +1,56 @@
-import { When } from '../fixtures/world';
+import type { ElementRef } from '../elements';
+import { category } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Scroll & viewport steps
-//
-// Supported step patterns:
-//   When I scroll to the bottom of the page
-//   When I scroll to the top of the page
-//   When I scroll to "section results"
-//   When I scroll "down" by 500 pixels
-//   When I scroll "up" by 200 pixels
-// ---------------------------------------------------------------------------
+const step = category('Scrolling');
 
-When('I scroll to the bottom of the page', async ({ page, world }) => {
-  await world.getPage(page).evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+// Clicking and checking scroll automatically. These steps are for pages that react to scrolling.
+
+step({
+  pattern: 'I scroll to the {element}',
+  level: 'advanced',
+  description: 'Scrolls until the element is in view.',
+  example: 'I scroll to the "You scrolled all the way down!" element',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => el.scrollIntoViewIfNeeded());
+  },
 });
 
-When('I scroll to the top of the page', async ({ page, world }) => {
-  await world.getPage(page).evaluate(() => window.scrollTo(0, 0));
+step({
+  pattern: 'I scroll to the bottom of the page',
+  level: 'advanced',
+  description: 'Scrolls to the end of the page.',
+  example: 'I scroll to the bottom of the page',
+  fn: async ({ world }) => {
+    await world.page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  },
 });
 
-When('I scroll to {string}', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await world.locator(page, selector).scrollIntoViewIfNeeded();
+step({
+  pattern: 'I scroll to the top of the page',
+  level: 'advanced',
+  description: 'Scrolls to the start of the page.',
+  example: 'I scroll to the top of the page',
+  fn: async ({ world }) => {
+    await world.page.evaluate(() => window.scrollTo(0, 0));
+  },
 });
 
-When('I scroll {string} by {int} pixels', async ({ page, world }, direction: string, pixels: number) => {
-  const lower = direction.toLowerCase();
-  if (lower !== 'up' && lower !== 'down') {
-    throw new Error(
-      `[playwright-bdd-steps] Invalid scroll direction "${direction}". Use "up" or "down".`,
-    );
-  }
-  const dy = lower === 'down' ? pixels : -pixels;
-  await world.getPage(page).evaluate((offset) => window.scrollBy(0, offset), dy);
+step({
+  pattern: 'I scroll down by {number} pixels',
+  level: 'advanced',
+  description: 'Scrolls the page down by this many pixels.',
+  example: 'I scroll down by "500" pixels',
+  fn: async ({ world }, pixels: number) => {
+    await world.page.evaluate((dy) => window.scrollBy(0, dy), pixels);
+  },
+});
+
+step({
+  pattern: 'I scroll up by {number} pixels',
+  level: 'advanced',
+  description: 'Scrolls the page up by this many pixels.',
+  example: 'I scroll up by "200" pixels',
+  fn: async ({ world }, pixels: number) => {
+    await world.page.evaluate((dy) => window.scrollBy(0, -dy), pixels);
+  },
 });

@@ -1,83 +1,92 @@
 Feature: Interactions
 
   Background:
-    Given I use the page object "interactions"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/interactions.html"
+    * I open the "Interactions" page
 
-  Scenario: Hover shows tooltip
-    When I hover over "hover target"
-    Then I see the "hover tooltip"
-    Then I see the text "Tooltip appeared!"
+  Scenario: Hovering shows a tooltip
+    * I hover over the "Hover over me" element
+    * I see the text "Tooltip appeared!"
 
-  Scenario: Double click triggers event
-    When I double click the "btn double click"
-    Then I see the "double click result"
-    Then I see the text "Double clicked!"
+  Scenario: Double click
+    * I double click the "Double click me" button
+    * I see the text "Double clicked!"
 
-  Scenario: Right click triggers event
-    When I right click the "right click target"
-    Then I see the "right click result"
+  Scenario: Right click
+    * I right click the "Right click me" element
+    * I see the text "Right clicked!"
 
-  Scenario: Scroll to element at bottom of page
-    When I scroll to "scroll target"
-    Then I see the "scroll target"
+  Scenario: Scroll to an element
+    * I scroll to the "You scrolled all the way down!" element
+    * I see the "You scrolled all the way down!" element is in the viewport
 
-  Scenario: Scroll to bottom and back to top of page
-    When I scroll to the bottom of the page
-    Then I see the "scroll target"
-    When I scroll to the top of the page
+  Scenario: Scroll the page
+    * I scroll to the bottom of the page
+    * I see the "Open Dashboard in new tab" link is in the viewport
+    * I scroll to the top of the page
+    * I see the "Open Dashboard in new tab" link is not in the viewport
+    * I scroll down by "400" pixels
+    * I see the "Interactions Demo" heading is not in the viewport
+    * I scroll up by "400" pixels
+    * I see the "Interactions Demo" heading is in the viewport
 
-  Scenario: Keyboard input in text field
-    When I focus on "input keyboard"
-    When I type the text "Hello BDD!"
-    Then the value of "input keyboard" equals "Hello BDD!"
+  Scenario: Accept an alert
+    * I accept the next dialog
+    * I click the "Show Alert" button
+    * I see a dialog with the message "This is an alert message"
+    * I see the text "alert accepted"
 
-  Scenario: Press key on element
-    When I fill "hello" in the "input keyboard"
-    When I press "Backspace" on "input keyboard"
-    Then the value of "input keyboard" equals "hell"
+  Scenario: Dismiss a confirm dialog
+    * I dismiss the next dialog
+    * I click the "Show Confirm" button
+    * I see a dialog with the message "Do you confirm?"
+    * I see the text "dismissed"
 
-  Scenario: Wait steps work correctly
-    When I wait 1 seconds
-    Then I see the "hover target"
+  Scenario: Accept a confirm dialog
+    * I accept the next dialog
+    * I click the "Show Confirm" button
+    * I see the text "confirmed"
 
-  Scenario: Wait for element to be visible
-    When I wait for the element "hover target" to be visible
-    Then I see the "hover target"
+  Scenario: Answer a prompt
+    * I accept the next dialog with "Hello"
+    * I click the "Show Prompt" button
+    * I see the text "prompt: Hello"
 
-  Scenario: Element visibility and count assertions
-    Then I see the "[data-testid='hover-target']"
-    Then I do not see the "[data-testid='double-click-result']"
+  Scenario: Dialogs that were not announced are dismissed
+    * I click the "Show Prompt" button
+    * I see the text "prompt dismissed"
 
-  # Bug 1 fix: wait for element to be enabled uses toBeEnabled() not waitFor(visible)
-  Scenario: Wait for element to be enabled
-    When I wait for the element "hover target" to be enabled
-    Then the "hover target" is enabled
+  Scenario: Continue in a tab the page opened
+    * I click the "Open Dashboard in new tab" link
+    * I see "2" tabs
+    * I switch to tab "2"
+    * I see the url containing "dashboard.html"
+    * I see the "Welcome to your Dashboard" heading
+    * I close the current tab
+    * I see "1" tab
+    * I see the "Interactions Demo" heading
 
-  # Bug 3 fix: dialog steps have proper async/await in event handlers
-  Scenario: Accept alert dialog
-    When I accept the dialog
-    When I click the "btn alert"
-    Then I see the text "alert accepted"
+  Scenario: Open an empty tab
+    * I open a new tab
+    * I see "2" tabs
+    * I open the "Login" page
+    * I see the "Log in" heading
+    * I switch to tab "1"
+    * I see the "Interactions Demo" heading
 
-  Scenario: Dismiss confirm dialog
-    When I dismiss the dialog
-    When I click the "btn confirm"
-    Then I see the text "dismissed"
+  Scenario: Work inside a frame
+    * I switch to the "Greeting" frame
+    * I see the text "Hello from iframe!"
+    * I fill "Hi" in the "Message" field
+    * I see the value "Hi" in the "Message" field
+    * I switch to the main frame
+    * I see the "Interactions Demo" heading
 
-  # Bug 5 fix: tab switching updates the active page in world so subsequent steps target the correct tab
-  Scenario: Switch to new tab and interact
-    When I click the "link new tab"
-    When I wait 1 seconds
-    Then 2 tabs are open
-    When I switch to tab 2
-    Then the url contains "dashboard.html"
-    When I close the current tab
-    Then 1 tabs are open
+  Scenario: Type on the keyboard
+    * I click the "Keyboard input" field
+    * I type "Hello BDD!" on the keyboard
+    * I see the value "Hello BDD!" in the "Keyboard input" field
 
-  # Bug 4 fix: I switch to frame properly sets the FrameLocator context in world
-  Scenario: Switch to iframe and interact with its content
-    When I switch to frame "iframe demo"
-    Then I see the text "Hello from iframe!"
-    When I switch to the main frame
-    Then I see the "hover target"
+  Scenario: Press a key in a field
+    * I fill "hello" in the "Keyboard input" field
+    * I press "Backspace" in the "Keyboard input" field
+    * I see the value "hell" in the "Keyboard input" field

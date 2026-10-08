@@ -1,0 +1,81 @@
+# Migrating from Gauge
+
+Gauge specs and playwright-keywords features look alike: both are lists of `*` steps with
+values in double quotes. Most of a migration is renaming files and adjusting step wording.
+
+## Concepts
+
+| Gauge                                     | playwright-keywords                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------- |
+| Specification (`.spec`, Markdown)         | Feature file (`.feature`, Gherkin)                                            |
+| `# Spec heading`                          | `Feature: …`                                                                  |
+| `## Scenario heading`                     | `Scenario: …`                                                                 |
+| Context steps (before the first scenario) | `Background:`                                                                 |
+| Teardown steps (`___` at the end)         | No direct equivalent; use Playwright fixtures or playwright-bdd `After` hooks |
+| `* step "with" "params"`                  | `* step "with" "params"` (same)                                               |
+| Concept (`.cpt` file)                     | Keyword: `Scenario Outline:` in `keywords/*.feature`                          |
+| Concept parameter `<name>`                | Keyword parameter `"<name>"` (in quotes)                                      |
+| Data table driving a scenario             | `Scenario Outline:` with `Examples:`                                          |
+| Step implementation (Java, Python, …)     | Built-in steps; your own with `defineStep()` in TypeScript                    |
+| Page object with selectors                | `definePage()`; selectors only as aliases for unnamed elements                |
+| Tags                                      | Tags (`@smoke`), run with `npx playwright test --grep @smoke`                 |
+| Gauge HTML report                         | Playwright HTML report with traces                                            |
+
+## Step wording
+
+Typical Gauge + Selenium setups name elements by page-object field (`"input user"`) and use
+`type`. playwright-keywords names elements by what the user sees and uses `fill`.
+
+| Gauge                                                        | playwright-keywords                             |
+| ------------------------------------------------------------ | ----------------------------------------------- |
+| `* I visit the url "/sign-in"`                               | `* I open the "Login" page`                     |
+| `* I see the page "login"`                                   | `* I am on the "Login" page`                    |
+| `* I type "1234567890" in the "input user"`                  | `* I fill "1234567890" in the "Username" field` |
+| `* I click the "button login"`                               | `* I click the "Log in" button`                 |
+| `* I not see the "button close modal"`                       | `* I do not see the "Close" button`             |
+| `* I see the attribute "disabled" in element "button login"` | `* I see the "Log in" button is disabled`       |
+| `* I see the url "/de"`                                      | `* I see the url "/de"`                         |
+
+`npx playwright-keywords lint` suggests the closest existing step for every line that does not
+match, which makes a first pass quick.
+
+## Concepts become keywords
+
+```markdown
+# Login concepts (Gauge, login.cpt)
+
+## I am logged in as <user>
+
+- I visit the page login
+- I type <user> in the "input user"
+- I type "secret" in the "input password"
+- I click the "button login"
+```
+
+```gherkin
+# keywords/login.feature
+Feature: Login
+
+  Scenario Outline: I am logged in as "<user>"
+    * I open the "Login" page
+    * I fill "<user>" in the "Username" field
+    * I fill "secret" in the "Password" field
+    * I click the "Log in" button
+```
+
+Load them with `defineKeywords('keywords/**/*.feature')` in a step file.
+
+## Test data and secrets
+
+Do not commit real credentials in feature files. Use dedicated test accounts, or a project
+step that reads them from the environment, for example
+`I log in as the "standard" test user`.
+
+## Steps
+
+1. Install and configure: see the [README quick start](../README.md#quick-start).
+2. Define a page for every Gauge page object with `definePage()`. Keep selectors only where the
+   element has no visible name.
+3. Convert specs to features (`#` → `Feature:`, `##` → `Scenario:`), concepts to keywords.
+4. Run `lint` and fix the reported lines.
+5. Run the tests and compare with the Gauge results.

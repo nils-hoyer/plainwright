@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orders</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!--
+      This page is deliberately hard to test by visible names:
+      - the search field has no label and no placeholder,
+      - the settings button only shows an icon,
+      - every order row has a button with the same name "Delete".
+      The "Orders" page definition in test/steps/pages.ts adds aliases for them.
+    -->
+    <main>
+      <h1>Orders</h1>
+
+      <input type="text" data-testid="input-search" />
+      <button type="button" data-testid="btn-settings">⚙</button>
+
+      <div role="dialog" aria-labelledby="settings-title" data-testid="settings" hidden>
+        <h2 id="settings-title">Settings</h2>
+        <p>Nothing to configure yet.</p>
+      </div>
+
+      <table>
+        <tbody>
+          <tr data-order="1001">
+            <td>Order 1001</td>
+            <td><button type="button">Delete</button></td>
+          </tr>
+          <tr data-order="1002">
+            <td>Order 1002</td>
+            <td><button type="button">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p data-testid="status" role="status"></p>
+    </main>
+
+    <script>
+      document.querySelector('[data-testid="btn-settings"]').addEventListener('click', () => {
+        document.querySelector('[data-testid="settings"]').hidden = false;
+      });
+      document.querySelectorAll('tr[data-order] button').forEach((button) => {
+        button.addEventListener('click', () => {
+          const row = button.closest('tr');
+          document.querySelector('[data-testid="status"]').textContent =
+            'Order ' + row.dataset.order + ' deleted';
+          row.remove();
+        });
+      });
+    </script>
+  </body>
+</html>

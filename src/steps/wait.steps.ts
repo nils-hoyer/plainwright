@@ -1,60 +1,63 @@
 import { expect } from '@playwright/test';
-import { When, Then } from '../fixtures/world';
+import type { ElementRef } from '../elements';
+import { category } from './builtin';
 
-// ---------------------------------------------------------------------------
-// Wait steps
-//
-// Supported step patterns:
-//   When I wait {int} seconds
-//   When I wait {int} milliseconds
-//   When I wait for the element "button submit" to be visible
-//   When I wait for the element "button submit" to be hidden
-//   When I wait for the element "button submit" to be enabled
-//   Then the element "button submit" is visible within {int} seconds
-//   Then the element "button submit" is hidden within {int} seconds
-// ---------------------------------------------------------------------------
+const step = category('Waiting');
 
-When('I wait {int} seconds', async ({ page, world }, seconds: number) => {
-  await world.getPage(page).waitForTimeout(seconds * 1000);
+// Every "I see" step already waits. Fixed waits make tests slow and still flaky.
+const FIXED_WAIT =
+  'Fixed waits slow tests down and still break on slow days. Check for what the user waits for instead, e.g. I see the text "...".';
+
+step({
+  pattern: 'I wait {number} second(s)',
+  level: 'advanced',
+  description: 'Pauses the test for this many seconds.',
+  example: 'I wait "2" seconds',
+  discouraged: FIXED_WAIT,
+  fn: async ({ world }, seconds: number) => {
+    await world.page.waitForTimeout(seconds * 1000);
+  },
 });
 
-When('I wait {int} milliseconds', async ({ page, world }, ms: number) => {
-  await world.getPage(page).waitForTimeout(ms);
+step({
+  pattern: 'I wait {number} millisecond(s)',
+  level: 'advanced',
+  description: 'Pauses the test for this many milliseconds.',
+  example: 'I wait "500" milliseconds',
+  discouraged: FIXED_WAIT,
+  fn: async ({ world }, milliseconds: number) => {
+    await world.page.waitForTimeout(milliseconds);
+  },
 });
 
-When(
-  'I wait for the element {string} to be visible',
-  async ({ page, world }, reference: string) => {
-    const selector = world.resolve(reference);
-    await world.locator(page, selector).waitFor({ state: 'visible' });
+step({
+  pattern: 'I see the {element} within {number} second(s)',
+  level: 'advanced',
+  description: 'Checks that the element becomes visible, waiting up to this many seconds.',
+  example: 'I see the "Report ready" heading within "30" seconds',
+  fn: async ({ world }, element: ElementRef, seconds: number) => {
+    await world.withElement(element, (el) => expect(el).toBeVisible({ timeout: seconds * 1000 }));
   },
-);
-
-When('I wait for the element {string} to be hidden', async ({ page, world }, reference: string) => {
-  const selector = world.resolve(reference);
-  await world.locator(page, selector).waitFor({ state: 'hidden' });
 });
 
-When(
-  'I wait for the element {string} to be enabled',
-  async ({ page, world }, reference: string) => {
-    const selector = world.resolve(reference);
-    await expect(world.locator(page, selector)).toBeEnabled();
+step({
+  pattern: 'I wait for the page to load',
+  level: 'advanced',
+  description: 'Waits until the browser reports that the page and its images have loaded.',
+  example: 'I wait for the page to load',
+  fn: async ({ world }) => {
+    await world.page.waitForLoadState('load');
   },
-);
+});
 
-Then(
-  'the element {string} is visible within {int} seconds',
-  async ({ page, world }, reference: string, seconds: number) => {
-    const selector = world.resolve(reference);
-    await world.locator(page, selector).waitFor({ state: 'visible', timeout: seconds * 1000 });
+step({
+  pattern: 'I wait for network idle',
+  level: 'advanced',
+  description: 'Waits until the page has made no network requests for half a second.',
+  example: 'I wait for network idle',
+  discouraged:
+    'Network idle is unreliable for pages that poll or stream. Check for what the user waits for instead.',
+  fn: async ({ world }) => {
+    await world.page.waitForLoadState('networkidle');
   },
-);
-
-Then(
-  'the element {string} is hidden within {int} seconds',
-  async ({ page, world }, reference: string, seconds: number) => {
-    const selector = world.resolve(reference);
-    await world.locator(page, selector).waitFor({ state: 'hidden', timeout: seconds * 1000 });
-  },
-);
+});

@@ -1,69 +1,57 @@
 Feature: Forms
 
   Background:
-    Given I use the page object "forms"
-    And I navigate to "file:///Users/nilshoyer/dev/playwright-bdd-all/test/test-app/forms.html"
+    * I open the "Forms" page
 
-  # Round-2 API fix: the value of X contains Y uses expect().toHaveValue(regex) with auto-retry
-  Scenario: Fill text inputs
-    When I fill "Jane Doe" in the "input full name"
-    When I fill "jane@example.com" in the "input email"
-    Then the value of "input full name" equals "Jane Doe"
-    Then the value of "input email" contains "example"
-    Then the value of "input email" contains "@"
+  Scenario: Fill text fields
+    * I fill "Jane Doe" in the "Full Name" field
+    * I fill "jane@example.com" in the "Email" field
+    * I see the value "Jane Doe" in the "Full Name" field
+    * I see the value "jane@example.com" in the "Email" field
 
-  Scenario: Type alias works like fill
-    When I type "John Doe" in the "input full name"
-    Then the value of "input full name" equals "John Doe"
+  Scenario: A field can also be named by its placeholder
+    * I fill "Jane Doe" in the "Your name" field
+    * I see the value "Jane Doe" in the "Full Name" field
 
-  Scenario: Clear an input field
-    When I fill "Jane Doe" in the "input full name"
-    When I clear the "input full name"
-    Then the value of "input full name" is empty
+  Scenario: Clear a field
+    * I fill "Jane Doe" in the "Full Name" field
+    * I clear the "Full Name" field
+    * I see the "Full Name" field is empty
 
-  Scenario: Clear and fill in one step
-    When I fill "Old Value" in the "input full name"
-    When I clear and fill "New Value" in the "input full name"
-    Then the value of "input full name" equals "New Value"
+  Scenario: Disabled and read-only fields
+    * I see the "Disabled Field" field is disabled
+    * I see the "Read-only Field" field is read-only
+    * I see the "Full Name" field is enabled
+    * I see the "Full Name" field is editable
 
-  Scenario: Disabled and read-only field states
-    Then the "input disabled" is disabled
-    Then the "input readonly" is read-only
-    Then the "input full name" is enabled
-    Then the "input full name" is editable
+  Scenario: Choose an option in a dropdown
+    * I select "Germany" in the "Country" dropdown
+    * I see "Germany" selected in the "Country" dropdown
+    * I see the value "de" in the "Country" dropdown
 
-  Scenario: Select a dropdown option
-    When I select "Germany" in the "select country"
-    Then the value of "select country" equals "de"
+  Scenario: Choose an option by its position
+    * I select option "3" in the "Country" dropdown
+    * I see "Austria" selected in the "Country" dropdown
 
-  Scenario: Select option by index
-    When I select the option at index 2 in the "select country"
-    Then the value of "select country" equals "at"
+  Scenario: Tick and untick checkboxes
+    * I check the "I accept the terms and conditions" checkbox
+    * I see the "I accept the terms and conditions" checkbox is checked
+    * I uncheck the "Subscribe to newsletter" checkbox
+    * I see the "Subscribe to newsletter" checkbox is not checked
 
-  Scenario: Check and uncheck checkboxes
-    When I check the "checkbox terms"
-    Then the "checkbox terms" is checked
-    When I uncheck the "checkbox newsletter"
-    Then the "checkbox newsletter" is not checked
+  Scenario: Pressing Enter in a field submits the form
+    * I fill "Jane Doe" in the "Full Name" field
+    * I press "Enter" in the "Email" field
+    * I see the text "Form submitted successfully!"
 
-  Scenario: Press Enter submits form
-    When I fill "Jane Doe" in the "input full name"
-    When I fill "jane@example.com" in the "input email"
-    When I focus on "btn submit form"
-    When I press "Enter" on "btn submit form"
-    Then I see the "form result"
-    Then I see the text "Form submitted successfully!"
+  Scenario: Submit the form with its button
+    * I click the "Submit Form" button
+    * I see the text "Form submitted successfully!"
 
-  Scenario: Local storage can be set and read
-    When I click the "btn set storage"
-    Then local storage "demo_key" equals "demo_value"
-    When I click the "btn clear storage"
+  Scenario: Upload a file in a file field
+    * I upload the file "test/test-app/test-file.txt" with the "Upload file" field
+    * I see the text "test-file.txt"
 
-  Scenario: Focus on input field
-    When I focus on "input full name"
-    Then the "input full name" is focused
-
-  # Bug 1 fix: wait for element to be enabled uses toBeEnabled() not waitFor(visible)
-  Scenario: Wait for enabled element passes immediately for an active input
-    When I wait for the element "input full name" to be enabled
-    Then the "input full name" is enabled
+  Scenario: Focus a field
+    * I focus on the "Full Name" field
+    * I see the "Full Name" field is focused
