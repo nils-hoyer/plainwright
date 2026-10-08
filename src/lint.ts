@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { featureSteps, parseGherkin } from './gherkin';
-import { validateKeywords } from './keywords';
+import { unescapeQuotes } from './elements';
+import { checkKeywords } from './keywords';
 import { findSteps, getSteps, suggestSteps } from './registry';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
@@ -44,7 +45,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       messages.push(...fromLocatedErrors(String((error as Error).message), 'syntax', file));
       continue;
     }
-    for (const { text, line } of steps) {
+    for (const { text, line, tags } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
       const add = (severity: LintSeverity, rule: LintMessage['rule'], message: string) => {
         const key = `${file}:${line}:${rule}:${message}`;
@@ -69,8 +70,18 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         }
       }
 
-      const matches = findSteps(text);
+      const matches = findSteps(text, tags);
       if (matches.length === 0) {
+        const elsewhere = findSteps(text);
+        if (elsewhere.length) {
+          const needed = [...new Set(elsewhere.map(({ step }) => step.tags.join(' and ')))];
+          add(
+            'error',
+            'undefined-step',
+            `"${text}" only applies to scenarios tagged ${needed.join(' or ')}, the folder of its step file.`,
+          );
+          continue;
+        }
         const suggestion = suggestSteps(text)[0];
         add(
           'error',
@@ -95,12 +106,16 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
     }
   }
 
-  for (const error of validateKeywords()) {
+  const keywordProblems = checkKeywords();
+  for (const error of keywordProblems.errors) {
     messages.push(...fromLocatedErrors(error, 'keyword', ''));
+  }
+  for (const warning of keywordProblems.warnings) {
+    messages.push(...fromLocatedErrors(warning, 'keyword', '', 'warning'));
   }
 
   for (const step of getSteps()) {
-    const matches = findSteps(step.example);
+    const matches = findSteps(step.example, step.tags);
     if (matches.length === 1 && matches[0].step === step) continue;
     messages.push({
       file: step.location ? path.relative(cwd, step.location.file) : '',
@@ -132,9 +147,7 @@ export function summarize(messages: LintMessage[]): string {
 }
 
 function quotedValues(text: string): string[] {
-  return [...text.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((match) =>
-    match[1].replace(/\\(.)/g, '$1'),
-  );
+  return [...text.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((match) => unescapeQuotes(match[1]));
 }
 
 /** Turns "file:line: message" lines into lint messages. */
@@ -142,6 +155,7 @@ function fromLocatedErrors(
   text: string,
   rule: LintMessage['rule'],
   fallbackFile: string,
+  severity: LintSeverity = 'error',
 ): LintMessage[] {
   return text
     .split('\n')
@@ -151,7 +165,7 @@ function fromLocatedErrors(
       return {
         file: match ? match[1] : fallbackFile,
         line: match ? Number(match[2]) : 0,
-        severity: 'error' as const,
+        severity,
         rule,
         message: match ? match[3] : line,
       };

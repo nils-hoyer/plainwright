@@ -43,8 +43,8 @@ export class World {
     this.baseURL = options.baseURL;
     this.exactNames = options.exactNames;
     this.#context = page.context();
-    // Without a listener Playwright dismisses dialogs silently; we record them and apply the
-    // action from "I accept the next dialog" / "I dismiss the next dialog".
+    // We record every dialog and apply the action from "I accept the next dialog" /
+    // "I dismiss the next dialog". Unannounced dialogs are answered the way Playwright does.
     this.#context.on('dialog', this.#onDialog);
   }
 
@@ -124,9 +124,14 @@ export class World {
   async #handleDialog(dialog: Dialog) {
     this.dialogs.push({ type: dialog.type(), message: dialog.message() });
     const action = this.#nextDialog;
+    // Context listeners run before page listeners. A project step that listens on the page
+    // answers unannounced dialogs itself.
+    if (!action && hasDialogListener(dialog.page())) return;
     this.#nextDialog = undefined;
+    // Like Playwright without a listener: leave the page ("Leave site?"), dismiss the rest.
+    const accept = action ? action.accept : dialog.type() === 'beforeunload';
     try {
-      if (action?.accept) await dialog.accept(action.promptText);
+      if (accept) await dialog.accept(action?.promptText);
       else await dialog.dismiss();
     } catch {
       // The page may already be closed.
@@ -146,4 +151,10 @@ export class World {
     error.message = `${hint}\n\n${original}`;
     if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
   }
+}
+
+/** Whether the page has its own `dialog` listener. Pages are Node event emitters at runtime. */
+function hasDialogListener(page: Page | null): boolean {
+  const emitter = page as { listenerCount?: (event: string) => number } | null;
+  return (emitter?.listenerCount?.('dialog') ?? 0) > 0;
 }

@@ -19,3 +19,20 @@ Feature: Helpful error messages
       """
       I open the "Logon" page
       """
+
+  Scenario: Text checks compare capitals
+    * I open the "Login" page
+    * I see the text "Accept Cookies"
+    * I do not see the text "accept cookies"
+    * I see this step fail with "accept cookies":
+      """
+      I see the text "accept cookies"
+      """
+
+  Scenario: Text checks in an element compare capitals
+    * I open the "Login" page
+    * I see the text "Accept Cookies" in the "Cookie consent" dialog
+    * I see this step fail with "accept cookies":
+      """
+      I see the text "accept cookies" in the "Cookie consent" dialog
+      """

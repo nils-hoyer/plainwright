@@ -34,6 +34,7 @@ describe('{element} parameter', () => {
     ['I click the "Yes" radio button', 'Yes', 'radio button'],
     ['I click the "Save as" menu item', 'Save as', 'menu item'],
     ['I click the "Say \\"hi\\"" button', 'Say "hi"', 'button'],
+    ['I click the "C:\\temp" button', 'C:\\temp', 'button'],
   ])('%s', (text, name, type) => {
     const element = findStep(text).args[0] as ElementRef;
     expect(element).toBeInstanceOf(ElementRef);
@@ -55,11 +56,17 @@ describe('locate', () => {
     ['radio button', `getByRole("radio", {"name":"X","exact":true})`],
     ['heading', `getByRole("heading", {"name":"X","exact":true})`],
     ['tab', `getByRole("tab", {"name":"X","exact":true})`],
-    ['dialog', `getByRole("dialog", {"name":"X","exact":true})`],
-    ['menu item', `getByRole("menuitem", {"name":"X","exact":true})`],
+    [
+      'dialog',
+      `getByRole("dialog", {"name":"X","exact":true}).or(getByRole("alertdialog", {"name":"X","exact":true}))`,
+    ],
+    [
+      'menu item',
+      `getByRole("menuitem", {"name":"X","exact":true}).or(getByRole("menuitemcheckbox", {"name":"X","exact":true})).or(getByRole("menuitemradio", {"name":"X","exact":true}))`,
+    ],
     ['section', `getByRole("region", {"name":"X","exact":true})`],
     ['list', `getByRole("list", {"name":"X","exact":true})`],
-    ['image', `getByAltText("X", {"exact":true})`],
+    ['image', `getByAltText("X", {"exact":true}).or(getByRole("img", {"name":"X","exact":true}))`],
     ['element', `getByText("X", {"exact":true})`],
   ] as const)('finds a %s by %s', (type, expected) => {
     expect(describeLocator(new ElementRef('X', type), exact)).toBe(expected);
@@ -151,6 +158,23 @@ describe('aria snapshot', () => {
   it('says when the page has no element of that type', () => {
     expect(describeMissing(new ElementRef('Agree', 'checkbox'), snapshot)).toContain(
       'Checkboxes on this page: (none).',
+    );
+  });
+
+  it('lists every role the lookup finds', () => {
+    const widgets = `
+- alertdialog "Delete order?"
+- menuitemcheckbox "Show grid" [checked]
+- menuitemradio "Compact"
+- img "Company logo"
+`;
+    expect(groupSnapshot(widgets).elements).toEqual({
+      dialog: ['Delete order?'],
+      'menu item': ['Show grid', 'Compact'],
+      image: ['Company logo'],
+    });
+    expect(describeMissing(new ElementRef('Confirm', 'dialog'), widgets)).toContain(
+      'Dialogs on this page: "Delete order?".',
     );
   });
 

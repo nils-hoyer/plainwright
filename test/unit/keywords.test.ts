@@ -62,15 +62,23 @@ describe('defineKeywords', () => {
     expect(library.validateKeywords()).toEqual([]);
   });
 
-  it('reports steps that match nothing, unknown and unused parameters', async () => {
+  it('reports steps that match nothing and unused parameters', async () => {
     const { library, define } = await load('broken-steps');
     define();
     const file = 'test/unit/fixtures/keywords/broken-steps/broken.feature';
     expect(library.validateKeywords()).toEqual([
       `${file}:5: No step matches "I clik the "Search" button". Did you mean "I click the "Log in" button"?`,
-      `${file}:6: Unknown parameter <query>. The title of "I search for "<term>"" defines: <term>.`,
       `${file}:3: The parameter <term> of "I search for "<term>"" is not used in any step.`,
       `${file}:8: The parameter <email> of "I sign up as "<name>" with "<email>"" is not used in any step.`,
+    ]);
+  });
+
+  it('keeps other <…> as text and warns when one looks like a misspelled parameter', async () => {
+    const { define } = await load('broken-steps');
+    define();
+    const { checkKeywords } = await import('../../src/keywords');
+    expect(checkKeywords().warnings).toEqual([
+      'test/unit/fixtures/keywords/broken-steps/broken.feature:10: <nme> is not a parameter of "I sign up as "<name>" with "<email>"" and stays as written. Did you mean <name>?',
     ]);
   });
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Widgets</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Elements with roles beyond the obvious ones, as component libraries render them. -->
+    <main>
+      <h1>Widgets</h1>
+
+      <svg role="img" aria-label="Company logo" width="40" height="40" viewBox="0 0 40 40">
+        <circle cx="20" cy="20" r="18" fill="#2b6cb0" />
+      </svg>
+
+      <div role="menu" aria-label="View">
+        <div role="menuitem" tabindex="-1">Refresh</div>
+        <div role="menuitemcheckbox" aria-checked="true" tabindex="-1">Show grid</div>
+        <div role="menuitemradio" aria-checked="false" tabindex="-1">Compact</div>
+      </div>
+
+      <div role="alertdialog" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+        <h2 id="confirm-title">Delete order?</h2>
+        <p id="confirm-text">This cannot be undone.</p>
+        <button type="button">Keep</button>
+      </div>
+    </main>
+  </body>
+</html>

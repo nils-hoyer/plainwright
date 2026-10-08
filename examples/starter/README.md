@@ -17,8 +17,8 @@ npm run report    # open the report
 | `features/`            | The tests, in plain sentences.                              |
 | `keywords/`            | Your own steps, written in Gherkin (`I add the todo "…"`).  |
 | `steps/pages.ts`       | Page names and aliases for elements without a visible name. |
-| `steps/todos.steps.ts` | A step in TypeScript, for what other steps cannot express.  |
-| `steps/fixtures.ts`    | The Playwright `test` used by the generated tests.          |
+| `steps/todos.steps.ts` | Steps in TypeScript, for what other steps cannot express.   |
+| `steps/fixtures.ts`    | The Playwright `test`, extended with your own fixtures.     |
 | `AGENTS.md`            | Instructions for AI assistants writing tests here.          |
 
 ## Useful commands

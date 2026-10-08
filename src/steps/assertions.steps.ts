@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import type { ElementRef } from '../elements';
+import type { World } from '../world';
 import { category, escapeRegExp } from './builtin';
 
 const step = category('Checking what you see');
@@ -29,27 +30,29 @@ step({
 step({
   pattern: 'I see the text {string}',
   level: 'core',
-  description: 'Checks that some visible element on the page contains this text.',
+  description:
+    'Checks that some visible element on the page contains this text, with the same capitals.',
   example: 'I see the text "Welcome back!"',
   fn: async ({ world }, text: string) => {
-    await expect(world.scope.getByText(text).filter({ visible: true }).first()).toBeVisible();
+    await expect(containingText(world, text).first()).toBeVisible();
   },
 });
 
 step({
   pattern: 'I do not see the text {string}',
   level: 'core',
-  description: 'Checks that no visible element on the page contains this text.',
+  description:
+    'Checks that no visible element on the page contains this text, with the same capitals.',
   example: 'I do not see the text "Username and password are incorrect."',
   fn: async ({ world }, text: string) => {
-    await expect(world.scope.getByText(text).filter({ visible: true })).toHaveCount(0);
+    await expect(containingText(world, text)).toHaveCount(0);
   },
 });
 
 step({
   pattern: 'I see the text {string} in the {element}',
   level: 'core',
-  description: 'Checks that the element contains this text.',
+  description: 'Checks that the element contains this text, with the same capitals.',
   example: 'I see the text "Savings" in the "Account Overview" section',
   fn: async ({ world }, text: string, element: ElementRef) => {
     await world.withElement(element, (el) => expect(el).toContainText(text));
@@ -59,7 +62,7 @@ step({
 step({
   pattern: 'I do not see the text {string} in the {element}',
   level: 'core',
-  description: 'Checks that the element does not contain this text.',
+  description: 'Checks that the element does not contain this text, with the same capitals.',
   example: 'I do not see the text "Loans" in the "Account Overview" section',
   fn: async ({ world }, text: string, element: ElementRef) => {
     await world.withElement(element, (el) => expect(el).not.toContainText(text));
@@ -305,3 +308,11 @@ step({
     await world.withElement(element, (el) => expect(el).not.toContainClass(className));
   },
 });
+
+/**
+ * Visible elements that contain the text with the same capitals, like `toContainText`.
+ * A plain string in `getByText` would also ignore capitals.
+ */
+function containingText(world: World, text: string) {
+  return world.scope.getByText(new RegExp(escapeRegExp(text))).filter({ visible: true });
+}

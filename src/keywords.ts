@@ -9,6 +9,7 @@ import {
   findSteps,
   formatLocation,
   getSteps,
+  levenshtein,
   registerStep,
   StepDefinition,
   StepFixtures,
@@ -91,11 +92,20 @@ export function assertKeywordsValid() {
 
 /**
  * Checks every loaded keyword: each step matches exactly one step definition, all parameters
- * exist and are used, keywords do not call themselves, and the title collides with no other step.
+ * are used, keywords do not call themselves, and the title collides with no other step.
  * Returns messages formatted as `file:line: message`.
  */
 export function validateKeywords(): string[] {
+  return checkKeywords().errors;
+}
+
+/**
+ * Like validateKeywords(), plus warnings that do not stop tests: `<…>` in a step that is not
+ * a parameter but looks like a misspelled one.
+ */
+export function checkKeywords(): { errors: string[]; warnings: string[] } {
   const errors: string[] = [];
+  const warnings: string[] = [];
   const calls = new Map<KeywordDefinition, Set<KeywordDefinition>>();
 
   for (const keyword of keywords) {
@@ -112,20 +122,26 @@ export function validateKeywords(): string[] {
 
     for (const sub of keyword.steps) {
       const subWhere = `${relative(keyword.file)}:${sub.line}`;
-      for (const name of placeholders(sub.text)) {
-        used.add(name);
-        if (!keyword.params.includes(name)) {
-          errors.push(
-            `${subWhere}: Unknown parameter <${name}>. The title of "${keyword.title}" defines: ${
-              keyword.params.map((p) => `<${p}>`).join(', ') || '(none)'
-            }.`,
+      for (const name of angleBrackets(sub.text)) {
+        if (keyword.params.includes(name)) {
+          used.add(name);
+          continue;
+        }
+        // Any other <…> is text, e.g. HTML. Warn when it looks like a misspelled parameter.
+        const meant = keyword.params.find((param) => isMisspelling(name, param));
+        if (meant) {
+          warnings.push(
+            `${subWhere}: <${name}> is not a parameter of "${keyword.title}" and stays as written. Did you mean <${meant}>?`,
           );
         }
       }
 
       let matches = findSteps(sub.text);
-      // A placeholder can stand for a number, e.g. I wait "<seconds>" seconds.
-      if (!matches.length) matches = findSteps(sub.text.replace(/<[^<>]+>/g, '1'));
+      // A parameter can stand for a number, e.g. I wait "<seconds>" seconds.
+      if (!matches.length) {
+        const values = Object.fromEntries(keyword.params.map((name) => [name, '1']));
+        matches = findSteps(fillPlaceholders(sub.text, values));
+      }
       if (!matches.length) {
         const suggestions = suggestSteps(sub.text);
         errors.push(
@@ -164,7 +180,7 @@ export function validateKeywords(): string[] {
   }
 
   errors.push(...findCycles(calls));
-  return errors;
+  return { errors, warnings };
 }
 
 type ParsedKeyword = Omit<KeywordDefinition, 'step'> & {
@@ -352,15 +368,25 @@ function escapeExpression(text: string) {
   return text.replace(/[\\(){}/]/g, '\\$&');
 }
 
-function placeholders(text: string): string[] {
+function angleBrackets(text: string): string[] {
   return [...text.matchAll(/<([^<>"]+)>/g)].map((match) => match[1]);
 }
 
-/** Replaces `<name>` with the value; quotes and backslashes are escaped for quoted values. */
+/**
+ * Replaces `<name>` with the value when `name` is a parameter; any other `<…>` stays.
+ * Quotes in values are escaped, because `{string}` and `{element}` turn `\"` back into `"`.
+ * Backslashes stay as they are: they only escape a quote.
+ */
 function fillPlaceholders(text: string, values: Record<string, string>) {
   return text.replace(/<([^<>"]+)>/g, (whole, name: string) =>
-    name in values ? values[name].replace(/[\\"]/g, '\\$&') : whole,
+    Object.hasOwn(values, name) ? values[name].replace(/"/g, '\\"') : whole,
   );
+}
+
+/** `<usrname>` for `<username>`: close, but not a short name like `<b>` next to `<a>`. */
+function isMisspelling(name: string, param: string) {
+  const distance = levenshtein(name.toLowerCase(), param.toLowerCase());
+  return name !== param && distance <= 2 && distance * 2 < Math.max(name.length, param.length);
 }
 
 function findCycles(calls: Map<KeywordDefinition, Set<KeywordDefinition>>): string[] {

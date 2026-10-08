@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { renderElementTypes, renderStepReference, replaceGenerated } from '../../src/docs';
 import { getSteps } from '../../src/index';
 import { formatLintMessage, lintFeatures, summarize } from '../../src/lint';
+import { registerStep } from '../../src/registry';
 
 const root = path.join(__dirname, '../..');
 
@@ -25,6 +26,25 @@ describe('lint', () => {
 
   it('summarizes the counts', () => {
     expect(summarize(messages)).toBe('4 errors, 1 warning, 3 info');
+  });
+
+  it('says when a step only applies to scenarios with other tags', () => {
+    registerStep(
+      {
+        pattern: 'I open the start page for tagged lint',
+        description: 'Test step.',
+        example: 'I open the start page for tagged lint',
+        fn: () => {},
+      },
+      {
+        source: 'project',
+        location: { file: path.join(root, 'steps/@admin/start.ts'), line: 1, column: 1 },
+      },
+    );
+    const [message] = lintFeatures([path.join(__dirname, 'fixtures/lint/tags.feature')], root);
+    expect(formatLintMessage(message)).toBe(
+      'test/unit/fixtures/lint/tags.feature:4: error: "I open the start page for tagged lint" only applies to scenarios tagged @admin, the folder of its step file. (undefined-step)',
+    );
   });
 
   it('reports syntax errors with the line', () => {

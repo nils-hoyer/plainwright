@@ -44,22 +44,22 @@ that kind whose visible name is exactly the text in quotes (same spelling and ca
 
 <!-- generated:element-types -->
 
-| Written as             | Finds                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name (`getByRole('button')`)                                           |
-| `the "…" link`         | a link with this text (`getByRole('link')`)                                               |
-| `the "…" field`        | a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`) |
-| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                      |
-| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                     |
-| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`)                         |
-| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                         |
-| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                 |
-| `the "…" dialog`       | a dialog with this title (`getByRole('dialog')`)                                          |
-| `the "…" menu item`    | a menu item with this name (`getByRole('menuitem')`)                                      |
-| `the "…" image`        | an image with this alternative text (`getByAltText`)                                      |
-| `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                        |
-| `the "…" list`         | a list with this name (`getByRole('list')`)                                               |
-| `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases             |
+| Written as             | Finds                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
+| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
+| `the "…" field`        | a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)                                  |
+| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
+| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
+| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
+| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
+| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
+| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
+| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
+| `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                                                         |
+| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
+| `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases                                              |
 
 <!-- /generated:element-types -->
 
@@ -81,8 +81,13 @@ the page to get there, so a slow page does not fail the test by itself.
 | `I see the "Log in" button is disabled`       | the button is shown but cannot be used           |
 | `I am on the "Dashboard" page`                | the browser shows the address of that page       |
 
-"Contains" means the text can be part of a longer text. Checks of a field value, a page address
-or "exactly the text" compare the whole value.
+"Contains" means the text can be part of a longer text, with the same spelling and capitals:
+`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a field
+value, a page address or "exactly the text" compare the whole value.
+
+Because capitals count, a negative check passes when only the capitals differ:
+`I do not see the text "error"` passes on a page that shows "Error". Write the text exactly as
+the page shows it.
 
 ## Pages
 

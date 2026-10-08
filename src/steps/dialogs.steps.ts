@@ -4,13 +4,14 @@ import { category } from './builtin';
 const step = category('Dialogs');
 
 // Browser dialogs (alert, confirm, prompt) block the page until they are answered.
-// Say how to answer the next one *before* the step that opens it. Unannounced dialogs are dismissed.
+// Say how to answer the next one *before* the step that opens it. Unannounced dialogs are
+// dismissed, except "Leave site?" (accepted) and dialogs a project step listens for itself.
 
 step({
   pattern: 'I accept the next dialog',
   level: 'core',
   description:
-    'Clicks OK in the next alert, confirm or prompt dialog. Use it before the step that opens the dialog.',
+    'Clicks OK in the next alert, confirm or prompt dialog. Use it before the step that opens the dialog; dialogs nobody announced are dismissed, except "Leave site?", which is accepted.',
   example: 'I accept the next dialog',
   fn: ({ world }) => {
     world.setNextDialogAction({ accept: true });
@@ -32,7 +33,7 @@ step({
   pattern: 'I dismiss the next dialog',
   level: 'core',
   description:
-    'Clicks Cancel in the next confirm or prompt dialog. Use it before the step that opens the dialog.',
+    'Clicks Cancel in the next confirm, prompt or "Leave site?" dialog. Use it before the step that opens the dialog; dialogs nobody announced are dismissed, except "Leave site?", which is accepted.',
   example: 'I dismiss the next dialog',
   fn: ({ world }) => {
     world.setNextDialogAction({ accept: false });

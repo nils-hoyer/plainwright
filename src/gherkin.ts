@@ -19,11 +19,17 @@ export function parseGherkin(source: string, file: string): GherkinDocument {
   }
 }
 
-export type FeatureStep = { text: string; line: number; column: number };
+export type FeatureStep = {
+  text: string;
+  line: number;
+  column: number;
+  /** Tags of the scenario the step runs in, including inherited ones. */
+  tags: string[];
+};
 
 /**
- * Step texts as they run, with Scenario Outline placeholders filled in, and the line of the
- * step in the file. A step in an outline appears once per distinct text.
+ * Step texts as they run, with Scenario Outline placeholders filled in, the line of the step
+ * in the file and the scenario's tags. A step in an outline appears once per distinct text.
  */
 export function featureSteps(document: GherkinDocument, file: string): FeatureStep[] {
   const pickles: readonly Pickle[] = compile(document, file, IdGenerator.incrementing());
@@ -43,13 +49,14 @@ export function featureSteps(document: GherkinDocument, file: string): FeatureSt
   const seen = new Set<string>();
   const result: FeatureStep[] = [];
   for (const pickle of pickles) {
+    const tags = pickle.tags.map((tag) => tag.name);
     for (const step of pickle.steps) {
       const location = locations.get(step.astNodeIds[0]);
       if (!location) continue;
-      const key = `${location.line}\u0000${step.text}`;
+      const key = `${location.line}\u0000${step.text}\u0000${tags.join(' ')}`;
       if (seen.has(key)) continue;
       seen.add(key);
-      result.push({ text: step.text, ...location });
+      result.push({ text: step.text, ...location, tags });
     }
   }
   return result.sort((a, b) => a.line - b.line);

@@ -1,6 +1,6 @@
 // Public API of playwright-keywords.
 
-export { test } from './fixtures';
+export { test, useTest } from './fixtures';
 export type { KeywordsFixtures, KeywordsOptions } from './fixtures';
 export { World } from './world';
 export type { DialogRecord, WorldOptions } from './world';

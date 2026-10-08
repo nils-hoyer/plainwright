@@ -15,7 +15,8 @@ step({
         `[playwright-keywords] Cannot set a cookie on "${url}". Open a web page first.`,
       );
     }
-    await world.page.context().addCookies([{ name, value, url }]);
+    // For the whole site. With the page URL, the browser would limit the cookie to its folder.
+    await world.page.context().addCookies([{ name, value, url: new URL('/', url).toString() }]);
   },
 });
 

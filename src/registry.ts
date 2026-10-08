@@ -1,3 +1,5 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { CucumberExpression } from '@cucumber/cucumber-expressions';
 import type {
   PlaywrightTestArgs,
@@ -51,6 +53,11 @@ export type StepDefinition = {
   readonly source: StepSource;
   readonly discouraged?: string;
   readonly location?: StepLocation;
+  /**
+   * Tags from the folder and file names of a project step file, e.g. `['@admin']` for
+   * `steps/@admin/users.ts`. The step only applies to scenarios with all of these tags.
+   */
+  readonly tags: readonly string[];
   /** Parameter types in order of appearance, e.g. `['string', 'element']`. */
   readonly parameters: string[];
   /** Fixture names the step function destructures, e.g. `['world']`. */
@@ -93,7 +100,10 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
       `[playwright-keywords] defineStep("${options.pattern}") needs a function "fn".`,
     );
   }
-  if (steps.some((step) => step.pattern === options.pattern)) {
+  // playwright-bdd locates every step in this file, so it cannot see the folder tags of a
+  // project step file. We pass them on.
+  const tags = meta.source === 'project' && meta.location ? tagsFromPath(meta.location.file) : [];
+  if (steps.some((step) => step.pattern === options.pattern && sameTags(step.tags, tags))) {
     throw new Error(`[playwright-keywords] The step "${options.pattern}" is defined twice.`);
   }
   const step: StepDefinition = Object.freeze({
@@ -105,12 +115,16 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
     source: meta.source,
     discouraged: options.discouraged,
     location: meta.location,
+    tags: Object.freeze(tags),
     parameters: parameterNames(options.pattern),
     fixtures: fixtureNames(options.fn),
     fn: options.fn,
   });
   steps.push(step);
-  const providedOptions = meta.arityCheck === false ? { arityCheck: false } : {};
+  const providedOptions = {
+    ...(meta.arityCheck === false ? { arityCheck: false } : {}),
+    ...(tags.length ? { tags: tags.join(' and ') } : {}),
+  };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (Step as any)(step.pattern, providedOptions, step.fn);
   return step;
@@ -121,10 +135,14 @@ export function getSteps(): readonly StepDefinition[] {
   return steps;
 }
 
-/** All steps whose pattern matches the step text (without the Given/When/Then keyword). */
-export function findSteps(text: string): StepMatch[] {
+/**
+ * All steps whose pattern matches the step text (without the Given/When/Then keyword).
+ * With `tags` (of a scenario), steps from tagged folders only count when the tags fit.
+ */
+export function findSteps(text: string, tags?: readonly string[]): StepMatch[] {
   const matches: StepMatch[] = [];
   for (const step of steps) {
+    if (tags && !step.tags.every((tag) => tags.includes(tag))) continue;
     const result = expressionOf(step).match(text);
     if (result) matches.push({ step, args: result.map((arg) => arg.getValue(null)) });
   }
@@ -197,21 +215,48 @@ export function fixtureNames(fn: Function): string[] {
 function callerLocation(): StepLocation | undefined {
   const lines = new Error().stack?.split('\n') ?? [];
   // [0] "Error", [1] callerLocation, [2] defineStep, [3] the caller
-  const frame = lines[3] ?? '';
-  const match = /\(?((?:file:\/\/)?[^\s()]+):(\d+):(\d+)\)?$/.exec(frame.trim());
+  return parseStackFrame(lines[3] ?? '');
+}
+
+/**
+ * The location in a stack frame: `at fn (/path/to/file.ts:3:5)`, `at /path/to/file.ts:3:5`
+ * or `at file:///path/to/file.ts:3:5`. Paths may contain spaces and brackets.
+ */
+export function parseStackFrame(frame: string): StepLocation | undefined {
+  const text = frame.trim().replace(/^at\s+/, '');
+  // With a function name, the location is in brackets at the end.
+  const location = text.endsWith(')') ? text.slice(text.indexOf('(') + 1, -1) : text;
+  const match = /^(.+):(\d+):(\d+)$/.exec(location);
   if (!match) return undefined;
-  return {
-    file: match[1].replace(/^file:\/\//, ''),
-    line: Number(match[2]),
-    column: Number(match[3]),
-  };
+  let file = match[1];
+  if (file.startsWith('file://')) {
+    try {
+      file = fileURLToPath(file);
+    } catch {
+      return undefined;
+    }
+  }
+  return { file, line: Number(match[2]), column: Number(match[3]) };
+}
+
+/** Tags in folder and file names, like playwright-bdd: `steps/@admin/@beta.users.ts` → `['@admin', '@beta']`. */
+export function tagsFromPath(file: string, cwd = process.cwd()): string[] {
+  const relative = path.isAbsolute(file) ? path.relative(cwd, file) : file;
+  const parts = relative.split(/[\\/]/);
+  if (parts.includes('node_modules')) return [];
+  parts[parts.length - 1] = parts[parts.length - 1].split('.')[0];
+  return [...new Set(parts.flatMap((part) => part.match(/@[^@\s]+/g) ?? []))];
+}
+
+function sameTags(a: readonly string[], b: readonly string[]) {
+  return a.length === b.length && a.every((tag) => b.includes(tag));
 }
 
 function normalizeForSuggestion(text: string) {
   return text.toLowerCase().replace(/"[^"]*"/g, '""');
 }
 
-function levenshtein(a: string, b: string): number {
+export function levenshtein(a: string, b: string): number {
   const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
   for (let i = 1; i <= a.length; i++) {
     let diagonal = previous[0];

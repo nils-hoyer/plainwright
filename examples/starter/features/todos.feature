@@ -7,6 +7,7 @@ Feature: Todo list
     * I add the todo "Buy milk"
     * I see the text "Buy milk" in the "Todo items" list
     * I see the text "1 item left"
+    * I see "1" todo saved in the browser
 
   Scenario: Complete a todo
     * I add the todo "Buy milk"

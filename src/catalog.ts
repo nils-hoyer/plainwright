@@ -13,6 +13,8 @@ export type CatalogStep = {
   source: StepDefinition['source'];
   parameters: { type: string; name?: string }[];
   discouraged?: string;
+  /** The step only applies to scenarios with all of these tags (from its folder names). */
+  tags?: string[];
   location?: string;
 };
 
@@ -62,6 +64,7 @@ export function buildCatalog(cwd = process.cwd()): Catalog {
           ...(keyword ? { name: keyword.params[i] } : {}),
         })),
         ...(step.discouraged ? { discouraged: step.discouraged } : {}),
+        ...(step.tags.length ? { tags: [...step.tags] } : {}),
         ...(step.location && step.source !== 'built-in'
           ? { location: `${path.relative(cwd, step.location.file)}:${step.location.line}` }
           : {}),

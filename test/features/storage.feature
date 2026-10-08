@@ -31,3 +31,9 @@ Feature: Cookies and local storage
     * I clear all cookies
     * I do not see the cookie "first"
     * I do not see the cookie "second"
+
+  Scenario: A cookie set on a page in a folder applies to the whole site
+    * I open the "Account settings" page
+    * I set the cookie "theme" to "dark"
+    * I open the "Cookies" page
+    * I see the text "theme=dark"

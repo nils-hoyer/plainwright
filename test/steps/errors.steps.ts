@@ -20,6 +20,7 @@ defineStep({
     } finally {
       world.page.setDefaultTimeout(10_000);
     }
-    expect(message).toContain(expected);
+    // Playwright highlights differences with terminal colors.
+    expect(message.replace(/\x1b\[[0-9;]*m/g, '')).toContain(expected);
   },
 });

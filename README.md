@@ -68,6 +68,7 @@ export default defineConfig({
 
 ```ts
 // steps/fixtures.ts: playwright-bdd imports this `test` into the generated tests.
+// To add your own fixtures, see "Steps in TypeScript" below.
 export { test } from 'playwright-keywords';
 ```
 
@@ -101,22 +102,22 @@ element is found:
 
 <!-- generated:element-types -->
 
-| Written as             | Finds                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name (`getByRole('button')`)                                           |
-| `the "…" link`         | a link with this text (`getByRole('link')`)                                               |
-| `the "…" field`        | a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`) |
-| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                      |
-| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                     |
-| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`)                         |
-| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                         |
-| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                 |
-| `the "…" dialog`       | a dialog with this title (`getByRole('dialog')`)                                          |
-| `the "…" menu item`    | a menu item with this name (`getByRole('menuitem')`)                                      |
-| `the "…" image`        | an image with this alternative text (`getByAltText`)                                      |
-| `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                        |
-| `the "…" list`         | a list with this name (`getByRole('list')`)                                               |
-| `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases             |
+| Written as             | Finds                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
+| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
+| `the "…" field`        | a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)                                  |
+| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
+| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
+| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
+| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
+| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
+| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
+| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
+| `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                                                         |
+| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
+| `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases                                              |
 
 <!-- /generated:element-types -->
 
@@ -182,6 +183,10 @@ import { defineKeywords } from 'playwright-keywords';
 defineKeywords('keywords/**/*.feature');
 ```
 
+A `<name>` in the keyword's steps is replaced by the value only when `name` is a parameter in
+the title. Any other `<…>`, such as `"<b>bold</b>"`, is text and stays as written; lint warns
+when it looks like a misspelled parameter. Values arrive unchanged, backslashes included.
+
 Now `* I log in as "1234567890" with password "password123"` works in any feature. The report
 shows the keyword's steps nested under it, and errors point to the line in the keyword file.
 Before any test runs, every keyword is checked: each step must match exactly one step, all
@@ -218,6 +223,45 @@ The `world` fixture holds the active tab (`world.page`), the active frame, the c
 definition and `world.element(ref)` to resolve an `{element}` parameter. Use
 `defineParameterType()` from this package (not from playwright-bdd) for custom parameter types,
 so lint and keywords know them.
+
+**Your own fixtures.** Extend `test` as usual in Playwright and pass it to `useTest()`, so
+playwright-bdd runs every feature with it. Steps then get your fixtures like `world`:
+
+```ts
+// steps/fixtures.ts
+import { test as base, useTest, type StepFixtures } from 'playwright-keywords';
+
+type ProjectFixtures = { account: Account };
+export type Fixtures = StepFixtures & ProjectFixtures;
+
+export const test = useTest(
+  base.extend<ProjectFixtures>({
+    account: async ({}, use) => use(await createAccount()),
+  }),
+);
+```
+
+```ts
+// steps/account.steps.ts
+import { defineStep } from 'playwright-keywords';
+import type { Fixtures } from './fixtures';
+
+defineStep<Fixtures>({
+  pattern: 'I log in with a new account',
+  description: 'Logs in on the open login page with a freshly created account.',
+  example: 'I log in with a new account',
+  fn: async ({ world, account }) => {
+    await world.page.getByLabel('Email').fill(account.email);
+    // …
+  },
+});
+```
+
+Steps that use your fixtures cannot be used inside keywords, which only pass `page` and `world`.
+
+**Steps for some features only.** As in playwright-bdd, a step file in a folder named after a
+tag (`steps/@admin/users.steps.ts`) only applies to scenarios with that tag. Two folders may
+define the same wording for different tags.
 
 ## AI writes, you review
 
@@ -303,30 +347,30 @@ The everyday vocabulary. Prefer these steps.
 
 #### Checking what you see
 
-| Step                                              | What it does                                                                | Example                                                             |
-| ------------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `I see the {element}`                             | Checks that the element is visible.                                         | `I see the "Welcome to your Dashboard" heading`                     |
-| `I do not see the {element}`                      | Checks that the element is hidden or not on the page.                       | `I do not see the "Close" button`                                   |
-| `I see the text {string}`                         | Checks that some visible element on the page contains this text.            | `I see the text "Welcome back!"`                                    |
-| `I do not see the text {string}`                  | Checks that no visible element on the page contains this text.              | `I do not see the text "Username and password are incorrect."`      |
-| `I see the text {string} in the {element}`        | Checks that the element contains this text.                                 | `I see the text "Savings" in the "Account Overview" section`        |
-| `I do not see the text {string} in the {element}` | Checks that the element does not contain this text.                         | `I do not see the text "Loans" in the "Account Overview" section`   |
-| `I see the value {string} in the {element}`       | Checks that the field contains exactly this value.                          | `I see the value "Jane Doe" in the "Full Name" field`               |
-| `I see {string} selected in the {element}`        | Checks that the option with this visible text is selected in the dropdown.  | `I see "Germany" selected in the "Country" dropdown`                |
-| `I see the {element} is empty`                    | Checks that the field has no value, or that the element has no text.        | `I see the "Full Name" field is empty`                              |
-| `I see the {element} is enabled`                  | Checks that the element can be used (it is not disabled).                   | `I see the "Log in" button is enabled`                              |
-| `I see the {element} is disabled`                 | Checks that the element is disabled and cannot be used.                     | `I see the "Log in" button is disabled`                             |
-| `I see the {element} is checked`                  | Checks that the checkbox is ticked or the radio button is selected.         | `I see the "I accept the terms and conditions" checkbox is checked` |
-| `I see the {element} is not checked`              | Checks that the checkbox is not ticked or the radio button is not selected. | `I see the "Subscribe to newsletter" checkbox is not checked`       |
-| `I see {number} item(s) in the {element}`         | Checks how many visible items the list has.                                 | `I see "3" items in the "Accounts" list`                            |
+| Step                                              | What it does                                                                             | Example                                                             |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `I see the {element}`                             | Checks that the element is visible.                                                      | `I see the "Welcome to your Dashboard" heading`                     |
+| `I do not see the {element}`                      | Checks that the element is hidden or not on the page.                                    | `I do not see the "Close" button`                                   |
+| `I see the text {string}`                         | Checks that some visible element on the page contains this text, with the same capitals. | `I see the text "Welcome back!"`                                    |
+| `I do not see the text {string}`                  | Checks that no visible element on the page contains this text, with the same capitals.   | `I do not see the text "Username and password are incorrect."`      |
+| `I see the text {string} in the {element}`        | Checks that the element contains this text, with the same capitals.                      | `I see the text "Savings" in the "Account Overview" section`        |
+| `I do not see the text {string} in the {element}` | Checks that the element does not contain this text, with the same capitals.              | `I do not see the text "Loans" in the "Account Overview" section`   |
+| `I see the value {string} in the {element}`       | Checks that the field contains exactly this value.                                       | `I see the value "Jane Doe" in the "Full Name" field`               |
+| `I see {string} selected in the {element}`        | Checks that the option with this visible text is selected in the dropdown.               | `I see "Germany" selected in the "Country" dropdown`                |
+| `I see the {element} is empty`                    | Checks that the field has no value, or that the element has no text.                     | `I see the "Full Name" field is empty`                              |
+| `I see the {element} is enabled`                  | Checks that the element can be used (it is not disabled).                                | `I see the "Log in" button is enabled`                              |
+| `I see the {element} is disabled`                 | Checks that the element is disabled and cannot be used.                                  | `I see the "Log in" button is disabled`                             |
+| `I see the {element} is checked`                  | Checks that the checkbox is ticked or the radio button is selected.                      | `I see the "I accept the terms and conditions" checkbox is checked` |
+| `I see the {element} is not checked`              | Checks that the checkbox is not ticked or the radio button is not selected.              | `I see the "Subscribe to newsletter" checkbox is not checked`       |
+| `I see {number} item(s) in the {element}`         | Checks how many visible items the list has.                                              | `I see "3" items in the "Accounts" list`                            |
 
 #### Dialogs
 
-| Step                                       | What it does                                                                                         | Example                                             |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `I accept the next dialog`                 | Clicks OK in the next alert, confirm or prompt dialog. Use it before the step that opens the dialog. | `I accept the next dialog`                          |
-| `I dismiss the next dialog`                | Clicks Cancel in the next confirm or prompt dialog. Use it before the step that opens the dialog.    | `I dismiss the next dialog`                         |
-| `I see a dialog with the message {string}` | Checks that a dialog with exactly this message was shown during the test.                            | `I see a dialog with the message "Do you confirm?"` |
+| Step                                       | What it does                                                                                                                                                                                      | Example                                             |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `I accept the next dialog`                 | Clicks OK in the next alert, confirm or prompt dialog. Use it before the step that opens the dialog; dialogs nobody announced are dismissed, except "Leave site?", which is accepted.             | `I accept the next dialog`                          |
+| `I dismiss the next dialog`                | Clicks Cancel in the next confirm, prompt or "Leave site?" dialog. Use it before the step that opens the dialog; dialogs nobody announced are dismissed, except "Leave site?", which is accepted. | `I dismiss the next dialog`                         |
+| `I see a dialog with the message {string}` | Checks that a dialog with exactly this message was shown during the test.                                                                                                                         | `I see a dialog with the message "Do you confirm?"` |
 
 ### Advanced steps
 

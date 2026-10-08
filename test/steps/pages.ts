@@ -14,6 +14,11 @@ definePage('File upload', { url: '/filechooser.html' });
 definePage('Mouse', { url: '/mouse.html' });
 definePage('Touch', { url: '/touch.html' });
 definePage('Swatch', { url: '/swatch.html' });
+definePage('Widgets', { url: '/widgets.html' });
+definePage('Account settings', { url: '/account/settings.html' });
+definePage('Cookies', { url: '/cookies.html' });
+// Asks "Leave site?" once the notes have unsaved changes.
+definePage('Editor', { url: '/editor.html' });
 
 // A page whose elements have no usable visible names. Aliases give them one.
 definePage('Orders', {

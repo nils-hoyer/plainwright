@@ -1,5 +1,7 @@
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { defineStep, findStep, findSteps, getSteps } from '../../src/index';
+import { parseStackFrame, registerStep, tagsFromPath } from '../../src/registry';
 import { CATEGORIES } from '../../src/steps/builtin';
 
 const builtIn = getSteps().filter((step) => step.source === 'built-in');
@@ -111,5 +113,79 @@ describe('defineStep', () => {
     expect(() =>
       defineStep({ pattern: 'I reload the page', description: 'x.', example: 'x', fn: () => {} }),
     ).toThrow(/defined twice/);
+  });
+});
+
+describe('parseStackFrame', () => {
+  it.each([
+    ['    at Object.<anonymous> (/home/jane/app/steps/a.ts:3:5)', '/home/jane/app/steps/a.ts'],
+    ['    at /home/jane/app/steps/a.ts:3:5', '/home/jane/app/steps/a.ts'],
+    [
+      '    at Object.<anonymous> (/home/jane/my app/steps/a.ts:3:5)',
+      '/home/jane/my app/steps/a.ts',
+    ],
+    ['    at /home/jane/my app (copy)/steps/a.ts:3:5', '/home/jane/my app (copy)/steps/a.ts'],
+    ['    at fn (/home/jane/[id]/steps (old)/a.ts:3:5)', '/home/jane/[id]/steps (old)/a.ts'],
+    ['    at file:///home/jane/my%20app/steps/a.ts:3:5', '/home/jane/my app/steps/a.ts'],
+    ['    at async fn (file:///home/jane/%5Bid%5D/a.ts:3:5)', '/home/jane/[id]/a.ts'],
+  ])('%s', (frame, file) => {
+    expect(parseStackFrame(frame)).toEqual({ file, line: 3, column: 5 });
+  });
+
+  it('returns nothing for frames without a file', () => {
+    expect(parseStackFrame('    at async Promise.all (index 0)')).toBeUndefined();
+  });
+});
+
+describe('tagsFromPath', () => {
+  const cwd = '/home/jane/app';
+
+  it('collects tags from folder and file names', () => {
+    expect(tagsFromPath('/home/jane/app/steps/@admin/@beta-users.steps.ts', cwd)).toEqual([
+      '@admin',
+      '@beta-users',
+    ]);
+    expect(tagsFromPath('/home/jane/app/steps/users.steps.ts', cwd)).toEqual([]);
+  });
+
+  it('ignores folders above the project and in node_modules', () => {
+    expect(tagsFromPath('/home/@jane/app/steps/a.ts', '/home/@jane/app')).toEqual([]);
+    expect(tagsFromPath('/home/jane/app/node_modules/@scope/lib/steps.ts', cwd)).toEqual([]);
+  });
+});
+
+describe('steps in tagged folders', () => {
+  const define = (folder: string) =>
+    registerStep(
+      {
+        pattern: 'I open the tagged start page',
+        description: 'Test step.',
+        example: 'I open the tagged start page',
+        fn: () => {},
+      },
+      {
+        source: 'project',
+        location: {
+          file: path.join(process.cwd(), `steps/${folder}/start.ts`),
+          line: 1,
+          column: 1,
+        },
+      },
+    );
+
+  it('apply only to scenarios with the tags of their folder', () => {
+    const admin = define('@admin');
+    const guest = define('@guest');
+    const found = (tags?: string[]) =>
+      findSteps('I open the tagged start page', tags).map((match) => match.step);
+    expect(admin.tags).toEqual(['@admin']);
+    expect(found(['@admin'])).toEqual([admin]);
+    expect(found(['@guest', '@smoke'])).toEqual([guest]);
+    expect(found([])).toEqual([]);
+    expect(found()).toEqual([admin, guest]);
+  });
+
+  it('may share their wording with steps for other tags only', () => {
+    expect(() => define('@admin')).toThrow(/defined twice/);
   });
 });

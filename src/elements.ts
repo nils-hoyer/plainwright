@@ -47,8 +47,13 @@ const typeAlternatives = [...ELEMENT_TYPES].sort((a, b) => b.length - a.length).
 /** Matches `"<name>" <type>`; the name may contain escaped quotes (`\"`). */
 export const ELEMENT_REGEXP = new RegExp(`"((?:[^"\\\\]|\\\\.)*)" (${typeAlternatives})`);
 
+/** Like `{string}`, a backslash only escapes a quote: `"Say \"hi\"" button` → `Say "hi"`. */
 export function toElementRef(name: string, type: string): ElementRef {
-  return new ElementRef(name.replace(/\\(.)/g, '$1'), type as ElementType);
+  return new ElementRef(unescapeQuotes(name), type as ElementType);
+}
+
+export function unescapeQuotes(text: string) {
+  return text.replace(/\\(["'])/g, '$1');
 }
 
 /** Selector for elements that count as a text field (everything that takes typed input). */
@@ -65,77 +70,119 @@ const FIELD_SELECTOR = [
 
 type AriaRole = Parameters<Page['getByRole']>[0];
 
-const ROLE_BY_TYPE: Partial<Record<ElementType, AriaRole>> = {
-  button: 'button',
-  link: 'link',
-  checkbox: 'checkbox',
-  'radio button': 'radio',
-  heading: 'heading',
-  tab: 'tab',
-  dialog: 'dialog',
-  'menu item': 'menuitem',
-  section: 'region',
-  list: 'list',
+type ElementTypeSpec = {
+  /**
+   * Roles that count as this type. The lookup finds an element with one of them, and the
+   * "what this page offers" hint and `inspect` list their names from `ariaSnapshot()`.
+   */
+  roles: readonly AriaRole[];
+  /** A lookup other than by role and accessible name. */
+  locate?: (scope: Scope, name: string, exact: boolean) => Locator;
+  plural: string;
+  /** How the element is found, in words. Used by docs and the reviewer guide. */
+  lookup: string;
 };
 
-/** Roles shown in the "what this page offers" hint, per element type. */
-const SNAPSHOT_ROLES: Record<ElementType, string[]> = {
-  button: ['button'],
-  link: ['link'],
-  field: ['textbox', 'searchbox', 'spinbutton'],
-  checkbox: ['checkbox'],
-  'radio button': ['radio'],
-  dropdown: ['combobox', 'listbox'],
-  heading: ['heading'],
-  tab: ['tab'],
-  dialog: ['dialog', 'alertdialog'],
-  'menu item': ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
-  image: ['img'],
-  section: ['region'],
-  list: ['list'],
-  element: [],
+const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
+  button: {
+    roles: ['button'],
+    plural: 'Buttons',
+    lookup: "a button with this name (`getByRole('button')`)",
+  },
+  link: {
+    roles: ['link'],
+    plural: 'Links',
+    lookup: "a link with this text (`getByRole('link')`)",
+  },
+  field: {
+    roles: ['textbox', 'searchbox', 'spinbutton'],
+    locate: (scope, name, exact) =>
+      scope
+        .getByLabel(name, { exact })
+        .or(scope.getByPlaceholder(name, { exact }))
+        .and(scope.locator(FIELD_SELECTOR)),
+    plural: 'Fields',
+    lookup:
+      'a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)',
+  },
+  checkbox: {
+    roles: ['checkbox'],
+    plural: 'Checkboxes',
+    lookup: "a checkbox with this label (`getByRole('checkbox')`)",
+  },
+  'radio button': {
+    roles: ['radio'],
+    plural: 'Radio buttons',
+    lookup: "a radio button with this label (`getByRole('radio')`)",
+  },
+  dropdown: {
+    roles: ['combobox', 'listbox'],
+    plural: 'Dropdowns',
+    lookup: "a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)",
+  },
+  heading: {
+    roles: ['heading'],
+    plural: 'Headings',
+    lookup: "a heading with this text (`getByRole('heading')`)",
+  },
+  tab: {
+    roles: ['tab'],
+    plural: 'Tabs',
+    lookup: "a tab with this name (`getByRole('tab')`)",
+  },
+  dialog: {
+    roles: ['dialog', 'alertdialog'],
+    plural: 'Dialogs',
+    lookup: "a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)",
+  },
+  'menu item': {
+    roles: ['menuitem', 'menuitemcheckbox', 'menuitemradio'],
+    plural: 'Menu items',
+    lookup:
+      "a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`)",
+  },
+  image: {
+    roles: ['img'],
+    locate: (scope, name, exact) =>
+      scope.getByAltText(name, { exact }).or(scope.getByRole('img', { name, exact })),
+    plural: 'Images',
+    lookup: "an image with this alternative text or name (`getByAltText`, `getByRole('img')`)",
+  },
+  section: {
+    roles: ['region'],
+    plural: 'Sections',
+    lookup: "a section (landmark region) with this name (`getByRole('region')`)",
+  },
+  list: {
+    roles: ['list'],
+    plural: 'Lists',
+    lookup: "a list with this name (`getByRole('list')`)",
+  },
+  element: {
+    roles: [],
+    locate: (scope, name, exact) => scope.getByText(name, { exact }),
+    plural: 'Elements',
+    lookup: 'any element showing exactly this text (`getByText`); mostly used with aliases',
+  },
 };
 
 /** The element type a role from `ariaSnapshot()` belongs to, e.g. `textbox` → `field`. */
 export function elementTypeOfRole(role: string): ElementType | undefined {
-  return ELEMENT_TYPES.find((type) => SNAPSHOT_ROLES[type].includes(role));
+  return ELEMENT_TYPES.find((type) =>
+    (ELEMENT_TYPE_SPECS[type].roles as readonly string[]).includes(role),
+  );
 }
 
-export const PLURAL: Record<ElementType, string> = {
-  button: 'Buttons',
-  link: 'Links',
-  field: 'Fields',
-  checkbox: 'Checkboxes',
-  'radio button': 'Radio buttons',
-  dropdown: 'Dropdowns',
-  heading: 'Headings',
-  tab: 'Tabs',
-  dialog: 'Dialogs',
-  'menu item': 'Menu items',
-  image: 'Images',
-  section: 'Sections',
-  list: 'Lists',
-  element: 'Elements',
-};
+export const PLURAL = mapTypes((spec) => spec.plural);
 
 /** How each element type is found, in words. Used by docs and the reviewer guide. */
-export const LOOKUP_DESCRIPTION: Record<ElementType, string> = {
-  button: "a button with this name (`getByRole('button')`)",
-  link: "a link with this text (`getByRole('link')`)",
-  field:
-    'a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)',
-  checkbox: "a checkbox with this label (`getByRole('checkbox')`)",
-  'radio button': "a radio button with this label (`getByRole('radio')`)",
-  dropdown: "a dropdown (select box) with this label (`getByRole('combobox')`)",
-  heading: "a heading with this text (`getByRole('heading')`)",
-  tab: "a tab with this name (`getByRole('tab')`)",
-  dialog: "a dialog with this title (`getByRole('dialog')`)",
-  'menu item': "a menu item with this name (`getByRole('menuitem')`)",
-  image: 'an image with this alternative text (`getByAltText`)',
-  section: "a section (landmark region) with this name (`getByRole('region')`)",
-  list: "a list with this name (`getByRole('list')`)",
-  element: 'any element showing exactly this text (`getByText`); mostly used with aliases',
-};
+export const LOOKUP_DESCRIPTION = mapTypes((spec) => spec.lookup);
+
+function mapTypes<T>(fn: (spec: ElementTypeSpec) => T): Record<ElementType, T> {
+  return Object.fromEntries(
+    ELEMENT_TYPES.map((type) => [type, fn(ELEMENT_TYPE_SPECS[type])]),
+  ) as Record<ElementType, T>;
+}
 
 export type LocateOptions = {
   exact: boolean;
@@ -164,23 +211,11 @@ export function findAlias(
 
 export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Locator {
   const { name, type } = ref;
-  const role = ROLE_BY_TYPE[type];
-  if (role) return scope.getByRole(role, { name, exact });
-  switch (type) {
-    case 'field':
-      return scope
-        .getByLabel(name, { exact })
-        .or(scope.getByPlaceholder(name, { exact }))
-        .and(scope.locator(FIELD_SELECTOR));
-    case 'dropdown':
-      return scope
-        .getByRole('combobox', { name, exact })
-        .or(scope.getByRole('listbox', { name, exact }));
-    case 'image':
-      return scope.getByAltText(name, { exact });
-    default:
-      return scope.getByText(name, { exact });
-  }
+  const spec = ELEMENT_TYPE_SPECS[type];
+  if (spec.locate) return spec.locate(scope, name, exact);
+  return spec.roles
+    .map((role) => scope.getByRole(role, { name, exact }))
+    .reduce((found, other) => found.or(other));
 }
 
 /**
@@ -190,7 +225,7 @@ export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Loc
 export function describeMissing(ref: ElementRef, snapshot: string, pageName?: string): string {
   const where = pageName ? ` on the "${pageName}" page` : '';
   const lines = [`No ${ref} found${where}.`];
-  const roles = SNAPSHOT_ROLES[ref.type];
+  const roles: readonly string[] = ELEMENT_TYPE_SPECS[ref.type].roles;
   if (roles.length) {
     const names = [
       ...new Set(
