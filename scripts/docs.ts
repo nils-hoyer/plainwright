@@ -38,7 +38,7 @@ const targets: Target[] = [
   },
   {
     file: 'templates/claude-skill/SKILL.md',
-    content: `---\nname: playwright-keywords\ndescription: Write, lint and fix readable browser tests (Gherkin feature files) with playwright-keywords. Use when adding or changing tests in features/.\n---\n\n<!-- Generated from templates/AGENTS.md by npm run docs. Copy to .claude/skills/playwright-keywords/SKILL.md. -->\n\n# Writing browser tests with playwright-keywords\n\n${agentBody}`,
+    content: `---\nname: plainwright\ndescription: Write, lint and fix readable browser tests (Gherkin feature files) with Plainwright. Use when adding or changing tests in features/.\n---\n\n<!-- Generated from templates/AGENTS.md by npm run docs. Copy to .claude/skills/plainwright/SKILL.md. -->\n\n# Writing browser tests with Plainwright\n\n${agentBody}`,
   },
 ];
 

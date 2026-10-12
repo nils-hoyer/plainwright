@@ -11,9 +11,7 @@ step({
   fn: async ({ world }, name: string, value: string) => {
     const url = world.page.url();
     if (!/^https?:/.test(url)) {
-      throw new Error(
-        `[playwright-keywords] Cannot set a cookie on "${url}". Open a web page first.`,
-      );
+      throw new Error(`[plainwright] Cannot set a cookie on "${url}". Open a web page first.`);
     }
     // For the whole site. With the page URL, the browser would limit the cookie to its folder.
     await world.page.context().addCookies([{ name, value, url: new URL('/', url).toString() }]);

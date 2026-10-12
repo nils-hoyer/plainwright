@@ -1,4 +1,4 @@
-import { test as base, useTest, type StepFixtures } from 'playwright-keywords';
+import { test as base, useTest, type StepFixtures } from 'plainwright';
 
 // Your own fixtures: test data, API clients, a logged-in account …
 type ProjectFixtures = {

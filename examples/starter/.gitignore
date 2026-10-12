@@ -3,4 +3,4 @@ node_modules/
 test-results/
 playwright-report/
 steps.json
-.vscode/playwright-keywords.steps.js
+.vscode/plainwright.steps.js

@@ -7,7 +7,7 @@
  * Placeholders are filled by playwright-bdd.
  */
 export const aiFixPromptTemplate = `
-You fix failing browser tests written with playwright-keywords.
+You fix failing browser tests written with Plainwright.
 The test is a Gherkin scenario made of plain sentences. Fix the scenario, not the step code.
 
 Rules:

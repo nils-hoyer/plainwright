@@ -1,4 +1,4 @@
-# playwright-keywords starter
+# Plainwright starter
 
 Readable, keyword-driven Playwright tests against the
 [TodoMVC demo](https://demo.playwright.dev/todomvc/).
@@ -31,4 +31,4 @@ npm run stubs                 # step file for editor autocomplete (see .vscode/s
 ```
 
 To test your own app, change `baseURL` in `playwright.config.ts` and the pages in
-`steps/pages.ts`. See the [playwright-keywords README](https://github.com/nils-hoyer/playwright-keywords#readme).
+`steps/pages.ts`. See the [Plainwright README](https://github.com/nils-hoyer/plainwright#readme).

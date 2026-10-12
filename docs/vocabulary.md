@@ -97,7 +97,7 @@ rules. `lint` lists them as info, so a reviewer can spot them.
 
 ## What lint checks
 
-`npx playwright-keywords lint` prints `file:line: severity: message (rule)`:
+`npx plainwright lint` prints `file:line: severity: message (rule)`:
 
 | Rule               | Severity | Reports                                                  |
 | ------------------ | -------- | -------------------------------------------------------- |

@@ -15,7 +15,7 @@ step({
     const page = world.usePage(name);
     if (typeof page.url !== 'string') {
       throw new Error(
-        `[playwright-keywords] The page "${name}" has no address to open. ` +
+        `[plainwright] The page "${name}" has no address to open. ` +
           `Add url: '/...' to definePage('${name}').`,
       );
     }
@@ -33,7 +33,7 @@ step({
     const page = getPageDefinition(name);
     if (!page.url) {
       throw new Error(
-        `[playwright-keywords] The page "${name}" has no address to check. ` +
+        `[plainwright] The page "${name}" has no address to check. ` +
           `Add url: '/...' to definePage('${name}').`,
       );
     }

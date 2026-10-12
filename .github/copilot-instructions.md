@@ -1,6 +1,6 @@
-# playwright-keywords: contributor instructions
+# Plainwright: contributor instructions
 
-This repository is the playwright-keywords library: readable, keyword-driven browser tests on
+This repository is the Plainwright library: readable, keyword-driven browser tests on
 top of playwright-bdd. (For instructions to give an assistant in a project that _uses_ the
 library, see `templates/AGENTS.md`.)
 

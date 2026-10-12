@@ -109,7 +109,7 @@ step({
   fn: async ({ world }, button: string) => {
     if (button !== 'left' && button !== 'right' && button !== 'middle') {
       throw new Error(
-        `[playwright-keywords] Unknown mouse button "${button}". Use "left", "right" or "middle".`,
+        `[plainwright] Unknown mouse button "${button}". Use "left", "right" or "middle".`,
       );
     }
     await world.page.mouse.down({ button });

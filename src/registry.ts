@@ -92,19 +92,17 @@ export function defineStep<F = StepFixtures>(options: StepOptions<F>): StepDefin
 export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): StepDefinition {
   for (const key of ['pattern', 'description', 'example'] as const) {
     if (typeof options[key] !== 'string' || !options[key].trim()) {
-      throw new Error(`[playwright-keywords] defineStep() needs a non-empty "${key}".`);
+      throw new Error(`[plainwright] defineStep() needs a non-empty "${key}".`);
     }
   }
   if (typeof options.fn !== 'function') {
-    throw new Error(
-      `[playwright-keywords] defineStep("${options.pattern}") needs a function "fn".`,
-    );
+    throw new Error(`[plainwright] defineStep("${options.pattern}") needs a function "fn".`);
   }
   // playwright-bdd locates every step in this file, so it cannot see the folder tags of a
   // project step file. We pass them on.
   const tags = meta.source === 'project' && meta.location ? tagsFromPath(meta.location.file) : [];
   if (steps.some((step) => step.pattern === options.pattern && sameTags(step.tags, tags))) {
-    throw new Error(`[playwright-keywords] The step "${options.pattern}" is defined twice.`);
+    throw new Error(`[plainwright] The step "${options.pattern}" is defined twice.`);
   }
   const step: StepDefinition = Object.freeze({
     pattern: options.pattern,

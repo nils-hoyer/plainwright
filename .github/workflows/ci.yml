@@ -43,7 +43,7 @@ jobs:
         run: |
           npm pack
           cd examples/starter
-          npm install --no-save ../../playwright-keywords-*.tgz
+          npm install --no-save ../../plainwright-*.tgz
           npm run lint
 
       - name: Upload Playwright report

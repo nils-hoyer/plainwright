@@ -19,7 +19,7 @@ export type CatalogStep = {
 };
 
 export type Catalog = {
-  generator: 'playwright-keywords';
+  generator: 'plainwright';
   rules: string[];
   elementTypes: { type: string; lookup: string }[];
   pages: { name: string; url?: string; aliases: string[] }[];
@@ -39,7 +39,7 @@ export const RULES = [
 /** Everything an AI assistant (or a person) needs to write steps that exist: steps.json. */
 export function buildCatalog(cwd = process.cwd()): Catalog {
   return {
-    generator: 'playwright-keywords',
+    generator: 'plainwright',
     rules: RULES,
     elementTypes: ELEMENT_TYPES.map((type) => ({
       type,

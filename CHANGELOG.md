@@ -5,7 +5,7 @@ All notable changes are listed here, breaking changes first. Step text is public
 
 ## [0.1.0] - Unreleased
 
-First release as **playwright-keywords** (the earlier, unpublished `playwright-bdd-steps` code
+First release as **Plainwright** (the earlier, unpublished `playwright-bdd-steps` code
 in this repository is replaced).
 
 ### Breaking (compared with the repository before the rename)
@@ -59,7 +59,7 @@ in this repository is replaced).
   nested in the report with locations in the keyword file. `<name>` in a keyword's steps is a
   parameter only when the title defines it; any other `<…>` is text (lint warns when it looks
   like a misspelled parameter).
-- CLI `playwright-keywords`: `lint`, `catalog` (steps.json), `docs`, `inspect`, `stubs`.
+- CLI `plainwright`: `lint`, `catalog` (steps.json), `docs`, `inspect`, `stubs`.
 - `aiFixPromptTemplate` for playwright-bdd's "Fix with AI" attachment.
 - Agent instruction templates (AGENTS.md, Copilot, Claude skill), reviewer guide, vocabulary
   rules, guides for Gauge and Robot Framework users, starter example.

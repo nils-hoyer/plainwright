@@ -1,11 +1,11 @@
 # Migrating from Gauge
 
-Gauge specs and playwright-keywords features look alike: both are lists of `*` steps with
+Gauge specs and Plainwright features look alike: both are lists of `*` steps with
 values in double quotes. Most of a migration is renaming files and adjusting step wording.
 
 ## Concepts
 
-| Gauge                                     | playwright-keywords                                                           |
+| Gauge                                     | Plainwright                                                                   |
 | ----------------------------------------- | ----------------------------------------------------------------------------- |
 | Specification (`.spec`, Markdown)         | Feature file (`.feature`, Gherkin)                                            |
 | `# Spec heading`                          | `Feature: …`                                                                  |
@@ -24,9 +24,9 @@ values in double quotes. Most of a migration is renaming files and adjusting ste
 ## Step wording
 
 Typical Gauge + Selenium setups name elements by page-object field (`"input user"`) and use
-`type`. playwright-keywords names elements by what the user sees and uses `fill`.
+`type`. Plainwright names elements by what the user sees and uses `fill`.
 
-| Gauge                                                        | playwright-keywords                             |
+| Gauge                                                        | Plainwright                                     |
 | ------------------------------------------------------------ | ----------------------------------------------- |
 | `* I visit the url "/sign-in"`                               | `* I open the "Login" page`                     |
 | `* I see the page "login"`                                   | `* I am on the "Login" page`                    |
@@ -36,7 +36,7 @@ Typical Gauge + Selenium setups name elements by page-object field (`"input user
 | `* I see the attribute "disabled" in element "button login"` | `* I see the "Log in" button is disabled`       |
 | `* I see the url "/de"`                                      | `* I see the url "/de"`                         |
 
-`npx playwright-keywords lint` suggests the closest existing step for every line that does not
+`npx plainwright lint` suggests the closest existing step for every line that does not
 match, which makes a first pass quick.
 
 ## Concepts become keywords

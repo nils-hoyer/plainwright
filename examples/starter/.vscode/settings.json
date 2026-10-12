@@ -1,4 +1,4 @@
 {
   "cucumber.features": ["features/**/*.feature"],
-  "cucumber.glue": [".vscode/playwright-keywords.steps.js"]
+  "cucumber.glue": [".vscode/plainwright.steps.js"]
 }

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { defineStep } from 'playwright-keywords';
+import { defineStep } from 'plainwright';
 import type { Fixtures } from './fixtures';
 
 // Every todo has a checkbox named "Toggle Todo", so a step picks the right one by its text.

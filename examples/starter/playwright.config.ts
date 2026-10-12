@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate } from 'playwright-keywords';
+import { aiFixPromptTemplate } from 'plainwright';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',

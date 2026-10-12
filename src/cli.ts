@@ -11,7 +11,7 @@ import { renderStubs } from './stubs';
 // Registers the built-in steps.
 import './index';
 
-const HELP = `Usage: playwright-keywords <command> [options]
+const HELP = `Usage: plainwright <command> [options]
 
 Commands:
   lint      Check feature files: unknown or ambiguous steps, selectors, absolute URLs,
@@ -32,9 +32,9 @@ Options:
   --help               Show this help.
 
 Examples:
-  npx playwright-keywords lint --features "features/**/*.feature" --steps "steps/**/*.ts"
-  npx playwright-keywords catalog --steps "steps/**/*.ts" --out steps.json
-  npx playwright-keywords inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000
+  npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"
+  npx plainwright catalog --steps "steps/**/*.ts" --out steps.json
+  npx plainwright inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000
 `;
 
 async function main(argv: string[]): Promise<number> {
@@ -81,7 +81,7 @@ async function main(argv: string[]): Promise<number> {
     case 'inspect': {
       const target = rest[0];
       if (!target) {
-        console.error('Usage: playwright-keywords inspect <url or page name>');
+        console.error('Usage: plainwright inspect <url or page name>');
         return 1;
       }
       const page = getPageDefinitions().find((p) => p.name === target);

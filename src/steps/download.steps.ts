@@ -16,7 +16,7 @@ step({
     await world.withElement(element, (el) => el.click());
     world.download = await download;
     const failure = await world.download.failure();
-    if (failure) throw new Error(`[playwright-keywords] The download failed: ${failure}`);
+    if (failure) throw new Error(`[plainwright] The download failed: ${failure}`);
   },
 });
 
@@ -43,7 +43,7 @@ step({
 function lastDownload(world: World) {
   if (!world.download) {
     throw new Error(
-      '[playwright-keywords] Nothing was downloaded yet. Use I download the file with the ... first.',
+      '[plainwright] Nothing was downloaded yet. Use I download the file with the ... first.',
     );
   }
   return world.download;

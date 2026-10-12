@@ -1,6 +1,7 @@
-# playwright-keywords
+# Plainwright
 
-Readable, keyword-driven tests for [Playwright](https://playwright.dev/).
+Readable, keyword-driven tests built on [Playwright](https://playwright.dev/) and
+[playwright-bdd](https://github.com/vitalets/playwright-bdd).
 
 People or AI write browser tests as short, plain sentences. Someone without programming
 knowledge can review a test by reading it, and confirm the result in the Playwright report.
@@ -35,7 +36,7 @@ Reviewers: the one-page [guide to reading tests](docs/reading-tests.md) is all y
 ## Quick start
 
 ```bash
-npm install --save-dev playwright-keywords playwright-bdd @playwright/test
+npm install --save-dev plainwright playwright-bdd @playwright/test
 npx playwright install chromium
 ```
 
@@ -44,7 +45,7 @@ npx playwright install chromium
 ```ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate } from 'playwright-keywords';
+import { aiFixPromptTemplate } from 'plainwright';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
@@ -69,12 +70,12 @@ export default defineConfig({
 ```ts
 // steps/fixtures.ts: playwright-bdd imports this `test` into the generated tests.
 // To add your own fixtures, see "Steps in TypeScript" below.
-export { test } from 'playwright-keywords';
+export { test } from 'plainwright';
 ```
 
 ```ts
 // steps/pages.ts
-import { definePage } from 'playwright-keywords';
+import { definePage } from 'plainwright';
 
 definePage('Login', { url: '/login' });
 definePage('Dashboard', { url: '/dashboard' });
@@ -178,7 +179,7 @@ Feature: Account
 
 ```ts
 // steps/keywords.ts
-import { defineKeywords } from 'playwright-keywords';
+import { defineKeywords } from 'plainwright';
 
 defineKeywords('keywords/**/*.feature');
 ```
@@ -206,7 +207,7 @@ docs, the AI catalog, lint, and can be used inside keywords.
 ```ts
 // steps/cart.steps.ts
 import { expect } from '@playwright/test';
-import { defineStep } from 'playwright-keywords';
+import { defineStep } from 'plainwright';
 
 defineStep({
   pattern: 'I see {string} in the cart',
@@ -229,7 +230,7 @@ playwright-bdd runs every feature with it. Steps then get your fixtures like `wo
 
 ```ts
 // steps/fixtures.ts
-import { test as base, useTest, type StepFixtures } from 'playwright-keywords';
+import { test as base, useTest, type StepFixtures } from 'plainwright';
 
 type ProjectFixtures = { account: Account };
 export type Fixtures = StepFixtures & ProjectFixtures;
@@ -243,7 +244,7 @@ export const test = useTest(
 
 ```ts
 // steps/account.steps.ts
-import { defineStep } from 'playwright-keywords';
+import { defineStep } from 'plainwright';
 import type { Fixtures } from './fixtures';
 
 defineStep<Fixtures>({
@@ -272,12 +273,12 @@ easy for you to check them.
    your project (also available for [Copilot](templates/copilot-instructions.md) and as a
    [Claude skill](templates/claude-skill/SKILL.md)).
 2. **The assistant looks up steps and pages:**
-   `npx playwright-keywords catalog --steps "steps/**/*.ts" --out steps.json` lists every step,
+   `npx plainwright catalog --steps "steps/**/*.ts" --out steps.json` lists every step,
    element type and page, including your own steps and keywords.
-3. **It looks at the real page:** `npx playwright-keywords inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000`
+3. **It looks at the real page:** `npx plainwright inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000`
    prints the names of buttons, fields, links and so on, so it uses names that exist.
 4. **It writes the scenario and lints it:**
-   `npx playwright-keywords lint --features "features/**/*.feature" --steps "steps/**/*.ts"`
+   `npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"`
    reports unknown steps (with suggestions), selectors, absolute URLs and fixed waits.
 5. **It runs the test.** For failed tests the report has a "Fix with AI" attachment with the
    scenario, the error and the page structure.
@@ -288,7 +289,7 @@ More in [docs/ai-authoring.md](docs/ai-authoring.md).
 ## Command line
 
 ```
-npx playwright-keywords <command> [options]
+npx plainwright <command> [options]
 
   lint      Check feature files: unknown or ambiguous steps, selectors, absolute URLs,
             fixed waits, advanced steps (info) and keyword definitions.

@@ -18,19 +18,19 @@ So by default it does not know:
 
 ## Generated stubs
 
-`playwright-keywords stubs` writes a file in exactly the shape the extension reads: one
+`plainwright stubs` writes a file in exactly the shape the extension reads: one
 `Given('pattern', () => {})` line per step (built-in, project steps and keywords) and the
 `{element}` and `{number}` parameter types. The file is never executed.
 
 ```bash
-npx playwright-keywords stubs --steps "steps/**/*.ts" --out .vscode/playwright-keywords.steps.js
+npx plainwright stubs --steps "steps/**/*.ts" --out .vscode/plainwright.steps.js
 ```
 
 ```jsonc
 // .vscode/settings.json
 {
   "cucumber.features": ["features/**/*.feature"],
-  "cucumber.glue": [".vscode/playwright-keywords.steps.js"],
+  "cucumber.glue": [".vscode/plainwright.steps.js"],
 }
 ```
 

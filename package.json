@@ -1,11 +1,11 @@
 {
-  "name": "playwright-keywords",
+  "name": "plainwright",
   "version": "0.1.0",
-  "description": "Readable, keyword-driven tests for Playwright.",
+  "description": "Readable, keyword-driven tests built on Playwright and playwright-bdd.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "playwright-keywords": "dist/cli.js"
+    "plainwright": "dist/cli.js"
   },
   "files": [
     "dist/",
@@ -35,11 +35,11 @@
     "test:unit": "vitest run",
     "test:e2e": "bddgen && playwright test",
     "verify": "npm run format:check && npm run typecheck && npm run docs:check && npm run lint:features && npm test",
-    "prepublishOnly": "npm run build"
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nils-hoyer/playwright-keywords.git"
+    "url": "git+https://github.com/nils-hoyer/plainwright.git"
   },
   "keywords": [
     "playwright",
@@ -53,9 +53,9 @@
   "author": "Nils Hoyer",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nils-hoyer/playwright-keywords/issues"
+    "url": "https://github.com/nils-hoyer/plainwright/issues"
   },
-  "homepage": "https://github.com/nils-hoyer/playwright-keywords#readme",
+  "homepage": "https://github.com/nils-hoyer/plainwright#readme",
   "peerDependencies": {
     "@playwright/test": ">=1.53.0",
     "playwright-bdd": "^9.0.0"

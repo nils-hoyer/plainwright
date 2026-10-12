@@ -1,4 +1,4 @@
-// Public API of playwright-keywords.
+// Public API of Plainwright.
 
 export { test, useTest } from './fixtures';
 export type { KeywordsFixtures, KeywordsOptions } from './fixtures';

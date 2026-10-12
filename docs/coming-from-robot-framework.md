@@ -1,12 +1,12 @@
 # Coming from Robot Framework
 
-Robot Framework and playwright-keywords share the idea of keyword-driven tests: tests are made
+Robot Framework and Plainwright share the idea of keyword-driven tests: tests are made
 of named actions, and teams build their own keywords from smaller ones. The differences are in
 syntax and in how elements are named.
 
 ## Concepts
 
-| Robot Framework                           | playwright-keywords                                              |
+| Robot Framework                           | Plainwright                                                      |
 | ----------------------------------------- | ---------------------------------------------------------------- |
 | Test suite (`.robot` file)                | Feature file (`.feature`)                                        |
 | Test case                                 | `Scenario:`                                                      |
@@ -25,7 +25,7 @@ syntax and in how elements are named.
 
 ## Library keywords
 
-| Robot Framework (Browser / SeleniumLibrary)          | playwright-keywords                            |
+| Robot Framework (Browser / SeleniumLibrary)          | Plainwright                                    |
 | ---------------------------------------------------- | ---------------------------------------------- |
 | `Go To    ${URL}/login`                              | `I open the "Login" page`                      |
 | `Input Text    id=username    jane`                  | `I fill "jane" in the "Username" field`        |
@@ -40,7 +40,7 @@ syntax and in how elements are named.
 | `Location Should Contain    /dashboard`              | `I see the url containing "/dashboard"`        |
 | `Sleep    2s`                                        | Avoid. Every `I see` step waits automatically. |
 
-Robot's wording is short; playwright-keywords reads as a sentence and every value is quoted.
+Robot's wording is short; Plainwright reads as a sentence and every value is quoted.
 
 ## User keywords
 
@@ -72,5 +72,5 @@ a keyword shows its steps nested, like Robot's keyword tree in `log.html`.
 ## Getting started
 
 See the [README quick start](../README.md#quick-start), then read the
-[vocabulary rules](vocabulary.md). `npx playwright-keywords catalog` lists every step if you are
+[vocabulary rules](vocabulary.md). `npx plainwright catalog` lists every step if you are
 looking for the equivalent of a library keyword.

@@ -60,7 +60,7 @@ export function defineKeywords(
   }).sort();
   if (!files.length) {
     throw new Error(
-      `[playwright-keywords] defineKeywords() found no files matching ${JSON.stringify(patterns)} in ${cwd}.`,
+      `[plainwright] defineKeywords() found no files matching ${JSON.stringify(patterns)} in ${cwd}.`,
     );
   }
   const parsed = files.flatMap(parseKeywordFile);
@@ -86,7 +86,7 @@ export function keywordOf(step: StepDefinition): KeywordDefinition | undefined {
 export function assertKeywordsValid() {
   const errors = validateKeywords();
   if (errors.length) {
-    throw new Error(`[playwright-keywords] Invalid keywords:\n${errors.join('\n')}`);
+    throw new Error(`[plainwright] Invalid keywords:\n${errors.join('\n')}`);
   }
 }
 
@@ -250,7 +250,7 @@ function parseKeywordFile(file: string): ParsedKeyword[] {
   }
 
   if (errors.length) {
-    throw new Error(`[playwright-keywords] Invalid keyword file:\n${errors.join('\n')}`);
+    throw new Error(`[plainwright] Invalid keyword file:\n${errors.join('\n')}`);
   }
   return result;
 }
@@ -284,7 +284,7 @@ function registerKeyword({ example, description, category, ...rest }: ParsedKeyw
   const existing = getSteps().find((step) => step.pattern === keyword.pattern);
   if (existing) {
     throw new Error(
-      `[playwright-keywords] Invalid keyword file:\n${relative(keyword.file)}:${keyword.line}: ` +
+      `[plainwright] Invalid keyword file:\n${relative(keyword.file)}:${keyword.line}: ` +
         `The keyword "${keyword.title}" has the same wording as the step "${existing.pattern}"${formatLocation(existing.location)}.`,
     );
   }

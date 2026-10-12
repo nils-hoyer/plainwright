@@ -159,7 +159,7 @@ function fromLocatedErrors(
 ): LintMessage[] {
   return text
     .split('\n')
-    .filter((line) => line.trim() && !line.startsWith('[playwright-keywords]'))
+    .filter((line) => line.trim() && !line.startsWith('[plainwright]'))
     .map((line) => {
       const match = /^(.+?):(\d+)(?::\d+)?: (.*)$/.exec(line);
       return {

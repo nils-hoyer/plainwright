@@ -31,9 +31,9 @@ const pages = new Map<string, PageDefinition>();
  *   * I open the "Login" page
  */
 export function definePage(name: string, options: PageOptions = {}): PageDefinition {
-  if (!name.trim()) throw new Error('[playwright-keywords] definePage() needs a page name.');
+  if (!name.trim()) throw new Error('[plainwright] definePage() needs a page name.');
   if (pages.has(name)) {
-    throw new Error(`[playwright-keywords] The page "${name}" is defined twice.`);
+    throw new Error(`[plainwright] The page "${name}" is defined twice.`);
   }
   const page: PageDefinition = Object.freeze({
     name,
@@ -49,7 +49,7 @@ export function getPageDefinition(name: string): PageDefinition {
   if (page) return page;
   const known = [...pages.keys()].map((n) => `"${n}"`).join(', ') || '(none)';
   throw new Error(
-    `[playwright-keywords] No page named "${name}". Defined pages: ${known}. ` +
+    `[plainwright] No page named "${name}". Defined pages: ${known}. ` +
       `Define it with definePage('${name}', { url: '...' }).`,
   );
 }

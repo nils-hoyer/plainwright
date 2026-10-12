@@ -1,4 +1,4 @@
-import { definePage } from 'playwright-keywords';
+import { definePage } from 'plainwright';
 
 // Feature files open pages by name: I open the "Todos" page.
 definePage('Todos', {

@@ -1,11 +1,11 @@
 ---
-name: playwright-keywords
-description: Write, lint and fix readable browser tests (Gherkin feature files) with playwright-keywords. Use when adding or changing tests in features/.
+name: plainwright
+description: Write, lint and fix readable browser tests (Gherkin feature files) with Plainwright. Use when adding or changing tests in features/.
 ---
 
-<!-- Generated from templates/AGENTS.md by npm run docs. Copy to .claude/skills/playwright-keywords/SKILL.md. -->
+<!-- Generated from templates/AGENTS.md by npm run docs. Copy to .claude/skills/plainwright/SKILL.md. -->
 
-# Writing browser tests with playwright-keywords
+# Writing browser tests with Plainwright
 
 Browser tests in this project are plain sentences in `features/**/*.feature` (Gherkin), run by
 Playwright. People who do not program review them, so they must read like a description of what
@@ -16,16 +16,16 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 ## Workflow
 
 1. **Look up the vocabulary.** Run
-   `npx playwright-keywords catalog --steps "steps/**/*.ts" --out steps.json` and read
+   `npx plainwright catalog --steps "steps/**/*.ts" --out steps.json` and read
    `steps.json`. Use only steps listed there. Prefer steps with `"level": "core"`. Use the
    page names listed under `pages`.
 2. **Look at the real page.** Run
-   `npx playwright-keywords inspect "<page name or URL>" --steps "steps/**/*.ts" --base-url <base URL>`.
+   `npx plainwright inspect "<page name or URL>" --steps "steps/**/*.ts" --base-url <base URL>`.
    Use element names exactly as printed (`the "Log in" button`). If an element you need has no
    name, add an alias to its `definePage()` in `steps/pages.ts` instead of using a selector.
 3. **Write the scenario** in an existing feature file or a new one. One scenario tests one thing;
    its title says what it shows.
-4. **Lint:** `npx playwright-keywords lint --features "features/**/*.feature" --steps "steps/**/*.ts"`.
+4. **Lint:** `npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"`.
    Fix every error. Unknown steps come with a suggestion.
 5. **Run:** `npx bddgen && npx playwright test <feature file>`.
 6. **If it fails,** read the error. A missing element lists the names the page offers
