@@ -5,9 +5,10 @@
   "scripts": {
     "test": "bddgen && playwright test",
     "report": "playwright show-report",
+    "app": "node app/server.mjs",
     "lint": "plainwright lint --features 'features/**/*.feature' --steps 'steps/**/*.ts' --quiet",
     "catalog": "plainwright catalog --steps 'steps/**/*.ts' --out steps.json",
-    "inspect": "plainwright inspect --steps 'steps/**/*.ts' --base-url https://demo.playwright.dev",
+    "inspect": "plainwright inspect --steps 'steps/**/*.ts' --base-url http://localhost:3210",
     "stubs": "plainwright stubs --steps 'steps/**/*.ts' --out .vscode/plainwright.steps.js"
   },
   "devDependencies": {

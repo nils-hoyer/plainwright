@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todos</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 2rem;
+      }
+      main {
+        max-width: 32rem;
+        margin: 0 auto;
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 4px #0002;
+      }
+      h1 {
+        margin-top: 0;
+        font-weight: 300;
+        color: #b83f45;
+      }
+      .new-todo {
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 1.1rem;
+        padding: 0.6rem;
+      }
+      .todo-list {
+        list-style: none;
+        padding: 0;
+      }
+      .todo-list li {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #eee;
+      }
+      .todo-list li.completed label {
+        text-decoration: line-through;
+        color: #999;
+      }
+      .todo-list label {
+        flex: 1;
+      }
+      .footer {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        color: #555;
+      }
+      .footer a.selected {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      A small todo app for the example tests, served by app/server.mjs (see webServer in
+      playwright.config.ts). To test your own app, change baseURL and steps/pages.ts.
+    -->
+    <main>
+      <h1>todos</h1>
+      <input class="new-todo" placeholder="What needs to be done?" autofocus />
+      <!-- No accessible name on purpose: steps/pages.ts gives it one with an alias. -->
+      <ul class="todo-list"></ul>
+      <footer class="footer" hidden>
+        <span class="todo-count"></span>
+        <nav aria-label="Filter">
+          <a href="#/">All</a>
+          <a href="#/active">Active</a>
+          <a href="#/completed">Completed</a>
+        </nav>
+        <button type="button" class="clear-completed" hidden>Clear completed</button>
+      </footer>
+    </main>
+
+    <script>
+      const STORAGE_KEY = 'todos';
+      let todos = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
+
+      const input = document.querySelector('.new-todo');
+      const list = document.querySelector('.todo-list');
+      const footer = document.querySelector('.footer');
+      const count = document.querySelector('.todo-count');
+      const clear = document.querySelector('.clear-completed');
+
+      function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+        render();
+      }
+
+      function render() {
+        const filter = location.hash.replace('#/', '');
+        const shown = todos.filter((todo) =>
+          filter === 'active' ? !todo.completed : filter === 'completed' ? todo.completed : true,
+        );
+        list.replaceChildren(
+          ...shown.map((todo) => {
+            const item = document.createElement('li');
+            item.dataset.testid = 'todo-item';
+            item.classList.toggle('completed', todo.completed);
+
+            const toggle = document.createElement('input');
+            toggle.type = 'checkbox';
+            toggle.setAttribute('aria-label', 'Toggle Todo');
+            toggle.checked = todo.completed;
+            toggle.addEventListener('change', () => {
+              todo.completed = toggle.checked;
+              save();
+            });
+
+            const label = document.createElement('label');
+            label.textContent = todo.title;
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.textContent = '×';
+            remove.setAttribute('aria-label', 'Delete');
+            remove.addEventListener('click', () => {
+              todos = todos.filter((other) => other !== todo);
+              save();
+            });
+
+            item.append(toggle, label, remove);
+            return item;
+          }),
+        );
+        const left = todos.filter((todo) => !todo.completed).length;
+        count.textContent = `${left} ${left === 1 ? 'item' : 'items'} left`;
+        footer.hidden = todos.length === 0;
+        clear.hidden = !todos.some((todo) => todo.completed);
+        for (const link of footer.querySelectorAll('nav a')) {
+          link.classList.toggle('selected', link.getAttribute('href') === (location.hash || '#/'));
+        }
+      }
+
+      input.addEventListener('keydown', (event) => {
+        const title = input.value.trim();
+        if (event.key !== 'Enter' || !title) return;
+        todos.push({ title, completed: false });
+        input.value = '';
+        save();
+      });
+      clear.addEventListener('click', () => {
+        todos = todos.filter((todo) => !todo.completed);
+        save();
+      });
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

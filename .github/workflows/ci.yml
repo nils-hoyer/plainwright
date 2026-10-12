@@ -10,12 +10,8 @@ on:
 
 jobs:
   verify:
-    name: Verify (Node ${{ matrix.node }})
+    name: Verify (Node LTS)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [22, 24]
 
     steps:
       - name: Checkout
@@ -24,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: lts/*
           cache: npm
 
       - name: Install dependencies
@@ -36,20 +32,21 @@ jobs:
       - name: Verify
         run: npm run verify
 
-      - name: Build
-        run: npm run build
-
-      - name: Check the packed package in the starter example
+      - name: Run the starter example with the packed package
         run: |
           npm pack
           cd examples/starter
           npm install --no-save ../../plainwright-*.tgz
+          npx playwright install chromium
           npm run lint
+          npm test
 
       - name: Upload Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-node-${{ matrix.node }}
-          path: playwright-report/
+          name: playwright-report
+          path: |
+            playwright-report/
+            examples/starter/playwright-report/
           retention-days: 7

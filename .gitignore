@@ -7,3 +7,5 @@ steps.json
 *.tgz
 .DS_Store
 plan.md
+# Saved login sessions (docs/logging-in.md)
+playwright/.auth/

@@ -14,7 +14,7 @@ export type Fixtures = StepFixtures & ProjectFixtures;
 export const test = useTest(
   base.extend<ProjectFixtures>({
     savedTodos: async ({ page }, use) => {
-      await use(() => page.evaluate(() => JSON.parse(localStorage['react-todos'] ?? '[]')));
+      await use(() => page.evaluate(() => JSON.parse(localStorage.getItem('todos') ?? '[]')));
     },
   }),
 );
