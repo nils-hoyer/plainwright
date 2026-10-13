@@ -139,7 +139,7 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
         .and(scope.locator(FIELD_SELECTOR)),
     plural: 'Fields',
     lookup:
-      'a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)',
+      'a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)',
   },
   checkbox: {
     roles: ['checkbox'],
@@ -187,7 +187,7 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   section: {
     roles: ['region'],
     plural: 'Sections',
-    lookup: "a section (landmark region) with this name (`getByRole('region')`)",
+    lookup: "an area of the page (landmark region) with this name (`getByRole('region')`)",
   },
   list: {
     roles: ['list'],
@@ -229,7 +229,8 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
     roles: [],
     locate: (scope, name, exact) => scope.getByText(name, { exact }),
     plural: 'Elements',
-    lookup: 'any element showing exactly this text (`getByText`); mostly used with aliases',
+    lookup:
+      'any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)',
   },
 };
 

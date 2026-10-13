@@ -25,10 +25,21 @@ export function renderStepReference(
   return sections.join('\n\n');
 }
 
-/** Markdown table of element types and how each is found. */
-export function renderElementTypes(): string {
-  const rows = ELEMENT_TYPES.map((type) => `| \`the "…" ${type}\` | ${LOOKUP_DESCRIPTION[type]} |`);
+/**
+ * Markdown table of element types and how each is found. `plain` leaves out the Playwright
+ * calls, for readers who don't program.
+ */
+export function renderElementTypes({ plain = false } = {}): string {
+  const rows = ELEMENT_TYPES.map((type) => {
+    const lookup = plain ? plainLookup(LOOKUP_DESCRIPTION[type]) : LOOKUP_DESCRIPTION[type];
+    return `| \`the "…" ${type}\` | ${lookup} |`;
+  });
   return ['| Written as | Finds |', '| --- | --- |', ...rows].join('\n');
+}
+
+/** `a button with this name (\`getByRole('button')\`)` → `a button with this name`. */
+export function plainLookup(lookup: string): string {
+  return lookup.replace(/ \(`.*`\)$/, '');
 }
 
 /** Replaces the text between `<!-- generated:name -->` and `<!-- /generated:name -->`. */
