@@ -516,6 +516,10 @@ For special cases. `lint` lists where they are used.
    and the end-to-end tests against the test app in `test/test-app`.
 3. Open a pull request with the implementation and tests.
 
+Releases run from the Actions tab: the Release workflow takes "patch", "minor" or "major", dates
+the `[Unreleased]` section of [CHANGELOG.md](CHANGELOG.md) and publishes to npm. Dependabot's
+minor and patch updates are merged automatically once CI passes.
+
 ## License
 
 MIT

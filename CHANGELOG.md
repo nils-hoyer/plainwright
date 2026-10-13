@@ -3,7 +3,7 @@
 All notable changes are listed here, breaking changes first. Step text is public API; see the
 [versioning policy](docs/versioning.md).
 
-## [0.1.0] - Unreleased
+## [Unreleased]
 
 First release as **Plainwright** (the earlier, unpublished `playwright-bdd-steps` code
 in this repository is replaced).
