@@ -34,11 +34,19 @@ export default defineConfig<KeywordsOptions>({
     reuseExistingServer: !process.env.CI,
   },
   projects: [
+    // Logs in once and saves the session for chromium-logged-in (docs/logging-in.md).
+    { name: 'setup', testDir: 'test/setup', testMatch: /\.setup\.ts$/ },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       // Touch scenarios need a browser with touch enabled, see chromium-touch.
-      grepInvert: /@touch/,
+      grepInvert: /@touch|@logged-in/,
+    },
+    {
+      name: 'chromium-logged-in',
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/user.json' },
+      dependencies: ['setup'],
+      grep: /@logged-in/,
     },
     {
       name: 'chromium-touch',

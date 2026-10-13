@@ -30,6 +30,7 @@ export type Catalog = {
 export const RULES = [
   'Every value is in double quotes. Anything in quotes is data; the rest of the sentence is fixed.',
   'Elements are named by what the user sees: the "Log in" button, the "Email" field. No CSS, XPath or test IDs.',
+  'When a name repeats, name the element it is in: the "Delete" button in the "Order 1001" row.',
   'One phrase per action. No synonyms.',
   'Every step does exactly what it says.',
   'Checks start with "I see" or "I do not see" and wait automatically. Avoid fixed waits.',

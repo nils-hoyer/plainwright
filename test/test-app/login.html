@@ -114,6 +114,8 @@
 
         if (USERS[user] === pass) {
           errorMsg.hidden = true;
+          // The session: the dashboard shows who is signed in.
+          localStorage.setItem('user', user);
           // Show welcome modal, then redirect to dashboard
           modal.hidden = false;
         } else {

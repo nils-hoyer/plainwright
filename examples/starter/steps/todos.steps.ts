@@ -2,21 +2,6 @@ import { expect } from '@playwright/test';
 import { defineStep } from 'plainwright';
 import type { Fixtures } from './fixtures';
 
-// Every todo has a checkbox named "Toggle Todo", so a step picks the right one by its text.
-defineStep({
-  pattern: 'I complete the todo {string}',
-  description: 'Ticks the checkbox of the todo with this text.',
-  example: 'I complete the todo "Buy milk"',
-  category: 'Todos',
-  fn: async ({ world }, text: string) => {
-    await world.page
-      .getByTestId('todo-item')
-      .filter({ hasText: text })
-      .getByRole('checkbox', { name: 'Toggle Todo' })
-      .check();
-  },
-});
-
 // A step that uses a fixture from steps/fixtures.ts.
 defineStep<Fixtures>({
   pattern: 'I see {number} todo(s) saved in the browser',

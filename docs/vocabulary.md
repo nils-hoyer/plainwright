@@ -35,7 +35,11 @@ uncheck, select … in, press, upload … with, drag … to, tap, scroll, switch
 reload, accept, dismiss, download, take a screenshot.
 
 Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
-menu item, image, section, list, element. See the [reviewer guide](reading-tests.md#element-types).
+menu item, image, section, list, list item, row, cell, message, element. See the
+[reviewer guide](reading-tests.md#element-types).
+
+An element can be named inside another one: `the "Delete" button in the "Order 1001" row`. Every
+step that takes an element accepts this, so no step needs its own "in the row" variant.
 
 ## Core and advanced
 
@@ -86,7 +90,7 @@ rules. `lint` lists them as info, so a reviewer can spot them.
 
 ## Adding a step
 
-1. Check that no step covers it. Combine steps into a [keyword](../README.md#keywords-your-own-steps-written-in-gherkin)
+1. Check that no step covers it. Combine steps into a [keyword](writing-steps.md#keywords)
    first; a new step is for something steps cannot express.
 2. Word it with the patterns above. Reuse existing verbs; do not add a synonym.
 3. Define it with `defineStep()` including a one-sentence `description` and an `example` that

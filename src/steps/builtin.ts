@@ -35,6 +35,4 @@ export function category(name: Category) {
     registerStep({ ...options, category: name }, { source: 'built-in' });
 }
 
-export function escapeRegExp(text: string) {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+export { escapeRegExp } from '../elements';

@@ -1,5 +1,5 @@
 import type { FrameLocator, Locator, Page } from '@playwright/test';
-import { parseAriaSnapshot } from './aria';
+import { AriaNode, parseAriaSnapshot } from './aria';
 
 /**
  * Element types a step can name, e.g. `the "Log in" button`.
@@ -19,37 +19,71 @@ export const ELEMENT_TYPES = [
   'image',
   'section',
   'list',
+  'list item',
+  'row',
+  'cell',
+  'message',
   'element',
 ] as const;
 
 export type ElementType = (typeof ELEMENT_TYPES)[number];
 
-/** Where elements are looked up: the active page, or the active frame after "I switch to the ... frame". */
-export type Scope = Page | FrameLocator;
+/**
+ * Where elements are looked up: the active page, the active frame after "I switch to the ...
+ * frame", or the element another one is named in (`the "Delete" button in the "Order 1" row`).
+ */
+export type Scope = Page | FrameLocator | Locator;
 
 /** A page-specific way to find an element: a selector string or a function returning a Locator. */
 export type ElementAlias = string | ((scope: Scope) => Locator);
 
-/** The value of an `{element}` parameter, e.g. `"Log in" button`. */
+/**
+ * The value of an `{element}` parameter, e.g. `"Log in" button`, or
+ * `"Delete" button in the "Order 1001" row` with the row as container.
+ */
 export class ElementRef {
   constructor(
     readonly name: string,
     readonly type: ElementType,
+    /** The element this one is looked up in. */
+    readonly container?: ElementRef,
   ) {}
 
-  toString() {
+  /** Name and type without the container: `"Delete" button`. */
+  get label() {
     return `"${this.name}" ${this.type}`;
+  }
+
+  toString(): string {
+    return this.container ? `${this.label} in the ${this.container}` : this.label;
   }
 }
 
-const typeAlternatives = [...ELEMENT_TYPES].sort((a, b) => b.length - a.length).join('|');
+const TYPES = [...ELEMENT_TYPES].sort((a, b) => b.length - a.length).join('|');
+/** A name in quotes may contain escaped quotes (`\"`). */
+const NAME = '(?:[^"\\\\]|\\\\.)*';
+const ONE_ELEMENT = new RegExp(`"(${NAME})" (${TYPES})`, 'g');
 
-/** Matches `"<name>" <type>`; the name may contain escaped quotes (`\"`). */
-export const ELEMENT_REGEXP = new RegExp(`"((?:[^"\\\\]|\\\\.)*)" (${typeAlternatives})`);
+/**
+ * Matches `"<name>" <type>`, optionally followed by `in the "<name>" <type>` for the element it
+ * is in, repeatable.
+ */
+export const ELEMENT_REGEXP = new RegExp(
+  `"${NAME}" (?:${TYPES})(?: in the "${NAME}" (?:${TYPES}))*`,
+);
 
-/** Like `{string}`, a backslash only escapes a quote: `"Say \"hi\"" button` → `Say "hi"`. */
-export function toElementRef(name: string, type: string): ElementRef {
-  return new ElementRef(unescapeQuotes(name), type as ElementType);
+/**
+ * `"Delete" button in the "Order 1001" row` → ElementRef with the row as container.
+ * Like `{string}`, a backslash only escapes a quote: `"Say \"hi\"" button` → `Say "hi"`.
+ */
+export function toElementRef(text: string): ElementRef {
+  const parts = [...text.matchAll(ONE_ELEMENT)].map(
+    ([, name, type]) => [unescapeQuotes(name), type as ElementType] as const,
+  );
+  return parts.reduceRight<ElementRef | undefined>(
+    (container, [name, type]) => new ElementRef(name, type, container),
+    undefined,
+  )!;
 }
 
 export function unescapeQuotes(text: string) {
@@ -78,6 +112,8 @@ type ElementTypeSpec = {
   roles: readonly AriaRole[];
   /** A lookup other than by role and accessible name. */
   locate?: (scope: Scope, name: string, exact: boolean) => Locator;
+  /** What the hint and `inspect` show for a node of this type. Default: its accessible name. */
+  label?: (node: AriaNode) => string;
   plural: string;
   /** How the element is found, in words. Used by docs and the reviewer guide. */
   lookup: string;
@@ -158,6 +194,37 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
     plural: 'Lists',
     lookup: "a list with this name (`getByRole('list')`)",
   },
+  // A list item's, row's or message's accessible name is not what the user sees (a row's name
+  // is the text of all its cells). These types match by the text they contain.
+  'list item': {
+    roles: ['listitem'],
+    locate: (scope, name, exact) => containing(scope.getByRole('listitem'), name, exact),
+    label: firstText,
+    plural: 'List items',
+    lookup: "a list item that contains this text (`getByRole('listitem')`)",
+  },
+  row: {
+    roles: ['row'],
+    locate: (scope, name, exact) => containing(scope.getByRole('row'), name, exact),
+    label: (node) =>
+      node.descendants.find((d) => CELL_ROLES.includes(d.role) && d.name)?.name ?? '',
+    plural: 'Rows',
+    lookup: "a table row that contains this text, e.g. in its first cell (`getByRole('row')`)",
+  },
+  cell: {
+    roles: ['cell', 'gridcell'],
+    plural: 'Cells',
+    lookup: "a table cell with this text (`getByRole('cell')`, `'gridcell'`)",
+  },
+  message: {
+    roles: ['alert', 'status'],
+    locate: (scope, name, exact) =>
+      containing(scope.getByRole('alert').or(scope.getByRole('status')), name, exact),
+    label: firstText,
+    plural: 'Messages',
+    lookup:
+      "a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)",
+  },
   element: {
     roles: [],
     locate: (scope, name, exact) => scope.getByText(name, { exact }),
@@ -173,10 +240,35 @@ export function elementTypeOfRole(role: string): ElementType | undefined {
   );
 }
 
+/** What the hint and `inspect` show for a node of a role, e.g. the first cell of a row. */
+export function labelOf(type: ElementType, node: AriaNode): string {
+  return ELEMENT_TYPE_SPECS[type].label?.(node) ?? node.name;
+}
+
 export const PLURAL = mapTypes((spec) => spec.plural);
 
 /** How each element type is found, in words. Used by docs and the reviewer guide. */
 export const LOOKUP_DESCRIPTION = mapTypes((spec) => spec.lookup);
+
+const CELL_ROLES = ['cell', 'gridcell', 'columnheader', 'rowheader'];
+
+/**
+ * Elements that contain the text: with the same capitals when `exact`, else ignoring them.
+ * Spaces match any whitespace or none, because the text of table cells may run together.
+ */
+function containing(elements: Locator, text: string, exact: boolean): Locator {
+  const words = text.trim().split(/\s+/).map(escapeRegExp);
+  return elements.filter({ hasText: new RegExp(words.join('\\s*'), exact ? '' : 'i') });
+}
+
+/** The first text in the node, e.g. `Buy milk` for a list item with a checkbox and a label. */
+function firstText(node: AriaNode): string {
+  return node.text || node.descendants.find((d) => d.text)?.text || '';
+}
+
+export function escapeRegExp(text: string) {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 function mapTypes<T>(fn: (spec: ElementTypeSpec) => T): Record<ElementType, T> {
   return Object.fromEntries(
@@ -190,23 +282,28 @@ export type LocateOptions = {
 };
 
 /**
- * Builds the Locator for an element reference.
+ * Builds the Locator for an element reference, inside its container if it names one.
  * Order: alias on the current page → lookup by role, label or text.
  * Alias keys are the name as written in the step (`'"Settings" button'`), or just the name
- * (`'Settings'`) to cover every element type.
+ * (`'Settings'`) to cover every element type. Containers are looked up the same way.
  */
 export function locate(scope: Scope, ref: ElementRef, options: LocateOptions): Locator {
+  const within = ref.container ? locate(scope, ref.container, options) : scope;
   const alias = findAlias(options.aliases, ref);
-  if (alias !== undefined) return typeof alias === 'string' ? scope.locator(alias) : alias(scope);
-  return locateByType(scope, ref, options.exact);
+  if (alias !== undefined) return typeof alias === 'string' ? within.locator(alias) : alias(within);
+  return locateByType(within, ref, options.exact);
 }
 
 export function findAlias(
   aliases: Readonly<Record<string, ElementAlias>> | undefined,
-  ref: ElementRef,
+  ref: Pick<ElementRef, 'name' | 'label'>,
 ): ElementAlias | undefined {
-  if (!aliases) return undefined;
-  return aliases[String(ref)] ?? aliases[ref.name];
+  return ownEntry(aliases, ref.label) ?? ownEntry(aliases, ref.name);
+}
+
+/** `record[key]`, but never a member of `Object.prototype` such as `constructor`. */
+export function ownEntry<T>(record: Readonly<Record<string, T>> | undefined, key: string) {
+  return record && Object.hasOwn(record, key) ? record[key] : undefined;
 }
 
 export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Locator {
@@ -219,23 +316,31 @@ export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Loc
 }
 
 /**
- * Explains a missing element by listing what the page offers, built from `ariaSnapshot()`.
+ * Explains a missing element by listing what the page offers, built from `ariaSnapshot()` of
+ * the page, or of the container the element is named in.
  * Example: `No "Log in" button found. Buttons on this page: "Sign in", "Forgot password?"`.
  */
 export function describeMissing(ref: ElementRef, snapshot: string, pageName?: string): string {
-  const where = pageName ? ` on the "${pageName}" page` : '';
-  const lines = [`No ${ref} found${where}.`];
+  const where = ref.container
+    ? ` in the ${ref.container}`
+    : pageName
+      ? ` on the "${pageName}" page`
+      : '';
+  const lines = [`No ${ref.label} found${where}.`];
   const roles: readonly string[] = ELEMENT_TYPE_SPECS[ref.type].roles;
   if (roles.length) {
     const names = [
       ...new Set(
         parseAriaSnapshot(snapshot)
-          .filter((node) => roles.includes(node.role) && node.name)
-          .map((node) => `"${node.name}"`),
+          .filter((node) => roles.includes(node.role))
+          .map((node) => labelOf(ref.type, node))
+          .filter(Boolean)
+          .map((name) => `"${name}"`),
       ),
     ];
     const shown = names.length > 15 ? [...names.slice(0, 15), '…'] : names;
-    lines.push(`${PLURAL[ref.type]} on this page: ${shown.length ? shown.join(', ') : '(none)'}.`);
+    const offered = ref.container ? `in the ${ref.container}` : 'on this page';
+    lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? shown.join(', ') : '(none)'}.`);
   }
   lines.push(
     pageName

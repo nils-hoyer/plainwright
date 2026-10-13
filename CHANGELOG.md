@@ -40,10 +40,16 @@ in this repository is replaced).
 - Step files in folders named after a tag (`steps/@admin/…`) apply only to scenarios with that
   tag, as in playwright-bdd. Two folders may define the same wording; lint and `catalog` know
   the tags.
-- `{element}` parameter type with 14 element types, resolved by role, label, placeholder, alt
+- `{element}` parameter type with 18 element types, resolved by role, label, placeholder, alt
   text or text; exact names by default (`exactNames` option). `dialog` also finds alert
   dialogs, `menu item` also menu items that can be ticked, `image` also elements with role
   `img` (for example an SVG icon), so every name `inspect` lists can be used.
+- Name an element inside another one: `the "Delete" button in the "Order 1001" row`. Every step
+  that takes an element accepts it; it can be repeated (`… in the "Total" cell in the "Order
+1001" row`). Errors for a missing element list what its container offers.
+- Element types `row`, `cell`, `list item` and `message` (role `alert` or `status`, for toasts
+  and notices). Rows, list items and messages are found by text they contain; `inspect` and the
+  error hint show a row's first cell and the first text of list items and messages.
 - In quoted values, a backslash only escapes a quote, the same in `{string}` and `{element}`.
 - Errors for missing elements list the elements of that type on the page.
 - Text checks (`I see the text …`, `I do not see the text …`, also `… in the {element}`) match
@@ -59,7 +65,11 @@ in this repository is replaced).
   nested in the report with locations in the keyword file. `<name>` in a keyword's steps is a
   parameter only when the title defines it; any other `<…>` is text (lint warns when it looks
   like a misspelled parameter).
-- CLI `plainwright`: `lint`, `catalog` (steps.json), `docs`, `inspect`, `stubs`.
+- CLI `plainwright`: `lint`, `catalog` (steps.json), `docs`, `inspect`, `stubs`. `lint` checks
+  element names for selectors and the address of `I open the url` for absolute URLs; other
+  quoted values are data. A step whose parameter type was defined with playwright-bdd's own
+  `defineParameterType()` is skipped by keywords and `lint`, which say so once.
 - `aiFixPromptTemplate` for playwright-bdd's "Fix with AI" attachment.
 - Agent instruction templates (AGENTS.md, Copilot, Claude skill), reviewer guide, vocabulary
-  rules, guides for Gauge and Robot Framework users, starter example.
+  rules, guides for Gauge and Robot Framework users, a guide to logging in once, starter
+  example with its own small app.

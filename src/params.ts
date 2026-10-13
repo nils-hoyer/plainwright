@@ -48,7 +48,7 @@ function defineBuiltInParameterType<T>(options: ParameterTypeOptions<T>) {
   }
 }
 
-// `"Log in" button` → ElementRef
+// `"Log in" button`, `"Delete" button in the "Order 1001" row` → ElementRef
 defineBuiltInParameterType({
   name: 'element',
   regexp: ELEMENT_REGEXP,

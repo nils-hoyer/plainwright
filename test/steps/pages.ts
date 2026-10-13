@@ -29,10 +29,6 @@ definePage('Orders', {
     // An icon-only button. The key includes the type, so the "Settings" dialog is still
     // found by its title.
     '"Settings" button': '[data-testid="btn-settings"]',
-    // Two buttons are both called "Delete"; name them by their row.
-    'Delete order 1001': (scope) =>
-      scope.locator('tr', { hasText: 'Order 1001' }).getByRole('button'),
-    'Delete order 1002': (scope) =>
-      scope.locator('tr', { hasText: 'Order 1002' }).getByRole('button'),
+    // Both rows have a "Delete" button. No alias needed: the "Delete" button in the "Order 1001" row.
   },
 });

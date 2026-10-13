@@ -40,7 +40,9 @@ The rest of the sentence is **fixed** and means the same everywhere.
 ## Element types
 
 The word after the name says what kind of element is meant. The test looks for an element of
-that kind whose visible name is exactly the text in quotes (same spelling and capitals).
+that kind whose visible name is exactly the text in quotes (same spelling and capitals). Rows,
+list items and messages are the exception: they are found by text they contain, because
+their full text is long.
 
 <!-- generated:element-types -->
 
@@ -59,9 +61,18 @@ that kind whose visible name is exactly the text in quotes (same spelling and ca
 | `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
 | `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                                                         |
 | `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
+| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                              |
+| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                           |
+| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                            |
+| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                   |
 | `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases                                              |
 
 <!-- /generated:element-types -->
+
+When several elements have the same name, the step says which one by naming the element it is
+in: `the "Delete" button in the "Order 1001" row` is the "Delete" button in the table row that
+contains "Order 1001". This can go further: `the "Edit" link in the "Total" cell in the "Order
+1001" row`.
 
 A team can give an element a name when the screen shows none (for example an icon-only button).
 Such names are defined once per page by the developers.

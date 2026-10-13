@@ -9,6 +9,7 @@ import {
   findSteps,
   formatLocation,
   getSteps,
+  getUnusableSteps,
   levenshtein,
   registerStep,
   StepDefinition,
@@ -37,6 +38,7 @@ const KEYWORD_FIXTURES = ['page', 'world'];
 
 const keywords: KeywordDefinition[] = [];
 const keywordOfStep = new WeakMap<StepDefinition, KeywordDefinition>();
+const warned = new Set<string>();
 let checkRegistered = false;
 
 /**
@@ -84,6 +86,11 @@ export function keywordOf(step: StepDefinition): KeywordDefinition | undefined {
 
 /** Throws one error listing every problem in the loaded keywords. */
 export function assertKeywordsValid() {
+  for (const { message } of getUnusableSteps()) {
+    if (warned.has(message)) continue;
+    warned.add(message);
+    console.warn(`[plainwright] ${message}`);
+  }
   const errors = validateKeywords();
   if (errors.length) {
     throw new Error(`[plainwright] Invalid keywords:\n${errors.join('\n')}`);

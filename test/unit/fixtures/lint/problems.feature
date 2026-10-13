@@ -7,6 +7,7 @@ Feature: Problems
     * I fill "<value>" in the "[data-testid='username']" field
     * I wait "2" seconds
     * I focus on the "Full Name" field
+    * I click the "Delete" button in the ".order-row" row
     * I click the "Log in" button
 
     Examples:

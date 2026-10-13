@@ -39,6 +39,8 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 - Every value is in double quotes. Anything in quotes is data; the rest of the sentence is fixed.
 - Name elements by what the user sees, followed by the element type: `the "Log in" button`,
   `the "Email" field`, `the "Country" dropdown`. Never write CSS, XPath or test IDs.
+- When a name repeats on the page, name the element it is in:
+  `the "Delete" button in the "Order 1001" row`, `the "Toggle" checkbox in the "Buy milk" list item`.
 - Open pages by name (`I open the "Login" page`), not by URL.
 - Checks start with `I see` / `I do not see` and wait on their own. Never add fixed waits
   (`I wait "2" seconds`).

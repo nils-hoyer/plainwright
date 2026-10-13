@@ -142,11 +142,21 @@ export class World {
     if (!(error instanceof Error)) return;
     const count = await element.count().catch(() => -1);
     if (count !== 0) return;
-    const snapshot = await this.scope
-      .locator('body')
-      .ariaSnapshot({ timeout: 2000 })
-      .catch(() => '');
-    const hint = describeMissing(ref, snapshot, this.#currentPage?.name);
+    // Explain the outermost part that is missing: the row before the button in it.
+    let missing = ref;
+    for (let container = ref.container; container; container = container.container) {
+      if (
+        (await this.element(container)
+          .count()
+          .catch(() => -1)) === 0
+      )
+        missing = container;
+    }
+    const where = missing.container
+      ? this.element(missing.container).first()
+      : this.scope.locator('body');
+    const snapshot = await where.ariaSnapshot({ timeout: 2000 }).catch(() => '');
+    const hint = describeMissing(missing, snapshot, this.#currentPage?.name);
     const original = error.message;
     error.message = `${hint}\n\n${original}`;
     if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
