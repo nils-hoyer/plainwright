@@ -72,6 +72,8 @@ type RegisterMeta = { source: StepSource; location?: StepLocation; arityCheck?: 
 
 const steps: StepDefinition[] = [];
 const expressions = new WeakMap<StepDefinition, CucumberExpression>();
+/** Steps whose pattern cannot be compiled here, with the reason. */
+const unusable = new Map<StepDefinition, string>();
 
 /**
  * Defines a step for feature files and registers it with playwright-bdd.
@@ -141,7 +143,7 @@ export function findSteps(text: string, tags?: readonly string[]): StepMatch[] {
   const matches: StepMatch[] = [];
   for (const step of steps) {
     if (tags && !step.tags.every((tag) => tags.includes(tag))) continue;
-    const result = expressionOf(step).match(text);
+    const result = expressionOf(step)?.match(text);
     if (result) matches.push({ step, args: result.map((arg) => arg.getValue(null)) });
   }
   return matches;
@@ -186,11 +188,33 @@ export function formatLocation(location?: StepLocation) {
   return location ? ` (${location.file}:${location.line})` : '';
 }
 
-function expressionOf(step: StepDefinition): CucumberExpression {
+/**
+ * Steps that lint, keywords and findStep() skip because their pattern uses a parameter type
+ * this package does not know, e.g. one defined with playwright-bdd's own defineParameterType().
+ * playwright-bdd itself still runs them.
+ */
+export function getUnusableSteps(): { step: StepDefinition; message: string }[] {
+  for (const step of steps) expressionOf(step);
+  return [...unusable].map(([step, message]) => ({ step, message }));
+}
+
+function expressionOf(step: StepDefinition): CucumberExpression | undefined {
   let expression = expressions.get(step);
-  if (!expression) {
-    expression = new CucumberExpression(step.pattern, parameterTypes);
-    expressions.set(step, expression);
+  if (!expression && !unusable.has(step)) {
+    try {
+      expression = new CucumberExpression(step.pattern, parameterTypes);
+      expressions.set(step, expression);
+    } catch (error) {
+      // cucumber-expressions' UndefinedParameterTypeError, which it does not export.
+      const name = (error as { undefinedParameterTypeName?: string }).undefinedParameterTypeName;
+      if (!name) throw error;
+      unusable.set(
+        step,
+        `The step "${step.pattern}" uses the parameter type {${name}}, which Plainwright ` +
+          `does not know. Define it with defineParameterType() from plainwright instead ` +
+          `of playwright-bdd; until then, keywords and lint skip this step.`,
+      );
+    }
   }
   return expression;
 }

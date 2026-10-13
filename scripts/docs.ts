@@ -18,12 +18,19 @@ const agentBody = agentInstructions.replace(/^# .*\n+/, '');
 type Target = { file: string; sections?: Record<string, string>; content?: string };
 
 const targets: Target[] = [
+  { file: 'README.md', sections: { 'element-types': renderElementTypes() } },
   {
-    file: 'README.md',
-    sections: {
-      'element-types': renderElementTypes(),
-      steps: renderStepReference(builtIn, 3),
-    },
+    file: 'docs/steps.md',
+    content: [
+      '<!-- Generated from the step registry by npm run docs. Do not edit. -->',
+      '# Step reference',
+      [
+        'Every built-in step, with what it does and an example. Your own steps and keywords are',
+        'listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements',
+        'is in the [README](../README.md#elements).',
+      ].join('\n'),
+      renderStepReference(builtIn, 2),
+    ].join('\n\n'),
   },
   { file: 'docs/reading-tests.md', sections: { 'element-types': renderElementTypes() } },
   {

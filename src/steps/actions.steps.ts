@@ -186,6 +186,8 @@ async function upload(world: World, element: ElementRef, files: string[]) {
       return;
     }
     const fileChooser = world.page.waitForEvent('filechooser');
+    // When the click fails, its error is the one to report, not a later one from waiting.
+    fileChooser.catch(() => {});
     await el.click();
     await (await fileChooser).setFiles(paths);
   });

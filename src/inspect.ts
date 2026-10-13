@@ -1,5 +1,5 @@
 import { parseAriaSnapshot } from './aria';
-import { ELEMENT_TYPES, elementTypeOfRole, ElementType, PLURAL } from './elements';
+import { ELEMENT_TYPES, elementTypeOfRole, ElementType, labelOf, PLURAL } from './elements';
 
 export type InspectResult = {
   url: string;
@@ -42,10 +42,11 @@ export function groupSnapshot(snapshot: string): Pick<InspectResult, 'elements' 
   for (const node of parseAriaSnapshot(snapshot)) {
     const type = elementTypeOfRole(node.role);
     if (!type) continue;
-    if (!node.name) {
+    const name = labelOf(type, node);
+    if (!name) {
       unnamed[type] = (unnamed[type] ?? 0) + 1;
-    } else if (!elements[type]?.includes(node.name)) {
-      (elements[type] ??= []).push(node.name);
+    } else if (!elements[type]?.includes(name)) {
+      (elements[type] ??= []).push(name);
     }
   }
   return { elements, unnamed };

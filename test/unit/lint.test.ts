@@ -21,11 +21,19 @@ describe('lint', () => {
       `${file}:8: warning: Fixed waits slow tests down and still break on slow days. Check for what the user waits for instead, e.g. I see the text "...". (discouraged-step)`,
       `${file}:8: info: "I wait {number} second(s)" is an advanced step. (advanced-step)`,
       `${file}:9: info: "I focus on the {element}" is an advanced step. (advanced-step)`,
+      `${file}:10: error: ".order-row" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
     ]);
   });
 
   it('summarizes the counts', () => {
-    expect(summarize(messages)).toBe('4 errors, 1 warning, 3 info');
+    expect(summarize(messages)).toBe('5 errors, 1 warning, 3 info');
+  });
+
+  it('checks only element names for selectors and only opened addresses for URLs', () => {
+    const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/data.feature')], root).filter(
+      (message) => message.severity === 'error',
+    );
+    expect(errors).toEqual([]);
   });
 
   it('says when a step only applies to scenarios with other tags', () => {

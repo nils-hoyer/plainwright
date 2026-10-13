@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { findAlias } from '../elements';
 import { category } from './builtin';
 
 const step = category('Tabs and frames');
@@ -9,6 +10,11 @@ step({
   description: 'Continues in the browser tab at this position, counting from 1.',
   example: 'I switch to tab "2"',
   fn: async ({ world }, position: number) => {
+    if (!Number.isInteger(position) || position < 1) {
+      throw new Error(
+        `[plainwright] There is no tab "${position}". Tabs are counted from 1: I switch to tab "1".`,
+      );
+    }
     const context = world.page.context();
     await expect
       .poll(() => context.pages().length, { message: `Expected tab ${position} to be open` })
@@ -63,8 +69,7 @@ step({
     'Continues inside the embedded frame (iframe) with this title or name, or with this alias.',
   example: 'I switch to the "Greeting" frame',
   fn: async ({ world }, name: string) => {
-    const aliases = world.currentPage?.elements ?? {};
-    const alias = aliases[`"${name}" frame`] ?? aliases[name];
+    const alias = findAlias(world.currentPage?.elements, { name, label: `"${name}" frame` });
     const scope = world.scope;
     const frame =
       alias === undefined

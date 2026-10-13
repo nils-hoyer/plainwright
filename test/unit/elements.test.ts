@@ -4,25 +4,33 @@ import { describeMissing, ElementRef, locate, Scope } from '../../src/elements';
 import { findStep } from '../../src/index';
 import { groupSnapshot } from '../../src/inspect';
 
-/** A stand-in for Page/FrameLocator that records how a locator was built. */
+/** A stand-in for Page/FrameLocator/Locator that records how a locator was built. */
 function fakeScope(): Scope {
+  const show = (value: unknown): string =>
+    value instanceof RegExp
+      ? String(value)
+      : typeof value === 'object' && value
+        ? `{${Object.entries(value)
+            .map(([k, v]): string => `"${k}":${show(v)}`)
+            .join(',')}}`
+        : JSON.stringify(value);
+  const methods = (prefix: string): Record<string, unknown> =>
+    Object.fromEntries(
+      ['getByRole', 'getByLabel', 'getByPlaceholder', 'getByAltText', 'getByText', 'locator'].map(
+        (name) => [
+          name,
+          (...args: unknown[]) => node(`${prefix}${name}(${args.map(show).join(', ')})`),
+        ],
+      ),
+    );
   const node = (description: string): unknown => ({
     description,
+    ...methods(`${description}.`),
     or: (other: { description: string }) => node(`${description}.or(${other.description})`),
     and: (other: { description: string }) => node(`${description}.and(${other.description})`),
+    filter: (options: unknown) => node(`${description}.filter(${show(options)})`),
   });
-  const method =
-    (name: string) =>
-    (...args: unknown[]) =>
-      node(`${name}(${args.map((a) => JSON.stringify(a)).join(', ')})`);
-  return {
-    getByRole: method('getByRole'),
-    getByLabel: method('getByLabel'),
-    getByPlaceholder: method('getByPlaceholder'),
-    getByAltText: method('getByAltText'),
-    getByText: method('getByText'),
-    locator: method('locator'),
-  } as unknown as Scope;
+  return methods('') as unknown as Scope;
 }
 
 const describeLocator = (ref: ElementRef, options: Parameters<typeof locate>[2]) =>
@@ -39,6 +47,33 @@ describe('{element} parameter', () => {
     const element = findStep(text).args[0] as ElementRef;
     expect(element).toBeInstanceOf(ElementRef);
     expect(element).toMatchObject({ name, type });
+  });
+
+  it('names the element it is in', () => {
+    const element = findStep('I click the "Delete" button in the "Order 1001" row')
+      .args[0] as ElementRef;
+    expect(element).toMatchObject({ name: 'Delete', type: 'button' });
+    expect(element.container).toMatchObject({ name: 'Order 1001', type: 'row' });
+    expect(String(element)).toBe('"Delete" button in the "Order 1001" row');
+  });
+
+  it('nests several levels and keeps escaped quotes', () => {
+    const element = findStep(
+      'I see the "Say \\"in the\\" row" link in the "Notes" cell in the "Orders" section',
+    ).args[0] as ElementRef;
+    expect(element.name).toBe('Say "in the" row');
+    expect(element.container?.container).toMatchObject({ name: 'Orders', type: 'section' });
+  });
+
+  it.each([
+    [
+      'I fill "Jane" in the "Name" field in the "Billing" section',
+      ['Jane', '"Name" field in the "Billing" section'],
+    ],
+    ['I see the text "Total" in the "Order 1001" row', ['Total', '"Order 1001" row']],
+    ['I press "Enter" in the "Search" field', ['Enter', '"Search" field']],
+  ])('keeps "in the" of the step apart: %s', (text, args) => {
+    expect(findStep(text).args.map(String)).toEqual(args);
   });
 
   it('rejects unknown element types', () => {
@@ -66,6 +101,10 @@ describe('locate', () => {
     ],
     ['section', `getByRole("region", {"name":"X","exact":true})`],
     ['list', `getByRole("list", {"name":"X","exact":true})`],
+    [
+      'cell',
+      `getByRole("cell", {"name":"X","exact":true}).or(getByRole("gridcell", {"name":"X","exact":true}))`,
+    ],
     ['image', `getByAltText("X", {"exact":true}).or(getByRole("img", {"name":"X","exact":true}))`],
     ['element', `getByText("X", {"exact":true})`],
   ] as const)('finds a %s by %s', (type, expected) => {
@@ -107,6 +146,40 @@ describe('locate', () => {
     );
   });
 
+  it('looks an element up inside the element it is named in', () => {
+    const ref = new ElementRef('Delete', 'button', new ElementRef('Order 1001', 'row'));
+    expect(describeLocator(ref, exact)).toBe(
+      `getByRole("row").filter({"hasText":/Order\\s*1001/}).getByRole("button", {"name":"Delete","exact":true})`,
+    );
+  });
+
+  it('uses aliases for containers too', () => {
+    const ref = new ElementRef('Delete', 'button', new ElementRef('Orders', 'section'));
+    const aliases = { Orders: '#orders', '"Delete" button': '.delete' };
+    expect(describeLocator(ref, { ...exact, aliases })).toBe(
+      'locator("#orders").locator(".delete")',
+    );
+  });
+
+  it.each([
+    ['row', 'getByRole("row")'],
+    ['list item', 'getByRole("listitem")'],
+    ['message', 'getByRole("alert").or(getByRole("status"))'],
+  ] as const)('finds a %s by the text it contains', (type, elements) => {
+    expect(describeLocator(new ElementRef('Buy milk', type), exact)).toBe(
+      `${elements}.filter({"hasText":/Buy\\s*milk/})`,
+    );
+    expect(describeLocator(new ElementRef('Buy milk', type), { exact: false })).toBe(
+      `${elements}.filter({"hasText":/Buy\\s*milk/i})`,
+    );
+  });
+
+  it('only uses aliases the page defines, not Object members', () => {
+    expect(
+      describeLocator(new ElementRef('constructor', 'button'), { ...exact, aliases: {} }),
+    ).toBe(`getByRole("button", {"name":"constructor","exact":true})`);
+  });
+
   it('calls alias functions with the scope', () => {
     const aliases = { Delete: (scope: Scope) => scope.getByText('row 1') };
     expect(describeLocator(new ElementRef('Delete', 'button'), { ...exact, aliases })).toBe(
@@ -131,7 +204,7 @@ const snapshot = `
 
 describe('aria snapshot', () => {
   it('extracts roles and names', () => {
-    expect(parseAriaSnapshot(snapshot)).toEqual([
+    expect(parseAriaSnapshot(snapshot).map(({ role, name }) => ({ role, name }))).toEqual([
       { role: 'dialog', name: 'Cookie consent' },
       { role: 'paragraph', name: '' },
       { role: 'button', name: 'Accept Cookies' },
@@ -175,6 +248,50 @@ describe('aria snapshot', () => {
     });
     expect(describeMissing(new ElementRef('Confirm', 'dialog'), widgets)).toContain(
       'Dialogs on this page: "Delete order?".',
+    );
+  });
+
+  it('names rows by their first cell, list items and messages by their text', () => {
+    const lists = `
+- table:
+  - rowgroup:
+    - row "Order 1001 Pending Delete":
+      - cell "Order 1001"
+      - cell "Pending"
+      - cell "Delete":
+        - button "Delete"
+- list "Todos":
+  - listitem:
+    - checkbox "Toggle Todo"
+    - text: Buy milk
+    - button "Delete"
+  - listitem: Walk the dog
+- status: Order 1001 deleted
+- alert:
+  - strong: "Error:"
+  - text: Payment failed
+`;
+    expect(groupSnapshot(lists).elements).toEqual({
+      row: ['Order 1001'],
+      cell: ['Order 1001', 'Pending', 'Delete'],
+      button: ['Delete'],
+      list: ['Todos'],
+      checkbox: ['Toggle Todo'],
+      'list item': ['Buy milk', 'Walk the dog'],
+      message: ['Order 1001 deleted', 'Error:'],
+    });
+  });
+
+  it('explains a missing element inside a container with what the container offers', () => {
+    const row = `
+- row "Order 1001 Edit":
+  - cell "Order 1001"
+  - cell "Edit":
+    - button "Edit"
+`;
+    const ref = new ElementRef('Delete', 'button', new ElementRef('Order 1001', 'row'));
+    expect(describeMissing(ref, row, 'Orders')).toMatch(
+      /^No "Delete" button found in the "Order 1001" row\.\nButtons in the "Order 1001" row: "Edit"\./,
     );
   });
 

@@ -13,6 +13,8 @@ step({
   example: 'I download the file with the "Download Test File" button',
   fn: async ({ world }, element: ElementRef) => {
     const download = world.page.waitForEvent('download');
+    // When the click fails, its error is the one to report, not a later one from waiting.
+    download.catch(() => {});
     await world.withElement(element, (el) => el.click());
     world.download = await download;
     const failure = await world.download.failure();

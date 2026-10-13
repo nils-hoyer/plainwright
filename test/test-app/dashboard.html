@@ -13,6 +13,7 @@
         <a href="forms.html" data-testid="link-forms">Forms Demo</a>
         <a href="interactions.html" data-testid="link-interactions">Interactions Demo</a>
       </nav>
+      <p id="signed-in"></p>
     </header>
 
     <main>
@@ -34,5 +35,11 @@
         <button data-testid="btn-disabled" disabled>Coming Soon</button>
       </section>
     </main>
+    <script>
+      const user = localStorage.getItem('user');
+      document.getElementById('signed-in').textContent = user
+        ? 'Signed in as ' + user
+        : 'Not signed in';
+    </script>
   </body>
 </html>

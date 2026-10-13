@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { featureSteps, parseGherkin } from './gherkin';
-import { unescapeQuotes } from './elements';
+import { ElementRef } from './elements';
 import { checkKeywords } from './keywords';
-import { findSteps, getSteps, suggestSteps } from './registry';
+import { findSteps, getSteps, getUnusableSteps, StepDefinition, suggestSteps } from './registry';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
 
@@ -20,7 +20,8 @@ export type LintMessage = {
     | 'discouraged-step'
     | 'advanced-step'
     | 'keyword'
-    | 'step-example';
+    | 'step-example'
+    | 'unknown-parameter-type';
   message: string;
 };
 
@@ -28,6 +29,7 @@ export type LintMessage = {
 const SELECTOR =
   /^(?:[#.][a-z_-]|\[[a-z_-]|\/\/|\.\/\/|(?:css|xpath|text|role|id|data-testid|internal:\w+)=)|>>|\[data-[\w-]+/i;
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
+const OPEN_URL = 'I open the url {string}';
 
 /**
  * Checks feature files against the registered steps. Also checks loaded keywords and that
@@ -36,6 +38,10 @@ const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[] {
   const messages: LintMessage[] = [];
   const reported = new Set<string>();
+  const unusable = getUnusableSteps();
+  const skippedHint = unusable.length
+    ? ` Lint skips ${unusable.length} step(s) with an unknown parameter type; see the warnings.`
+    : '';
   for (const absolute of files) {
     const file = path.relative(cwd, absolute) || absolute;
     let steps;
@@ -54,22 +60,6 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         messages.push({ file, line, severity, rule, message });
       };
 
-      for (const value of quotedValues(text)) {
-        if (SELECTOR.test(value)) {
-          add(
-            'error',
-            'selector',
-            `"${value}" looks like a selector. Name the element by what the user sees, or add an alias with definePage().`,
-          );
-        } else if (ABSOLUTE_URL.test(value)) {
-          add(
-            'error',
-            'absolute-url',
-            `"${value}" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL.`,
-          );
-        }
-      }
-
       const matches = findSteps(text, tags);
       if (matches.length === 0) {
         const elsewhere = findSteps(text);
@@ -86,7 +76,9 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         add(
           'error',
           'undefined-step',
-          `Unknown step "${text}".` + (suggestion ? ` Did you mean "${suggestion.example}"?` : ''),
+          `Unknown step "${text}".` +
+            (suggestion ? ` Did you mean "${suggestion.example}"?` : '') +
+            skippedHint,
         );
         continue;
       }
@@ -98,7 +90,24 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         );
         continue;
       }
-      const { step } = matches[0];
+      const { step, args } = matches[0];
+      // Only element names and addresses to open; other values are data, such as ".NET".
+      for (const name of elementNames(args)) {
+        if (SELECTOR.test(name)) {
+          add(
+            'error',
+            'selector',
+            `"${name}" looks like a selector. Name the element by what the user sees, or add an alias with definePage().`,
+          );
+        }
+      }
+      if (step.pattern === OPEN_URL && ABSOLUTE_URL.test(String(args[0]))) {
+        add(
+          'error',
+          'absolute-url',
+          `"${args[0]}" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL.`,
+        );
+      }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {
         add('info', 'advanced-step', `"${step.pattern}" is an advanced step.`);
@@ -114,12 +123,21 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
     messages.push(...fromLocatedErrors(warning, 'keyword', '', 'warning'));
   }
 
+  for (const { step, message } of unusable) {
+    messages.push({
+      ...stepLocation(step, cwd),
+      severity: 'warning',
+      rule: 'unknown-parameter-type',
+      message,
+    });
+  }
+
   for (const step of getSteps()) {
+    if (unusable.some((entry) => entry.step === step)) continue;
     const matches = findSteps(step.example, step.tags);
     if (matches.length === 1 && matches[0].step === step) continue;
     messages.push({
-      file: step.location ? path.relative(cwd, step.location.file) : '',
-      line: step.location?.line ?? 0,
+      ...stepLocation(step, cwd),
       severity: 'error',
       rule: 'step-example',
       message: matches.some((m) => m.step === step)
@@ -146,8 +164,22 @@ export function summarize(messages: LintMessage[]): string {
   return `${plural(count('error'), 'error')}, ${plural(count('warning'), 'warning')}, ${count('info')} info`;
 }
 
-function quotedValues(text: string): string[] {
-  return [...text.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((match) => unescapeQuotes(match[1]));
+function stepLocation(step: StepDefinition, cwd: string) {
+  return {
+    file: step.location ? path.relative(cwd, step.location.file) : '',
+    line: step.location?.line ?? 0,
+  };
+}
+
+/** Names of element parameters and the elements they are in. */
+function elementNames(args: unknown[]): string[] {
+  const names: string[] = [];
+  for (const arg of args) {
+    for (let ref = arg instanceof ElementRef ? arg : undefined; ref; ref = ref.container) {
+      names.push(ref.name);
+    }
+  }
+  return names;
 }
 
 /** Turns "file:line: message" lines into lint messages. */

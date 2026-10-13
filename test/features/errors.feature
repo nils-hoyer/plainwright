@@ -36,3 +36,53 @@ Feature: Helpful error messages
       """
       I see the text "accept cookies" in the "Cookie consent" dialog
       """
+
+  Scenario: A download whose click fails reports only the click
+    * I open the "Download" page
+    * I see this step fail with "No \"Missing\" button found on the \"Download\" page.":
+      """
+      I download the file with the "Missing" button
+      """
+    * I see the "Download Test File" button
+
+  Scenario: An upload whose click fails reports only the click
+    * I open the "File upload" page
+    * I see this step fail with "locator.click: Timeout":
+      """
+      I upload the file "test/test-app/test-file.txt" with the "Choose from cloud" button
+      """
+    * I see the "Choose File" button
+
+  Scenario: Tabs are counted from 1
+    * I open the "Login" page
+    * I see this step fail with "There is no tab \"0\". Tabs are counted from 1":
+      """
+      I switch to tab "0"
+      """
+    * I see this step fail with "There is no tab \"1.5\"":
+      """
+      I switch to tab "1.5"
+      """
+    * I see the "Log in" button
+
+  Scenario: A missing element inside another one lists what that one offers
+    * I open the "Orders" page
+    * I see this step fail with "No \"Remove\" button found in the \"Order 1001\" row.":
+      """
+      I click the "Remove" button in the "Order 1001" row
+      """
+    * I see this step fail with "Buttons in the \"Order 1001\" row: \"Delete\".":
+      """
+      I click the "Remove" button in the "Order 1001" row
+      """
+
+  Scenario: A missing container is named first
+    * I open the "Orders" page
+    * I see this step fail with "No \"Order 9999\" row found on the \"Orders\" page.":
+      """
+      I click the "Delete" button in the "Order 9999" row
+      """
+    * I see this step fail with "Rows on this page: \"Order 1001\", \"Order 1002\".":
+      """
+      I click the "Delete" button in the "Order 9999" row
+      """

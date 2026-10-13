@@ -16,6 +16,9 @@ Feature: Dashboard
     * I see the "Transfer Money" button is enabled
     * I do not see the attribute "disabled" on the "Transfer Money" button
 
+  Scenario: Nobody is signed in without the saved session
+    * I see the text "Not signed in"
+
   Scenario: Things that are not on the page
     * I do not see the text "This text does not exist on the page at all"
     * I do not see the "Delete account" button
