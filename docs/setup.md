@@ -1,0 +1,134 @@
+# Setting up Plainwright for your app
+
+This page is for whoever connects Plainwright to an app, usually once per project: a developer
+or a QA engineer who knows the app's addresses. After that, people write tests in feature files
+without touching any of this.
+
+The quickest way is to start from the [starter](../examples/starter) and change three things:
+`baseURL` in `playwright.config.ts`, the pages in `steps/pages.ts`, and the `webServer` entry
+(start your app there, or remove it if the app is already running somewhere).
+
+## Adding Plainwright to an existing project
+
+```bash
+npm install --save-dev plainwright playwright-bdd @playwright/test
+npx playwright install chromium
+```
+
+**1. Configure Playwright** (`playwright.config.ts`):
+
+```ts
+import { defineConfig, devices } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
+import { aiFixPromptTemplate } from 'plainwright';
+
+const testDir = defineBddConfig({
+  features: 'features/**/*.feature',
+  steps: 'steps/**/*.ts',
+  // Failed tests get a "Fix with AI" prompt in the report.
+  aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
+});
+
+export default defineConfig({
+  testDir,
+  reporter: [['list'], ['html', { open: 'never' }]],
+  use: {
+    baseURL: 'http://localhost:3000',
+    // A click or fill that finds nothing fails after 10 s and lists what the page offers.
+    actionTimeout: 10_000,
+    trace: 'retain-on-failure',
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+});
+```
+
+**2. Export the test** (`steps/fixtures.ts`). playwright-bdd imports this `test` into the
+tests it generates. To add your own fixtures, see [your own steps](writing-steps.md).
+
+```ts
+export { test } from 'plainwright';
+```
+
+**3. Name your pages** (`steps/pages.ts`), so tests say `I open the "Login" page` instead of an
+address:
+
+```ts
+import { definePage } from 'plainwright';
+
+definePage('Login', { url: '/login' });
+definePage('Orders', { url: '/orders' });
+```
+
+**4. Write a feature** in `features/` and run it: `npx bddgen && npx playwright test`. More
+commands are in [commands](commands.md).
+
+## Options
+
+Set them under `use` in `playwright.config.ts`.
+
+| Option          | Default            | Meaning                                                                                                                             |
+| --------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `baseURL`       | none               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                                    |
+| `exactNames`    | `true`             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.                        |
+| `actionTimeout` | none (Playwright)  | How long a click or fill waits for its element. Set 10 s, so a missing element fails soon and the error lists what the page offers. |
+| `trace`         | `off` (Playwright) | `retain-on-failure` keeps a replay of every failed test in the report.                                                              |
+
+Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
+
+## Elements without a usable name: aliases
+
+A step finds an element by what the user sees. Some elements show nothing usable: an icon-only
+button, a field without a label. Give them a name in the page definition; the alias applies
+while that page is open.
+
+```ts
+definePage('Orders', {
+  url: '/orders',
+  elements: {
+    // a field without label: the "Search" field
+    Search: '[data-testid="search"]',
+    // name plus type, so the "Settings" dialog is still found by its title
+    '"Settings" button': '[data-testid="settings"]',
+    // a function for anything more specific
+    'Order total': (scope) => scope.getByTestId('summary').locator('.total'),
+  },
+});
+```
+
+Use aliases sparingly: an element without a visible name is usually also a problem for people
+who use a screen reader, and worth fixing in the app. Several elements with the same name need
+no alias: `the "Delete" button in the "Order 1001" row`.
+
+## How element types are found
+
+What each type word looks up in Playwright:
+
+<!-- generated:element-types -->
+
+| Written as             | Finds                                                                                                                      |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
+| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
+| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)         |
+| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
+| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
+| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
+| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
+| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
+| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
+| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
+| `the "…" section`      | an area of the page (landmark region) with this name (`getByRole('region')`)                                               |
+| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
+| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                              |
+| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                           |
+| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                            |
+| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                   |
+| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)                    |
+
+<!-- /generated:element-types -->
+
+## Logging in
+
+If most tests start logged in, log in once per run and reuse the session: see
+[logging in once](logging-in.md).

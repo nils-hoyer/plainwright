@@ -1,171 +1,177 @@
 # Plainwright
 
-[![CI](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg)](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/plainwright)](https://www.npmjs.com/package/plainwright)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![CI](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg)](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml)
+[![Sponsor](https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub)](https://github.com/sponsors/nils-hoyer)
 
-Readable, keyword-driven tests built on [Playwright](https://playwright.dev/) and
-[playwright-bdd](https://github.com/vitalets/playwright-bdd). Tests are short sentences that
-people who don't program can review, and they run on the Playwright runner.
+Write browser tests as plain English sentences, and review them without reading code.
+Plainwright is built on [Playwright](https://playwright.dev/) and
+[playwright-bdd](https://github.com/vitalets/playwright-bdd): the tests run on Playwright, and
+you get its report.
+
+Writing tests in TypeScript? Use Playwright directly. Coming from Gauge or Robot Framework? See
+[migrating from Gauge](docs/migrating-from-gauge.md) and
+[coming from Robot Framework](docs/coming-from-robot-framework.md).
 
 ```gherkin
 Feature: Orders
 
   Scenario: Delete an order
-    * I log in as "1234567890" with password "password123"
     * I open the "Orders" page
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
 ```
 
+Every sentence is a step in Playwright's report. When something is not on the page, the error
+says what is there instead:
+
 ![The Playwright report: every sentence is a step, a keyword shows its own steps, and the failed click lists the buttons the page offers](docs/images/report.png)
 
-> **Status: experimental (0.x).** Changes to step wording are listed in the
+> **Status: experimental (0.x).** Changes to the wording of steps are listed in the
 > [changelog](CHANGELOG.md); see the [versioning policy](docs/versioning.md).
 
-## Why
+## What you get
 
-- **Real Playwright underneath.** Elements are found with `getByRole` and `getByLabel`, checks
-  are web-first assertions that wait, and you keep traces, the HTML report and the native
-  runner. It is not a Selenium-style wrapper.
-- **Errors say what the page offers.** A missing element fails with
+- **Sentences instead of code.** Everything in quotes is data; the rest of the sentence is fixed.
+- **Names as on the screen:** `the "Log in" button`, `the "Email" field`. No CSS selectors or
+  test IDs in your tests.
+- **Errors that say what is there:**
   `No "Sign in" button found. Buttons on this page: "Accept Cookies", "Log in".`
-- **Accessible names by default.** Elements are named by what the user sees, matched exactly.
-  Aliases for elements without a usable name are the exception, which pushes apps toward
-  accessibility.
-- **Keywords reviewers can read.** Your own steps are written in Gherkin, checked before any
-  test runs, and shown nested in the report.
-- **AI writes, people review.** `lint`, `catalog`, `inspect` and a "Fix with AI" prompt keep an
-  assistant to steps and names that exist; people read the sentences and the report.
-- **Step text is versioned like an API.** Core and advanced steps, discouraged steps with
-  a reason that lint shows, and a step reference generated from the code and checked in CI.
+- **Your own sentences without code.** Combine steps into a new sentence, written the same way.
+- **AI writes, you check.** An assistant gets the list of sentences and the names on a page;
+  `lint` catches anything it made up.
+- **Playwright's report and replay:** every step, screenshots of failures, and a step-by-step
+  replay of the test.
 
-**Who it is for:** teams where people who don't program review tests (QA, business analysts,
-product owners); teams moving from Gauge or Robot Framework; teams that let AI write tests that
-people must check. **Who it is not for:** teams where only developers read tests and plain
-Playwright works well. Stay with TypeScript then.
+**Who it is for:** teams where people who don't program write or review tests (testers, business
+analysts, product owners); teams moving from Gauge or Robot Framework; teams that let AI write
+tests that people check. **Who it is not for:** teams where only developers read tests and plain
+Playwright works well. See [how it compares](docs/comparison.md).
 
-| Compared with                                                       | Difference                                                                                                                                             |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Plain Playwright                                                    | Same runner, locators and report. Tests are sentences instead of TypeScript, so reviewers need no code; you trade some freedom for a fixed vocabulary. |
-| [Playwright's test agents](https://playwright.dev/docs/test-agents) | They write and repair TypeScript tests. Here an assistant writes sentences, limited to steps that exist and names on the page, and lint checks them.   |
-| [playwright-bdd](https://github.com/vitalets/playwright-bdd) alone  | You write every step definition. This adds ~100 ready steps, elements by role and name, keywords in Gherkin and the lint/catalog/inspect tools.        |
-| [Robot Framework Browser](https://robotframework-browser.org/)      | Also keyword-driven on Playwright, with its own syntax, runner and report. Here: Gherkin, TypeScript projects and Playwright's own runner and report.  |
-| [Gauge](https://gauge.org/)                                         | Markdown specs and concepts with its own runner. Keywords play the role of concepts; see [migrating from Gauge](docs/migrating-from-gauge.md).         |
+## Try it in 5 minutes
 
-## Quick start
+You need [Node.js](https://nodejs.org/) (the LTS version) and a terminal.
 
 ```bash
-npm install --save-dev plainwright playwright-bdd @playwright/test
+npx degit nils-hoyer/plainwright/examples/starter my-tests
+cd my-tests
+npm install
 npx playwright install chromium
+npm test
+npm run report
 ```
 
-**1. Configure Playwright** (`playwright.config.ts`):
+The starter tests a small todo app that comes with it. `npm test` runs three tests, and
+`npm run report` opens the report in your browser. Change a sentence in
+`features/todos.feature`, run `npm test` again and see what happens.
 
-```ts
-import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate } from 'plainwright';
+## Write your first test
 
-const testDir = defineBddConfig({
-  features: 'features/**/*.feature',
-  steps: 'steps/**/*.ts',
-  aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
-});
+A test is a `.feature` file in `features/`:
 
-export default defineConfig({
-  testDir,
-  use: {
-    baseURL: 'http://localhost:3000',
-    // A click or fill that finds nothing fails after 10 s and lists what the page offers.
-    actionTimeout: 10_000,
-    trace: 'retain-on-failure',
-  },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-});
+```gherkin
+Feature: Login
+
+  Scenario: A wrong password shows an error
+    * I open the "Login" page
+    * I fill "jane@example.com" in the "Email" field
+    * I fill "wrong" in the "Password" field
+    * I click the "Log in" button
+    * I see the text "Email or password is incorrect."
 ```
 
-**2. Export the test and name your pages:**
+- `Feature` names the area, `Scenario` is one test, and each `*` line is a step. `Given`, `When`
+  and `Then` may stand instead of `*`.
+- Everything in double quotes is data. Write the rest of the sentence exactly as listed below.
+- An element is its name on the screen followed by its type: `the "Log in" button`.
+- Sentences are English. Gherkin's own words (`Feature`, `Scenario`) also exist in other
+  languages.
 
-```ts
-// steps/fixtures.ts: playwright-bdd imports this `test` into the generated tests.
-// For your own fixtures, see docs/writing-steps.md.
-export { test } from 'plainwright';
-```
+**The sentences you will use most:**
 
-```ts
-// steps/pages.ts
-import { definePage } from 'plainwright';
+| To …                         | write                                                            |
+| ---------------------------- | ---------------------------------------------------------------- |
+| open a page                  | `I open the "Login" page`                                        |
+| check where you are          | `I am on the "Dashboard" page`                                   |
+| click                        | `I click the "Log in" button`                                    |
+| type into a field            | `I fill "jane@example.com" in the "Email" field`                 |
+| tick a checkbox              | `I check the "I accept the terms" checkbox`                      |
+| choose from a dropdown       | `I select "Germany" in the "Country" dropdown`                   |
+| press a key                  | `I press "Enter"`                                                |
+| upload a file                | `I upload the file "files/invoice.pdf" with the "Upload" button` |
+| answer the next pop-up       | `I accept the next dialog`                                       |
+| check that something shows   | `I see the "Welcome" heading`                                    |
+| check that something is gone | `I do not see the "Error" message`                               |
+| check a text                 | `I see the text "Welcome back!"`                                 |
+| check a text in one place    | `I see the text "Paid" in the "Order 1001" row`                  |
+| check what a field contains  | `I see the value "Jane" in the "Name" field`                     |
+| check a state                | `I see the "Log in" button is disabled`                          |
+| count items                  | `I see "3" items in the "Cart" list`                             |
 
-definePage('Login', { url: '/login' }); // * I open the "Login" page
-```
+All sentences are in the [step reference](docs/steps.md). VS Code can suggest them while you
+type: see [editor support](docs/ide-support.md).
 
-**3. Write a feature** in `features/`, and **4. run it:** `npx bddgen && npx playwright test`.
-
-A complete project is in [examples/starter](examples/starter).
-
-## Writing tests
-
-Everything in double quotes is data; the rest of the sentence is fixed. Checks start with
-`I see` / `I do not see` and wait up to 5 seconds. `Given` / `When` / `Then` are optional; `*`
-works everywhere. All steps are listed in the [step reference](docs/steps.md); reviewers read
-the one-page [guide to reading tests](docs/reading-tests.md).
-
-### Elements
-
-A step names an element by its visible name followed by its type. The type decides how the
-element is found:
+**Element types.** The word after the name says what kind of element is meant:
 
 <!-- generated:element-types -->
 
-| Written as             | Finds                                                                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
-| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
-| `the "…" field`        | a text field with this label, or else this placeholder (`getByLabel`, `getByPlaceholder`)                                  |
-| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
-| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
-| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
-| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
-| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
-| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
-| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
-| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
-| `the "…" section`      | a section (landmark region) with this name (`getByRole('region')`)                                                         |
-| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
-| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                              |
-| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                           |
-| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                            |
-| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                   |
-| `the "…" element`      | any element showing exactly this text (`getByText`); mostly used with aliases                                              |
+| Written as             | Finds                                                                                     |
+| ---------------------- | ----------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name                                                                   |
+| `the "…" link`         | a link with this text                                                                     |
+| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it           |
+| `the "…" checkbox`     | a checkbox with this label                                                                |
+| `the "…" radio button` | a radio button with this label                                                            |
+| `the "…" dropdown`     | a dropdown (select box) with this label                                                   |
+| `the "…" heading`      | a heading with this text                                                                  |
+| `the "…" tab`          | a tab with this name                                                                      |
+| `the "…" dialog`       | a dialog or alert dialog with this title                                                  |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked                                   |
+| `the "…" image`        | an image with this alternative text or name                                               |
+| `the "…" section`      | an area of the page (landmark region) with this name                                      |
+| `the "…" list`         | a list with this name                                                                     |
+| `the "…" list item`    | a list item that contains this text                                                       |
+| `the "…" row`          | a table row that contains this text, e.g. in its first cell                               |
+| `the "…" cell`         | a table cell with this text                                                               |
+| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text                     |
+| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases |
 
 <!-- /generated:element-types -->
 
-Names match exactly (spelling and capitals); set `use: { exactNames: false }` for parts of names.
-When several elements have the same name, name the element they are in:
-`the "Delete" button in the "Order 1001" row`. Every step that takes an element accepts this.
+**The same name twice?** Name the element it is in: `the "Delete" button in the "Order 1001" row`.
 
-### Pages and aliases
+**Finding the right names:**
 
-`definePage()` gives a page a name for `I open the "…" page` and `I am on the "…" page`. Where
-an element has no usable visible name, such as an icon button or an unlabeled field, give it one
-with an alias. Aliases apply while that page is open.
+1. Use what the screen shows: the label next to a field, the text on a button.
+2. Run the test: when a name is wrong, the error lists the names of that type on the page.
+3. Ask Plainwright: `npm run inspect -- "Login"` lists the buttons, fields, links … of a page.
+   See [commands](docs/commands.md).
 
-```ts
-definePage('Orders', {
-  url: '/orders',
-  elements: {
-    Search: '[data-testid="search"]', // the "Search" field
-    '"Settings" button': '[data-testid="settings"]', // only for the button type
-    'Order total': (scope) => scope.getByTestId('summary').locator('.total'),
-  },
-});
-```
+## How names and texts are matched
 
-### Keywords and steps in TypeScript
+- **Names match exactly, with the same capitals.** `the "Log in" button` does not find "Log In"
+  or "Log in now". Your setup can relax this (`exactNames`, see [setup](docs/setup.md#options)).
+- **Text checks find part of a text, with the same capitals.** `I see the text "Welcome"` passes
+  on "Welcome back!", not on "welcome back!".
+- **Rows, list items and messages are found by text they contain.** `the "Order 1001" row` is
+  the table row that contains "Order 1001".
+- **Field values and page addresses** are compared as a whole.
+- **Checks wait.** `I see …` waits up to 5 seconds for the page to get there.
 
-A keyword is a new step written in Gherkin: a `Scenario Outline:` whose title is the step, with
-parameters written `"<name>"`.
+## When a test fails
+
+- **The report** shows the failed step in red, with the error. For a missing element, the error
+  lists what the page offers instead.
+- **The replay:** open the trace from the report to step through the test, with a picture of the
+  page before and after each step.
+- **"Fix with AI":** the report has a prompt with the scenario, the error and the structure of the
+  page, ready to paste into an AI chat.
+
+The one-page [guide to reading tests](docs/reading-tests.md) explains the report for reviewers.
+
+## Your own sentences
+
+Steps you repeat become a keyword: a new sentence, written in the same language.
 
 ```gherkin
 # keywords/account.feature
@@ -178,53 +184,53 @@ Feature: Account
     * I click the "Log in" button
 ```
 
-Load them with `defineKeywords('keywords/**/*.feature')` in a step file. For what existing steps
-cannot express, `defineStep()` defines a step in TypeScript, and `useTest()` gives your steps
-your own fixtures. See [your own steps](docs/writing-steps.md).
+Now `I log in as "jane" with password "secret"` works in every test, and the report shows its
+steps nested underneath. More, including steps in TypeScript: [your own steps](docs/writing-steps.md).
 
-## AI writes, you review
+## Use it on your app
 
-The command line gives an assistant (or a person) what it needs to write steps that exist:
+Someone who knows the app sets up a few things once, usually a developer:
 
-```
-npx plainwright <command> --steps "steps/**/*.ts" [options]
+- the app's address and the page names (`I open the "Login" page`),
+- names for elements that show none, such as buttons with only an icon,
+- logging in once for all tests, if most of them need it.
 
-  catalog   All steps, element types and pages as JSON (steps.json).
-  inspect   Open a page and list its elements by type and visible name.
-  lint      Check feature files: unknown or ambiguous steps, selectors, fixed waits, keywords.
-  docs      All steps, yours included, as a Markdown reference.
-  stubs     A step file for editor autocomplete (docs/ide-support.md).
-```
+See [setup](docs/setup.md) and [logging in once](docs/logging-in.md). After that, tests are
+feature files only.
 
-Copy [templates/AGENTS.md](templates/AGENTS.md) into your project (also as
+## Let AI write tests
+
+Copy [templates/AGENTS.md](templates/AGENTS.md) into your project (also available as
 [Copilot instructions](templates/copilot-instructions.md) and a
-[Claude skill](templates/claude-skill/SKILL.md)): the assistant looks up the vocabulary, inspects
-the page, writes the scenario and lints it. For a failed test the report has a "Fix with AI"
-prompt with the error and the page structure. You review the sentences and the report. More in
-[AI authoring](docs/ai-authoring.md).
+[Claude skill](templates/claude-skill/SKILL.md)). The assistant looks up the sentences with
+`catalog`, the names on a page with `inspect`, and checks its test with `lint`. You review the
+sentences and the report. More in [AI authoring](docs/ai-authoring.md).
 
-## Guides
+## Learn more
 
-- [Step reference](docs/steps.md): every built-in step with an example.
 - [Reading tests](docs/reading-tests.md): one page for reviewers.
-- [Your own steps](docs/writing-steps.md): keywords, `defineStep()`, fixtures, tagged folders.
-- [Logging in once](docs/logging-in.md): save the session in a setup project and reuse it.
-- [Vocabulary rules](docs/vocabulary.md): how steps are worded, and how to add one.
-- [AI authoring](docs/ai-authoring.md) and [editor support](docs/ide-support.md).
-- [Migrating from Gauge](docs/migrating-from-gauge.md) and
-  [coming from Robot Framework](docs/coming-from-robot-framework.md).
+- [Step reference](docs/steps.md): every sentence with an example.
+- [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.
+- [Setup](docs/setup.md): connect Plainwright to your app.
+- [Your own steps](docs/writing-steps.md): keywords, steps in TypeScript, fixtures.
+- [Logging in once](docs/logging-in.md) · [Vocabulary rules](docs/vocabulary.md) ·
+  [AI authoring](docs/ai-authoring.md) · [Editor support](docs/ide-support.md)
+- [How it compares](docs/comparison.md) · [Migrating from Gauge](docs/migrating-from-gauge.md) ·
+  [Coming from Robot Framework](docs/coming-from-robot-framework.md)
 
 ## Contributing
 
-Open an issue describing the behaviour you need; a new core step also needs an update to the
-[reviewer guide](docs/reading-tests.md). Run `npm run verify` before a pull request: format,
-types, generated docs, feature lint, unit tests and the end-to-end tests against the test app in
-`test/test-app`.
-
-Releases run from the Actions tab: the Release workflow takes "patch", "minor" or "major", dates
-the `[Unreleased]` section of [CHANGELOG.md](CHANGELOG.md) and publishes to npm. Dependabot's
-minor and patch updates are merged automatically once CI passes.
+1. Open an issue that describes the problem and the expected behaviour. A new core step also
+   needs an update to the [reviewer guide](docs/reading-tests.md).
+2. Install dependencies with `npm ci` and the browser with `npx playwright install chromium`.
+3. Make your change in `src/` (built-in steps in `src/steps/`), with tests: unit tests in
+   `test/unit/`, feature files in `test/features/` against the app in `test/test-app/`.
+4. Run `npm run verify` (format, types, generated docs, feature lint, unit and end-to-end tests).
+   It must pass; `npm run docs` updates the generated docs.
+5. Open a pull request with the implementation and tests, and add your change under
+   `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md). Don't change the version in
+   `package.json`: the maintainer releases from GitHub Actions, which increases it.
 
 ## License
 
-MIT
+[MIT](LICENSE)

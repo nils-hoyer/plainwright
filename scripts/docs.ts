@@ -18,7 +18,8 @@ const agentBody = agentInstructions.replace(/^# .*\n+/, '');
 type Target = { file: string; sections?: Record<string, string>; content?: string };
 
 const targets: Target[] = [
-  { file: 'README.md', sections: { 'element-types': renderElementTypes() } },
+  { file: 'README.md', sections: { 'element-types': renderElementTypes({ plain: true }) } },
+  { file: 'docs/setup.md', sections: { 'element-types': renderElementTypes() } },
   {
     file: 'docs/steps.md',
     content: [
@@ -27,12 +28,15 @@ const targets: Target[] = [
       [
         'Every built-in step, with what it does and an example. Your own steps and keywords are',
         'listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements',
-        'is in the [README](../README.md#elements).',
+        'is in the [README](../README.md#write-your-first-test).',
       ].join('\n'),
       renderStepReference(builtIn, 2),
     ].join('\n\n'),
   },
-  { file: 'docs/reading-tests.md', sections: { 'element-types': renderElementTypes() } },
+  {
+    file: 'docs/reading-tests.md',
+    sections: { 'element-types': renderElementTypes({ plain: true }) },
+  },
   {
     file: 'docs/vocabulary.md',
     sections: { 'core-steps': core.map((step) => `- \`${step.example}\``).join('\n') },

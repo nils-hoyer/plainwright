@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { plainLookup } from './docs';
 import { ELEMENT_TYPES, LOOKUP_DESCRIPTION } from './elements';
 import { keywordOf } from './keywords';
 import { getPageDefinitions } from './pages';
@@ -44,7 +45,7 @@ export function buildCatalog(cwd = process.cwd()): Catalog {
     rules: RULES,
     elementTypes: ELEMENT_TYPES.map((type) => ({
       type,
-      lookup: LOOKUP_DESCRIPTION[type].replace(/ \(`.*`\)$/, ''),
+      lookup: plainLookup(LOOKUP_DESCRIPTION[type]),
     })),
     pages: getPageDefinitions().map((page) => ({
       name: page.name,
