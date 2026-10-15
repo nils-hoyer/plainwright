@@ -5,13 +5,10 @@
 [![Sponsor](https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub)](https://github.com/sponsors/nils-hoyer)
 
 Write browser tests as plain English sentences, and review them without reading code.
-Plainwright is built on [Playwright](https://playwright.dev/) and
-[playwright-bdd](https://github.com/vitalets/playwright-bdd): the tests run on Playwright, and
-you get its report.
-
-Writing tests in TypeScript? Use Playwright directly. Coming from Gauge or Robot Framework? See
-[migrating from Gauge](docs/migrating-from-gauge.md) and
-[coming from Robot Framework](docs/coming-from-robot-framework.md).
+Plainwright is built on [Playwright](https://playwright.dev/) and comes with more than 100
+ready-made steps for what you do in a browser: open pages, click, type, choose, upload, handle
+dialogs, tabs and downloads, and check texts, values and states. You write sentences, not step
+code.
 
 ```gherkin
 Feature: Orders
@@ -21,14 +18,6 @@ Feature: Orders
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
 ```
-
-Every sentence is a step in Playwright's report. When something is not on the page, the error
-says what is there instead:
-
-![The Playwright report: every sentence is a step, a keyword shows its own steps, and the failed click lists the buttons the page offers](docs/images/report.png)
-
-> **Status: experimental (0.x).** Changes to the wording of steps are listed in the
-> [changelog](CHANGELOG.md); see the [versioning policy](docs/versioning.md).
 
 ## What you get
 
@@ -45,10 +34,9 @@ says what is there instead:
 
 **Who it is for:** teams where people who don't program write or review tests (testers, business
 analysts, product owners); teams moving from Gauge or Robot Framework; teams that let AI write
-tests that people check. **Who it is not for:** teams where only developers read tests and plain
-Playwright works well. See [how it compares](docs/comparison.md).
+tests that people check.
 
-## Try it in 5 minutes
+## Getting started
 
 You need [Node.js](https://nodejs.org/) (the LTS version) and a terminal.
 
@@ -56,14 +44,21 @@ You need [Node.js](https://nodejs.org/) (the LTS version) and a terminal.
 npx degit nils-hoyer/plainwright/examples/starter my-tests
 cd my-tests
 npm install
-npx playwright install chromium
 npm test
-npm run report
 ```
 
-The starter tests a small todo app that comes with it. `npm test` runs three tests, and
-`npm run report` opens the report in your browser. Change a sentence in
-`features/todos.feature`, run `npm test` again and see what happens.
+The starter tests a small todo app that comes with it. `npm install` also installs the browser,
+and `npm test` runs three tests. If a test fails, the report opens by itself; `npm run report`
+opens it anytime. Change a sentence in `features/todos.feature`, run `npm test` again and see
+what happens.
+
+## Let AI write tests
+
+Copy [templates/AGENTS.md](templates/AGENTS.md) into your project (also available as
+[Copilot instructions](templates/copilot-instructions.md) and a
+[Claude skill](templates/claude-skill/SKILL.md)). The assistant looks up the sentences with
+`catalog`, the names on a page with `inspect`, and checks its test with `lint`. You review the
+sentences and the report. More in [AI authoring](docs/ai-authoring.md).
 
 ## Write your first test
 
@@ -80,8 +75,7 @@ Feature: Login
     * I see the text "Email or password is incorrect."
 ```
 
-- `Feature` names the area, `Scenario` is one test, and each `*` line is a step. `Given`, `When`
-  and `Then` may stand instead of `*`.
+- `Feature` names the area, `Scenario` is one test, and each `*` line is a step.
 - Everything in double quotes is data. Write the rest of the sentence exactly as listed below.
 - An element is its name on the screen followed by its type: `the "Log in" button`.
 - Sentences are English. Gherkin's own words (`Feature`, `Scenario`) also exist in other
@@ -110,33 +104,6 @@ Feature: Login
 
 All sentences are in the [step reference](docs/steps.md). VS Code can suggest them while you
 type: see [editor support](docs/ide-support.md).
-
-**Element types.** The word after the name says what kind of element is meant:
-
-<!-- generated:element-types -->
-
-| Written as             | Finds                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name                                                                   |
-| `the "…" link`         | a link with this text                                                                     |
-| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it           |
-| `the "…" checkbox`     | a checkbox with this label                                                                |
-| `the "…" radio button` | a radio button with this label                                                            |
-| `the "…" dropdown`     | a dropdown (select box) with this label                                                   |
-| `the "…" heading`      | a heading with this text                                                                  |
-| `the "…" tab`          | a tab with this name                                                                      |
-| `the "…" dialog`       | a dialog or alert dialog with this title                                                  |
-| `the "…" menu item`    | a menu item with this name, also one that can be ticked                                   |
-| `the "…" image`        | an image with this alternative text or name                                               |
-| `the "…" section`      | an area of the page (landmark region) with this name                                      |
-| `the "…" list`         | a list with this name                                                                     |
-| `the "…" list item`    | a list item that contains this text                                                       |
-| `the "…" row`          | a table row that contains this text, e.g. in its first cell                               |
-| `the "…" cell`         | a table cell with this text                                                               |
-| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text                     |
-| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases |
-
-<!-- /generated:element-types -->
 
 **The same name twice?** Name the element it is in: `the "Delete" button in the "Order 1001" row`.
 
@@ -187,36 +154,18 @@ Feature: Account
 Now `I log in as "jane" with password "secret"` works in every test, and the report shows its
 steps nested underneath. More, including steps in TypeScript: [your own steps](docs/writing-steps.md).
 
-## Use it on your app
-
-Someone who knows the app sets up a few things once, usually a developer:
-
-- the app's address and the page names (`I open the "Login" page`),
-- names for elements that show none, such as buttons with only an icon,
-- logging in once for all tests, if most of them need it.
-
-See [setup](docs/setup.md) and [logging in once](docs/logging-in.md). After that, tests are
-feature files only.
-
-## Let AI write tests
-
-Copy [templates/AGENTS.md](templates/AGENTS.md) into your project (also available as
-[Copilot instructions](templates/copilot-instructions.md) and a
-[Claude skill](templates/claude-skill/SKILL.md)). The assistant looks up the sentences with
-`catalog`, the names on a page with `inspect`, and checks its test with `lint`. You review the
-sentences and the report. More in [AI authoring](docs/ai-authoring.md).
-
 ## Learn more
 
 - [Reading tests](docs/reading-tests.md): one page for reviewers.
 - [Step reference](docs/steps.md): every sentence with an example.
 - [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.
-- [Setup](docs/setup.md): connect Plainwright to your app.
+- [Setup](docs/setup.md) and [logging in once](docs/logging-in.md): connect Plainwright to
+  your app, usually once by a developer. After that, tests are feature files only.
 - [Your own steps](docs/writing-steps.md): keywords, steps in TypeScript, fixtures.
-- [Logging in once](docs/logging-in.md) · [Vocabulary rules](docs/vocabulary.md) ·
+- [Vocabulary rules](docs/vocabulary.md) ·
   [AI authoring](docs/ai-authoring.md) · [Editor support](docs/ide-support.md)
-- [How it compares](docs/comparison.md) · [Migrating from Gauge](docs/migrating-from-gauge.md) ·
-  [Coming from Robot Framework](docs/coming-from-robot-framework.md)
+- Coming from Gauge or Robot Framework? See [migrating from Gauge](docs/migrating-from-gauge.md)
+  and [coming from Robot Framework](docs/coming-from-robot-framework.md).
 
 ## Contributing
 
