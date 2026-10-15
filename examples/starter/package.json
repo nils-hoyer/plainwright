@@ -3,6 +3,7 @@
   "private": true,
   "description": "Starter project for readable, keyword-driven Playwright tests.",
   "scripts": {
+    "postinstall": "playwright install chromium",
     "test": "bddgen && playwright test",
     "report": "playwright show-report",
     "app": "node app/server.mjs",

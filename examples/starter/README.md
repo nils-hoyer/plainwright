@@ -5,10 +5,9 @@ tests start themselves (`webServer` in `playwright.config.ts`). Nothing is fetch
 internet while the tests run.
 
 ```bash
-npm install
-npx playwright install chromium
-npm test          # generate and run the tests
-npm run report    # open the report
+npm install       # also installs the browser
+npm test          # generate and run the tests; the report opens if one fails
+npm run report    # open the report anytime
 ```
 
 ## What is where

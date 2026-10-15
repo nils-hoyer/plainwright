@@ -14,7 +14,8 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
   testDir,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // The report opens by itself when a test fails (not in CI); npm run report opens it anytime.
+  reporter: [['list'], ['html']],
   use: {
     // The app under test. Page addresses in steps/pages.ts are relative to it.
     baseURL: `http://localhost:${port}`,

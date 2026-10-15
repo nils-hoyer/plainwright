@@ -18,7 +18,6 @@ const agentBody = agentInstructions.replace(/^# .*\n+/, '');
 type Target = { file: string; sections?: Record<string, string>; content?: string };
 
 const targets: Target[] = [
-  { file: 'README.md', sections: { 'element-types': renderElementTypes({ plain: true }) } },
   { file: 'docs/setup.md', sections: { 'element-types': renderElementTypes() } },
   {
     file: 'docs/steps.md',
