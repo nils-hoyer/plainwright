@@ -10,7 +10,6 @@
   "files": [
     "dist/",
     "templates/",
-    "CHANGELOG.md",
     "!dist/**/*.map"
   ],
   "exports": {
