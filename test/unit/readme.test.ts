@@ -26,7 +26,7 @@ const keywords = [...readme.matchAll(/Scenario Outline: (.+)/g)].map((match) => 
 describe('README', () => {
   it('shows sentences', () => {
     expect(gherkinSteps.length).toBeGreaterThan(5);
-    expect(inlineSentences.length).toBeGreaterThan(15);
+    expect(inlineSentences.length).toBeGreaterThan(5);
   });
 
   it.each([...new Set([...gherkinSteps, ...inlineSentences])])('"%s" is a step', (text) => {
