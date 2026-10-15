@@ -29,9 +29,11 @@ element type finds elements, or removing a public function or option.
 ## Renaming steps
 
 A renamed step keeps its old wording for at least one minor release, marked `discouraged`, so
-`lint` warns with the new wording. The changelog lists every rename under **Breaking** with a
-search-and-replace hint.
+`lint` warns with the new wording. The pull request that renames a step names the old and new
+wording, and the release notes link to it.
 
-## Changelog
+## Release notes
 
-Every release is listed in [CHANGELOG.md](../CHANGELOG.md), with breaking changes first.
+Every release is listed on the
+[GitHub releases page](https://github.com/nils-hoyer/plainwright/releases), with the pull
+requests it contains.
