@@ -27,7 +27,7 @@ const targets: Target[] = [
       [
         'Every built-in step, with what it does and an example. Your own steps and keywords are',
         'listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements',
-        'is in the [README](../README.md#write-your-first-test).',
+        'is in [reading tests](reading-tests.md#how-a-step-is-built).',
       ].join('\n'),
       renderStepReference(builtIn, 2),
     ].join('\n\n'),
