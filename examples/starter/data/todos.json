@@ -1,0 +1,6 @@
+{
+  "shopping": [
+    { "title": "Buy milk", "completed": false },
+    { "title": "Buy bread", "completed": true }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
+  "Todos": {
+    "url": "/",
+    "elements": {
+      "Todo items": ".todo-list"
+    }
+  }
+}

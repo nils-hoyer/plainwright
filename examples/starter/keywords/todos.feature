@@ -9,3 +9,13 @@ Feature: Todos
     Examples:
       | text     |
       | Buy milk |
+
+  Scenario Outline: the app has saved the todos "<todos>"
+    Stores the todos in the browser the way the app does, and shows them.
+
+    * I set the local storage item "todos" to "<todos>"
+    * I reload the page
+
+    Examples:
+      | todos            |
+      | {todos.shopping} |
