@@ -25,6 +25,14 @@ export { defineKeywords, getKeywords, validateKeywords } from './keywords';
 export type { KeywordDefinition, KeywordStep } from './keywords';
 export { aiFixPromptTemplate } from './ai';
 
+/**
+ * The file that defines the built-in steps and `test`. Add it to playwright-bdd's `steps`, so a
+ * project needs no step file of its own:
+ *
+ *   defineBddConfig({ features: 'features/**\/*.feature', steps: ['steps/**\/*.ts', steps] })
+ */
+export const steps: string = __filename;
+
 // Registers the built-in steps.
 import './steps/navigation.steps';
 import './steps/actions.steps';
