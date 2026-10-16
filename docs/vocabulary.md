@@ -7,10 +7,11 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 ## The rules
 
 1. **Every value is in double quotes.** Anything in quotes is data; the rest of the sentence is
-   fixed. Numbers too: `I see "3" items in the "Cart" list`.
+   fixed. Numbers too: `I see "3" items in the "Cart" list`. Inside the quotes, `{name.path}` is
+   a value from a data file, the environment or an earlier step, and `\{` is a literal brace.
 2. **Elements are named by what the user sees**, followed by an element type:
    `the "Log in" button`, `the "Email" field`. CSS, XPath and test IDs stay out of feature files.
-   An element without a visible name gets an alias in its page definition.
+   An element without a visible name gets an alias in `pages.json`.
 3. **One phrase per action. No synonyms.** It is `fill`, never also `type` or `enter`.
 4. **Every step does exactly what it says**, documented in one sentence.
 5. **Checks start with `I see` / `I do not see`** and wait automatically. No fixed waits in the

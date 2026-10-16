@@ -19,20 +19,20 @@ Adjust the `features/` and `steps/` paths if yours differ.
 
 ## The workflow: inspect → write → lint → run → review
 
-**Catalog.** `npx plainwright catalog --steps "steps/**/*.ts" --out steps.json` writes
-every step with pattern, description, example, level and parameters, plus element types, the
-design rules and your page names and aliases. Project steps and keywords are included, with the
+**Catalog.** `npx plainwright catalog --out steps.json` writes every step with pattern,
+description, example, level and parameters, plus element types, the design rules, your page
+names and aliases, and the values from `data/` a step can write as `{users.admin.email}`. Project steps and keywords are included, with the
 file and line where they are defined. Regenerate it when steps change, or keep it out of git
 (`steps.json` is small and fast to build).
 
-**Inspect.** `npx plainwright inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000`
+**Inspect.** `npx plainwright inspect "Login" --base-url http://localhost:3000`
 opens the page in Chromium and lists buttons, fields, links, headings, dialogs and so on by the
 names the steps use, plus how many elements of each type have no name. `--json` prints JSON,
 `--storage-state auth.json` opens the page logged in.
 
-**Lint.** `npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"`
-reports unknown steps with the closest existing step, ambiguous steps, selectors, absolute URLs,
-fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on errors,
+**Lint.** `npx plainwright lint --features "features/**/*.feature"`
+reports unknown steps with the closest existing step, ambiguous steps, unknown pages and values,
+selectors, absolute URLs, fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on errors,
 so it can gate CI and agent loops.
 
 **Run.** `npx bddgen && npx playwright test`. When an element is missing, the error lists the

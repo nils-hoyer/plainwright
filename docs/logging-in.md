@@ -89,7 +89,7 @@ tag (`@admin`, `@customer`). Step files in a folder named after the same tag
 
 ```bash
 npx playwright test --project setup
-npx plainwright inspect "Dashboard" --steps "steps/**/*.ts" \
+npx plainwright inspect "Dashboard" \
   --base-url http://localhost:3000 --storage-state playwright/.auth/user.json
 ```
 

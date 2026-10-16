@@ -5,21 +5,22 @@ values in double quotes. Most of a migration is renaming files and adjusting ste
 
 ## Concepts
 
-| Gauge                                     | Plainwright                                                                   |
-| ----------------------------------------- | ----------------------------------------------------------------------------- |
-| Specification (`.spec`, Markdown)         | Feature file (`.feature`, Gherkin)                                            |
-| `# Spec heading`                          | `Feature: …`                                                                  |
-| `## Scenario heading`                     | `Scenario: …`                                                                 |
-| Context steps (before the first scenario) | `Background:`                                                                 |
-| Teardown steps (`___` at the end)         | No direct equivalent; use Playwright fixtures or playwright-bdd `After` hooks |
-| `* step "with" "params"`                  | `* step "with" "params"` (same)                                               |
-| Concept (`.cpt` file)                     | Keyword: `Scenario Outline:` in `keywords/*.feature`                          |
-| Concept parameter `<name>`                | Keyword parameter `"<name>"` (in quotes)                                      |
-| Data table driving a scenario             | `Scenario Outline:` with `Examples:`                                          |
-| Step implementation (Java, Python, …)     | Built-in steps; your own with `defineStep()` in TypeScript                    |
-| Page object with selectors                | `definePage()`; selectors only as aliases for unnamed elements                |
-| Tags                                      | Tags (`@smoke`), run with `npx playwright test --grep @smoke`                 |
-| Gauge HTML report                         | Playwright HTML report with traces                                            |
+| Gauge                                     | Plainwright                                                                |
+| ----------------------------------------- | -------------------------------------------------------------------------- |
+| Specification (`.spec`, Markdown)         | Feature file (`.feature`, Gherkin)                                         |
+| `# Spec heading`                          | `Feature: …`                                                               |
+| `## Scenario heading`                     | `Scenario: …`                                                              |
+| Context steps (before the first scenario) | `Background:`                                                              |
+| Teardown steps (`___` at the end)         | `I delete "…" after the test` in a keyword; else fixtures or `After` hooks |
+| `* step "with" "params"`                  | `* step "with" "params"` (same)                                            |
+| Concept (`.cpt` file)                     | Keyword: `Scenario Outline:` in `keywords/*.feature`                       |
+| Concept parameter `<name>`                | Keyword parameter `"<name>"` (in quotes)                                   |
+| Data table driving a scenario             | `Scenario Outline:` with `Examples:`                                       |
+| Data store, environment properties        | `data/*.json` and environment variables, written `"{users.admin.email}"`   |
+| Step implementation (Java, Python, …)     | Built-in steps; your own with `defineStep()` in TypeScript                 |
+| Page object with selectors                | `pages.json`; selectors only as aliases for unnamed elements               |
+| Tags                                      | Tags (`@smoke`), run with `npx playwright test --grep @smoke`              |
+| Gauge HTML report                         | Playwright HTML report with traces                                         |
 
 ## Step wording
 
@@ -63,18 +64,20 @@ Feature: Login
     * I click the "Log in" button
 ```
 
-Load them with `defineKeywords('keywords/**/*.feature')` in a step file.
+Files in `keywords/` load by themselves.
 
 ## Test data and secrets
 
-Do not commit real credentials in feature files. Use dedicated test accounts, or a project
-step that reads them from the environment, for example
-`I log in as the "standard" test user`.
+Do not commit real credentials in feature files. Gauge's table-driven data and environment
+properties map to JSON files in `data/` and environment variables, both written inside the
+quotes: `I fill "{users.standard.name}" in the "Username" field`,
+`I fill "{env.TEST_PASSWORD}" in the "Password" field`. A `.env` file holds them locally. See
+[test data](pages-and-data.md#data-files).
 
 ## Steps
 
 1. Install and configure: see the [README quick start](../README.md#quick-start).
-2. Define a page for every Gauge page object with `definePage()`. Keep selectors only where the
+2. Name a page in `pages.json` for every Gauge page object. Keep selectors only where the
    element has no visible name.
 3. Convert specs to features (`#` → `Feature:`, `##` → `Scenario:`), concepts to keywords.
 4. Run `lint` and fix the reported lines.

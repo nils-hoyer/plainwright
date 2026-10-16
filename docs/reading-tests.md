@@ -37,6 +37,21 @@ The rest of the sentence is **fixed** and means the same everywhere.
 - `"wrongpassword"` is the text typed.
 - `the "Password" field` is the element: its visible name, then its type.
 
+A name in braces inside the quotes is a **value from somewhere else**:
+
+> I fill **"{users.admin.email}"** in the **"Email" field**
+
+- `{users.admin.email}` comes from the team's data file `data/users.json`: the `email` of
+  `admin`.
+- `{env.TEST_PASSWORD}` is a secret from the environment, such as a password.
+- `{order.id}` is a value an earlier step remembered, for example with
+  `I remember the text of the "Order number" cell as "order"`, or the number the app gave a new
+  order.
+- `{unique}` is a text that differs in every test; `{today}` is today's date.
+
+In the report, a line under the step shows the value used: `{users.admin.email} =
+"admin@example.com"`. Secrets show as `(hidden)`.
+
 ## Element types
 
 The word after the name says what kind of element is meant. The test looks for an element of
@@ -112,6 +127,10 @@ Some steps are **keywords**: a team-defined step made of other steps, for exampl
 `I log in as "1234567890" with password "secret"`. Keywords are written in the same language in
 `keywords/*.feature`, so you can read them too. In the report, a keyword shows its steps
 nested underneath.
+
+A `Given` line often says what exists before the test starts, such as
+`Given there is an order for "Coffee"`. Its keyword creates that data through the app, usually
+with `I create "…" at "/api/…"`, and removes it after the test with `I delete "…" after the test`.
 
 ## Steps to question
 

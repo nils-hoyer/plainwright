@@ -23,7 +23,7 @@ So by default it does not know:
 `{element}` and `{number}` parameter types. The file is never executed.
 
 ```bash
-npx plainwright stubs --steps "steps/**/*.ts" --out .vscode/plainwright.steps.js
+npx plainwright stubs --out .vscode/plainwright.steps.js
 ```
 
 ```jsonc
