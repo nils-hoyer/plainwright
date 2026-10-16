@@ -14,7 +14,7 @@ Copy the instructions into your project:
 | GitHub Copilot      | [templates/copilot-instructions.md](../templates/copilot-instructions.md) | `.github/copilot-instructions.md`     |
 | Claude Code (skill) | [templates/claude-skill/SKILL.md](../templates/claude-skill/SKILL.md)     | `.claude/skills/plainwright/SKILL.md` |
 
-The templates are in the installed package too: `node_modules/plainwright/templates/`.
+The templates are in the installed package too: `node_modules/@nils.hoyer/plainwright/templates/`.
 Adjust the `features/` and `steps/` paths if yours differ.
 
 ## The workflow: inspect → write → lint → run → review
@@ -61,7 +61,7 @@ with Plainwright:
   feature file and the visible names, and drops the code snippet:
 
   ```ts
-  import { aiFixPromptTemplate } from 'plainwright';
+  import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
 
   defineBddConfig({
     // ...

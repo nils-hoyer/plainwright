@@ -4,7 +4,7 @@
 
 # Plainwright
 
-[![npm](https://img.shields.io/npm/v/plainwright)](https://www.npmjs.com/package/plainwright)
+[![npm](https://img.shields.io/npm/v/@nils.hoyer/plainwright)](https://www.npmjs.com/package/@nils.hoyer/plainwright)
 [![CI](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg)](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml)
 [![Sponsor](https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub)](https://github.com/sponsors/nils-hoyer)
 
@@ -45,7 +45,7 @@ To add Plainwright to an existing project instead:
 
 ```bash
 # Install Plainwright, Playwright and playwright-bdd
-npm install --save-dev plainwright playwright-bdd @playwright/test
+npm install --save-dev @nils.hoyer/plainwright playwright-bdd @playwright/test
 
 # Install the browser
 npx playwright install chromium
@@ -57,7 +57,7 @@ The minimal configuration is one file:
 // playwright.config.ts
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { steps } from 'plainwright';
+import { steps } from '@nils.hoyer/plainwright';
 
 export default defineConfig({
   testDir: defineBddConfig({

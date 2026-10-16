@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate } from 'plainwright';
+import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
 
 // The example app in app/. To test your own app, set baseURL to it and remove webServer.
 const port = 3210;

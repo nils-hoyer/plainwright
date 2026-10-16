@@ -11,7 +11,7 @@ The quickest way is to start from the [starter](../examples/starter) and change 
 ## Adding Plainwright to an existing project
 
 ```bash
-npm install --save-dev plainwright playwright-bdd @playwright/test
+npm install --save-dev @nils.hoyer/plainwright playwright-bdd @playwright/test
 npx playwright install chromium
 ```
 
@@ -20,7 +20,7 @@ npx playwright install chromium
 ```ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate, steps } from 'plainwright';
+import { aiFixPromptTemplate, steps } from '@nils.hoyer/plainwright';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
@@ -56,7 +56,7 @@ No step file is needed. To add your own fixtures, see [your own steps](writing-s
 instead of `I open the url "/login"`. More in [pages, test data and fixtures](pages-and-data.md).
 
 ```ts
-import { definePage } from 'plainwright';
+import { definePage } from '@nils.hoyer/plainwright';
 
 definePage('Login', { url: '/login' });
 definePage('Orders', { url: '/orders' });

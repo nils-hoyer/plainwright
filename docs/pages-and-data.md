@@ -18,7 +18,7 @@ Give a page a name and its address in `steps/pages.ts`:
 
 ```ts
 // steps/pages.ts
-import { definePage } from 'plainwright';
+import { definePage } from '@nils.hoyer/plainwright';
 
 definePage('Login', { url: '/login' });
 definePage('Dashboard', { url: '/dashboard' });
@@ -133,7 +133,7 @@ see the step that uses it.
 
 ```ts
 // steps/fixtures.ts
-import { test as base, useTest, type StepFixtures } from 'plainwright';
+import { test as base, useTest, type StepFixtures } from '@nils.hoyer/plainwright';
 
 type ProjectFixtures = { order: { id: string } };
 export type Fixtures = StepFixtures & ProjectFixtures;
@@ -152,7 +152,7 @@ export const test = useTest(
 
 ```ts
 // steps/orders.steps.ts
-import { defineStep } from 'plainwright';
+import { defineStep } from '@nils.hoyer/plainwright';
 import type { Fixtures } from './fixtures';
 
 defineStep<Fixtures>({

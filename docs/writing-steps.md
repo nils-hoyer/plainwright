@@ -36,7 +36,7 @@ Feature: Account
 
 ```ts
 // steps/keywords.ts
-import { defineKeywords } from 'plainwright';
+import { defineKeywords } from '@nils.hoyer/plainwright';
 
 defineKeywords('keywords/**/*.feature');
 ```
@@ -63,7 +63,7 @@ Data tables in keywords are not supported yet.
 ```ts
 // steps/cart.steps.ts
 import { expect } from '@playwright/test';
-import { defineStep } from 'plainwright';
+import { defineStep } from '@nils.hoyer/plainwright';
 
 defineStep({
   pattern: 'I see {string} in the cart',
@@ -95,7 +95,7 @@ feature with it. Steps then get your fixtures like `world`:
 
 ```ts
 // steps/fixtures.ts
-import { test as base, useTest, type StepFixtures } from 'plainwright';
+import { test as base, useTest, type StepFixtures } from '@nils.hoyer/plainwright';
 
 type ProjectFixtures = { account: Account };
 export type Fixtures = StepFixtures & ProjectFixtures;
@@ -109,7 +109,7 @@ export const test = useTest(
 
 ```ts
 // steps/account.steps.ts
-import { defineStep } from 'plainwright';
+import { defineStep } from '@nils.hoyer/plainwright';
 import type { Fixtures } from './fixtures';
 
 defineStep<Fixtures>({

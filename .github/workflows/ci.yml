@@ -27,7 +27,7 @@ jobs:
         run: |
           npm pack
           cd examples/starter
-          npm install --no-save ../../plainwright-*.tgz
+          npm install --no-save ../../nils.hoyer-plainwright-*.tgz
           npx playwright install chromium
           npm run lint
           npm test

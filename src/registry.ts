@@ -211,7 +211,7 @@ function expressionOf(step: StepDefinition): CucumberExpression | undefined {
       unusable.set(
         step,
         `The step "${step.pattern}" uses the parameter type {${name}}, which Plainwright ` +
-          `does not know. Define it with defineParameterType() from plainwright instead ` +
+          `does not know. Define it with defineParameterType() from @nils.hoyer/plainwright instead ` +
           `of playwright-bdd; until then, keywords and lint skip this step.`,
       );
     }

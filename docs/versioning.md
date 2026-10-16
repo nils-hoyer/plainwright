@@ -7,7 +7,7 @@ treated like an API.
 
 - The text of every built-in step, including parameter positions and types.
 - The element type words (`button`, `field`, …) and how each finds elements.
-- The JavaScript API exported from `plainwright` (`definePage`, `defineStep`,
+- The JavaScript API exported from `@nils.hoyer/plainwright` (`definePage`, `defineStep`,
   `defineKeywords`, `defineParameterType`, `test`, `World`, …).
 - The command line (`lint`, `catalog`, `docs`, `inspect`, `stubs`), its options and the
   `file:line: severity: message (rule)` lint output.

@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { defineStep } from 'plainwright';
+import { defineStep } from '@nils.hoyer/plainwright';
 import type { Fixtures } from './fixtures';
 
 // A step that uses a fixture from steps/fixtures.ts.

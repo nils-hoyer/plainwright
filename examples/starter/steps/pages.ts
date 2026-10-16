@@ -1,4 +1,4 @@
-import { definePage } from 'plainwright';
+import { definePage } from '@nils.hoyer/plainwright';
 
 // Feature files open pages by name: I open the "Todos" page.
 definePage('Todos', {
