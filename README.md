@@ -1,38 +1,42 @@
+<!-- Header variants for comparison. Keep one and delete the others before merging. -->
+
+<p align="center"><b>Variante 1</b></p>
+
+<p align="center">
+  <img src="docs/images/header.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
+</p>
+
+<p align="center"><b>Variante 2</b></p>
+
+<p align="center">
+  <img src="docs/images/header-2.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
+</p>
+
+<p align="center"><b>Variante 3</b></p>
+
+<p align="center">
+  <img src="docs/images/header-3.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
+</p>
+
 # Plainwright
 
 [![npm](https://img.shields.io/npm/v/plainwright)](https://www.npmjs.com/package/plainwright)
 [![CI](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg)](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml)
 [![Sponsor](https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub)](https://github.com/sponsors/nils-hoyer)
 
-**Browser tests as plain English sentences: written by you or by AI, reviewed without reading
-code.**
-
 Plainwright is built on [Playwright](https://playwright.dev/) and comes with more than 100
 ready-made steps for what you do in a browser. You put these sentences together into tests, or
-let an AI assistant do it, and anyone on the team can check what a test does.
+let an AI assistant do it, and anyone on the team can check what a test does, without
+programming.
 
 ```gherkin
 Feature: Orders
 
   Scenario: Delete an order
-    * I open the "Orders" page
+    * I open the url "/orders"
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
 ```
-
-- **Sentences instead of code.** Everything in quotes is data; the rest of the sentence is fixed.
-- **Names as on the screen:** `the "Log in" button`, `the "Email" field`. No CSS selectors or
-  test IDs in your tests.
-- **Errors that say what is there:**
-  `No "Sign in" button found. Buttons on this page: "Accept Cookies", "Log in".`
-- **AI writes, you review.** An assistant gets the list of sentences and the names on a page;
-  `lint` catches any sentence it made up.
-- **Your own sentences without code.** Combine steps into a new sentence, written the same way.
-- **Playwright's report and replay:** every step, screenshots of failures, and a step-by-step
-  replay of the test.
-
-**Who it is for:** teams where people who don't program write or review tests, teams that let AI
-write tests that people check, and teams moving from Gauge or Robot Framework.
 
 ## Getting started
 
@@ -63,7 +67,37 @@ npm install --save-dev plainwright playwright-bdd @playwright/test
 npx playwright install chromium
 ```
 
-Then connect it to your app as described in [setup](docs/setup.md).
+The minimal configuration is one file:
+
+```ts
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+import { defineBddConfig } from 'playwright-bdd';
+import { steps } from 'plainwright';
+
+export default defineConfig({
+  testDir: defineBddConfig({
+    features: 'features/**/*.feature',
+    // Your own steps, if any, and Plainwright's ready-made steps
+    steps: ['steps/**/*.ts', steps],
+  }),
+  use: {
+    // The address of your app. "/login" in a test means http://localhost:3000/login
+    baseURL: 'http://localhost:3000',
+  },
+});
+```
+
+```bash
+# Add "npm test": it turns the feature files into Playwright tests and runs them
+npm pkg set scripts.test="bddgen && playwright test"
+
+# Run the tests
+npm test
+```
+
+More options, such as the "Fix with AI" prompt and replays of failed tests, are in
+[setup](docs/setup.md).
 
 ### Your first test
 
@@ -73,28 +107,28 @@ A test is a `.feature` file in `features/`:
 Feature: Login
 
   Scenario: A wrong password shows an error
-    * I open the "Login" page
+    * I open the url "/login"
     * I fill "jane@example.com" in the "Email" field
     * I fill "wrong" in the "Password" field
     * I click the "Log in" button
     * I see the text "Email or password is incorrect."
 ```
 
-`Feature` names the area, `Scenario` is one test, and each `*` line is a step. An element is its
-name on the screen followed by its type: `the "Log in" button`.
+`Feature` names the area, `Scenario` is one test, and each `*` line is a step. The address
+`"/login"` is relative to the address of your app. An element is its name on the screen followed
+by its type: `the "Log in" button`.
 
 All these steps are ready-made. The ones you will use most:
 
-| To …                        | write                                            |
-| --------------------------- | ------------------------------------------------ |
-| open a page                 | `I open the "Login" page`                        |
-| click                       | `I click the "Log in" button`                    |
-| type into a field           | `I fill "jane@example.com" in the "Email" field` |
-| choose from a dropdown      | `I select "Germany" in the "Country" dropdown`   |
-| check that something shows  | `I see the "Welcome" heading`                    |
-| check a text                | `I see the text "Welcome back!"`                 |
-| check what a field contains | `I see the value "Jane" in the "Name" field`     |
-| check a state               | `I see the "Log in" button is disabled`          |
+| To …                   | write                                            |
+| ---------------------- | ------------------------------------------------ |
+| open a page            | `I open the url "/login"`                        |
+| click                  | `I click the "Log in" button`                    |
+| type into a field      | `I fill "jane@example.com" in the "Email" field` |
+| choose from a dropdown | `I select "Germany" in the "Country" dropdown`   |
+| check a text           | `I see the text "Welcome back!"`                 |
+| check a state          | `I see the "Log in" button is disabled`          |
+| check where you are    | `I see the url "/dashboard"`                     |
 
 Every sentence is in the [step reference](docs/steps.md), and VS Code can suggest them while you
 type ([editor support](docs/ide-support.md)).
@@ -112,7 +146,7 @@ Feature: Account
   Scenario Outline: I log in as "<username>" with password "<password>"
     Opens the login page and logs in.
 
-    * I open the "Login" page
+    * I open the url "/login"
     * I fill "<username>" in the "Username" field
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
@@ -130,19 +164,20 @@ Feature: Orders
 
   Scenario: Delete an order
     * I log in as "jane" with password "secret"
-    * I open the "Orders" page
+    * I open the url "/orders"
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
 ```
 
 The report shows the four login steps nested under `I log in as …`, and `lint` and the editor
-know the new sentence like any other. The starter already loads everything in `keywords/`. For
-what existing steps cannot do, such as calling an API, you can write steps in TypeScript: see
-[your own steps](docs/writing-steps.md).
+know the new sentence like any other. The starter already loads everything in `keywords/`; in
+your own project, add `defineKeywords('keywords/**/*.feature')` to a file in `steps/`.
 
 ## Learn more
 
 - [Setup](docs/setup.md): connect Plainwright to your app.
+- [Pages, test data and fixtures](docs/pages-and-data.md): named pages, data-driven tests and
+  data prepared in code.
 - [Logging in once](docs/logging-in.md): stay logged in across tests.
 - [Step reference](docs/steps.md): every sentence with an example.
 - [Editor support](docs/ide-support.md): suggestions for sentences in VS Code.
