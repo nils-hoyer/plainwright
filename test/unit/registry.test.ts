@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { defineStep, findStep, findSteps, getSteps } from '../../src/index';
+import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/index';
 import { parseStackFrame, registerStep, tagsFromPath } from '../../src/registry';
 import { CATEGORIES } from '../../src/steps/builtin';
 
@@ -187,5 +187,12 @@ describe('steps in tagged folders', () => {
 
   it('may share their wording with steps for other tags only', () => {
     expect(() => define('@admin')).toThrow(/defined twice/);
+  });
+});
+
+describe('steps', () => {
+  // playwright-bdd loads this file to find the built-in steps and `test`.
+  it('is the file of the package entry', () => {
+    expect(path.basename(steps, path.extname(steps))).toBe('index');
   });
 });
