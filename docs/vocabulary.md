@@ -50,8 +50,10 @@ after reading the [reviewer guide](reading-tests.md). Current core steps:
 
 - `I open the "Login" page`
 - `I am on the "Dashboard" page`
+- `I open the url "/login.html"`
 - `I go back`
 - `I reload the page`
+- `I see the url "/dashboard.html"`
 - `I click the "Log in" button`
 - `I double click the "Double click me" button`
 - `I hover over the "Hover over me" element`

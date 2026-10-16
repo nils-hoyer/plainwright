@@ -36,7 +36,8 @@ Adjust the paths below if this project keeps features or steps elsewhere.
   `the "Email" field`, `the "Country" dropdown`. Never write CSS, XPath or test IDs.
 - When a name repeats on the page, name the element it is in:
   `the "Delete" button in the "Order 1001" row`, `the "Toggle" checkbox in the "Buy milk" list item`.
-- Open pages by name (`I open the "Login" page`), not by URL.
+- Open pages by name (`I open the "Login" page`) when the project defines them (`pages` in
+  steps.json), otherwise by address relative to the base URL (`I open the url "/login"`).
 - Checks start with `I see` / `I do not see` and wait on their own. Never add fixed waits
   (`I wait "2" seconds`).
 - Every scenario checks something: it ends with at least one `I see` step.
