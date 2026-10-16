@@ -4,3 +4,4 @@ test-results/
 playwright-report/
 steps.json
 .vscode/plainwright.steps.js
+.env

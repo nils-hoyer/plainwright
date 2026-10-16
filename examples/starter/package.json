@@ -7,14 +7,14 @@
     "test": "bddgen && playwright test",
     "report": "playwright show-report",
     "app": "node app/server.mjs",
-    "lint": "plainwright lint --features 'features/**/*.feature' --steps 'steps/**/*.ts' --quiet",
-    "catalog": "plainwright catalog --steps 'steps/**/*.ts' --out steps.json",
-    "inspect": "plainwright inspect --steps 'steps/**/*.ts' --base-url http://localhost:3210",
-    "stubs": "plainwright stubs --steps 'steps/**/*.ts' --out .vscode/plainwright.steps.js"
+    "lint": "plainwright lint --features 'features/**/*.feature' --quiet",
+    "catalog": "plainwright catalog --out steps.json",
+    "inspect": "plainwright inspect --base-url http://localhost:3210",
+    "stubs": "plainwright stubs --out .vscode/plainwright.steps.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "playwright-bdd": "^9.2.1",
-    "@nils.hoyer/plainwright": "^0.1.0"
+    "@nils.hoyer/plainwright": "^0.2.0"
   }
 }
