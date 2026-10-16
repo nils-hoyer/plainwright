@@ -3,6 +3,8 @@ import { defineBddConfig } from 'playwright-bdd';
 import { aiFixPromptTemplate, type KeywordsOptions } from './src/index';
 
 const port = 3123;
+// Read by "{env.PLAINWRIGHT_TEST_PASSWORD}" in test/features/data.feature.
+process.env.PLAINWRIGHT_TEST_PASSWORD ??= 'password123';
 
 const testDir = defineBddConfig({
   features: 'test/features/**/*.feature',

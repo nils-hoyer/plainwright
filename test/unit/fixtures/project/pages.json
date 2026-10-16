@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../../schema/pages.json",
+  "Login": "/login",
+  "Order": "/orders/*",
+  "Orders": { "url": "/orders", "elements": { "Search": "[data-testid=search]" } }
+}

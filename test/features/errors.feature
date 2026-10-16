@@ -86,3 +86,34 @@ Feature: Helpful error messages
       """
       I click the "Delete" button in the "Order 9999" row
       """
+
+  # A backslash keeps the braces for the step inside the doc string.
+  Scenario: An unknown value lists the known ones
+    * I see this step fail with "No value named \"nothing\" for":
+      """
+      I fill "\{nothing}" in the "Username" field
+      """
+
+  Scenario: A missing part of a value lists what is there
+    * I see this step fail with "has no \"email\". It has \"username\", \"password\".":
+      """
+      I fill "\{users.member.email}" in the "Username" field
+      """
+
+  Scenario: A failing command shows its exit code
+    * I see this step fail with "failed with exit code 3":
+      """
+      I run the command "node -e 'process.exit(3)'"
+      """
+
+  Scenario: A page address with a wildcard can only be checked
+    * I see this step fail with "can only be checked":
+      """
+      I open the "Account pages" page
+      """
+
+  Scenario: Creating test data fails when the API does
+    * I see this step fail with "Creating \"order\" failed. POST /api/nothing answered 404":
+      """
+      I create "order" at "/api/nothing" with "x"
+      """

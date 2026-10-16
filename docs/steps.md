@@ -190,8 +190,23 @@ For special cases. `lint` lists where they are used.
 
 ### Downloads
 
-| Step                                     | What it does                                                          | Example                                                    |
-| ---------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `I download the file with the {element}` | Clicks the element and waits until the file it offers has downloaded. | `I download the file with the "Download Test File" button` |
-| `I see the downloaded file {string}`     | Checks the file name of the last download.                            | `I see the downloaded file "test-download.txt"`            |
-| `I save the downloaded file to {string}` | Saves the last download at this path, relative to the project folder. | `I save the downloaded file to "test-results/report.csv"`  |
+| Step                                             | What it does                                                              | Example                                                    |
+| ------------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `I download the file with the {element}`         | Clicks the element and waits until the file it offers has downloaded.     | `I download the file with the "Download Test File" button` |
+| `I see the downloaded file {string}`             | Checks the file name of the last download.                                | `I see the downloaded file "test-download.txt"`            |
+| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals. | `I see the text "Hello" in the downloaded file`            |
+| `I save the downloaded file to {string}`         | Saves the last download at this path, relative to the project folder.     | `I save the downloaded file to "test-results/report.csv"`  |
+
+### Test data and APIs
+
+| Step                                                        | What it does                                                                                                                  | Example                                                                    |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `I remember {string} as {string}`                           | Keeps the value under the name for the rest of the test; later steps write it as "{name}".                                    | `I remember "Coffee" as "item"`                                            |
+| `I remember the text of the {element} as {string}`          | Keeps the text of the element, or the value of a field, under the name for the rest of the test.                              | `I remember the text of the "Order number" cell as "order number"`         |
+| `I create {string} at {string} with {string}`               | Sends the value as JSON in a POST request to the address, checks that it succeeded and remembers the answer under the name.   | `I create "order" at "/api/orders" with "{new-order}"`                     |
+| `I delete {string} after the test`                          | Sends a DELETE request to the address after the test, also when it failed. An address that is already gone counts as deleted. | `I delete "/api/orders/{order.id}" after the test`                         |
+| `I send a {string} request to {string}`                     | Sends a request (GET, POST, PUT, PATCH or DELETE) to the address and remembers the answer as "{response}".                    | `I send a "GET" request to "/api/orders"`                                  |
+| `I send a {string} request to {string} with {string}`       | Sends a request with the value as JSON to the address and remembers the answer as "{response}".                               | `I send a "PATCH" request to "/api/orders/{order.id}" with "{paid-order}"` |
+| `I see the response status {number}`                        | Checks the status code of the answer to the last request, e.g. "200" or "404".                                                | `I see the response status "201"`                                          |
+| `I see the response field {string} with the value {string}` | Checks a field in the answer to the last request; "items.0.name" is the name of the first item.                               | `I see the response field "status" with the value "paid"`                  |
+| `I run the command {string}`                                | Runs the command in the project folder, e.g. a script that fills the database, and fails when the command fails.              | `I run the command "npm run db:seed"`                                      |

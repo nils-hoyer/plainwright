@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { expect } from '@playwright/test';
 import type { ElementRef } from '../elements';
@@ -29,6 +30,20 @@ step({
   example: 'I see the downloaded file "test-download.txt"',
   fn: ({ world }, fileName: string) => {
     expect(lastDownload(world).suggestedFilename()).toBe(fileName);
+  },
+});
+
+step({
+  pattern: 'I see the text {string} in the downloaded file',
+  level: 'advanced',
+  description: 'Checks that the last download contains this text, with the same capitals.',
+  example: 'I see the text "Hello" in the downloaded file',
+  fn: async ({ world }, text: string) => {
+    const file = await lastDownload(world).path();
+    expect(
+      fs.readFileSync(file, 'utf8'),
+      `Expected the downloaded file to contain "${text}"`,
+    ).toContain(text);
   },
 });
 

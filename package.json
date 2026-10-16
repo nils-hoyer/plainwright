@@ -10,7 +10,8 @@
   "files": [
     "dist/",
     "templates/",
-    "!dist/**/*.map"
+    "!dist/**/*.map",
+    "schema/"
   ],
   "exports": {
     ".": {

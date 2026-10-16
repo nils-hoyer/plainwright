@@ -1,0 +1,20 @@
+{
+  "$schema": "../schema/pages.json",
+  "Login": "/login.html",
+  "Dashboard": "/dashboard.html",
+  "Forms": "/forms.html",
+  "Interactions": "/interactions.html",
+  "Assertions": "/assertions.html",
+  "Download": "/download.html",
+  "Drag and drop": "/drag.html",
+  "File upload": "/filechooser.html",
+  "Mouse": "/mouse.html",
+  "Touch": "/touch.html",
+  "Swatch": "/swatch.html",
+  "Widgets": "/widgets.html",
+  "Account settings": "/account/settings.html",
+  "Account pages": "/account/*",
+  "Cookies": "/cookies.html",
+  "Editor": "/editor.html",
+  "Orders from the API": { "url": "/api-orders.html" }
+}

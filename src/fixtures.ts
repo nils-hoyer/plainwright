@@ -17,7 +17,11 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures>({
   world: async ({ page, baseURL, exactNames }, use) => {
     const world = new World(page, { baseURL, exactNames });
     await use(world);
-    world.dispose();
+    try {
+      await world.runAfterTest();
+    } finally {
+      world.dispose();
+    }
   },
 });
 

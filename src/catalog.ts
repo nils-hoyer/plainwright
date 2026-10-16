@@ -4,6 +4,7 @@ import { ELEMENT_TYPES, LOOKUP_DESCRIPTION } from './elements';
 import { keywordOf } from './keywords';
 import { getPageDefinitions } from './pages';
 import { getSteps, StepDefinition } from './registry';
+import { getDataFiles } from './values';
 
 export type CatalogStep = {
   pattern: string;
@@ -24,8 +25,38 @@ export type Catalog = {
   rules: string[];
   elementTypes: { type: string; lookup: string }[];
   pages: { name: string; url?: string; aliases: string[] }[];
+  /** Values a step can write as `{name}` inside quotes: data files and the built-in ones. */
+  values: CatalogValue[];
   steps: CatalogStep[];
 };
+
+export type CatalogValue = {
+  /** Written `{name}`, e.g. `users.admin.email`. */
+  name: string;
+  source: 'data' | 'built-in';
+  description?: string;
+  /** The data file it comes from. */
+  file?: string;
+};
+
+const BUILT_IN_VALUES: CatalogValue[] = [
+  {
+    name: 'env.NAME',
+    source: 'built-in',
+    description: 'The environment variable NAME, also from .env.',
+  },
+  {
+    name: 'unique',
+    source: 'built-in',
+    description: 'A short text that is different in every test, the same within one test.',
+  },
+  { name: 'today', source: 'built-in', description: "Today's date as YYYY-MM-DD." },
+  {
+    name: 'response',
+    source: 'built-in',
+    description: 'The answer to the last request a step sent.',
+  },
+];
 
 /** The design rules every step follows. Also used in the agent instructions. */
 export const RULES = [
@@ -36,6 +67,7 @@ export const RULES = [
   'Every step does exactly what it says.',
   'Checks start with "I see" or "I do not see" and wait automatically. Avoid fixed waits.',
   'Given/When/Then are optional; * works everywhere.',
+  'A value from a data file, the environment or remembered earlier is written {name.path} inside the quotes: "{users.admin.email}". \\{ is a literal brace.',
 ];
 
 /** Everything an AI assistant (or a person) needs to write steps that exist: steps.json. */
@@ -52,6 +84,16 @@ export function buildCatalog(cwd = process.cwd()): Catalog {
       url: page.url === undefined ? undefined : String(page.url),
       aliases: Object.keys(page.elements),
     })),
+    values: [
+      ...getDataFiles().flatMap(({ name, file, value }) =>
+        valuePaths(name, value).map((valuePath) => ({
+          name: valuePath,
+          source: 'data' as const,
+          file: path.relative(cwd, file),
+        })),
+      ),
+      ...BUILT_IN_VALUES,
+    ],
     steps: getSteps().map((step) => {
       const keyword = keywordOf(step);
       return {
@@ -73,4 +115,19 @@ export function buildCatalog(cwd = process.cwd()): Catalog {
       };
     }),
   };
+}
+
+/** The name of a data file and every value in it: `users`, `users.admin`, `users.admin.email`. */
+function valuePaths(name: string, value: unknown, limit = 500): string[] {
+  const paths = [name];
+  const visit = (prefix: string, current: unknown) => {
+    if (!current || typeof current !== 'object') return;
+    for (const [key, item] of Object.entries(current)) {
+      if (paths.length >= limit) return;
+      paths.push(`${prefix}.${key}`);
+      visit(`${prefix}.${key}`, item);
+    }
+  };
+  visit(name, value);
+  return paths;
 }

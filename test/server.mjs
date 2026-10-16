@@ -13,8 +13,44 @@ const types = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
+// A small API for the test data steps: /api/orders and /api/orders/<id>, kept in memory.
+const orders = new Map();
+let nextId = 1001;
+
+async function api(request, response, pathname) {
+  const id = pathname.split('/')[3];
+  const send = (status, body) =>
+    response
+      .writeHead(status, { 'content-type': 'application/json' })
+      .end(body === undefined ? '' : JSON.stringify(body));
+  let body = '';
+  for await (const chunk of request) body += chunk;
+  const data = body ? JSON.parse(body) : {};
+  if (!id && request.method === 'GET') return send(200, [...orders.values()]);
+  if (!id && request.method === 'POST') {
+    const order = { id: String(nextId++), status: 'new', ...data };
+    orders.set(order.id, order);
+    return send(201, order);
+  }
+  const order = orders.get(id);
+  if (!order) return send(404, { error: `No order ${id}` });
+  if (request.method === 'GET') return send(200, order);
+  if (request.method === 'PATCH') return send(200, Object.assign(order, data));
+  if (request.method === 'DELETE') {
+    orders.delete(id);
+    return send(204);
+  }
+  return send(405, { error: 'Method not allowed' });
+}
+
 createServer((request, response) => {
   const { pathname } = new URL(request.url ?? '/', 'http://localhost');
+  if (pathname.startsWith('/api/orders')) {
+    api(request, response, pathname).catch((error) =>
+      response.writeHead(400, { 'content-type': 'text/plain' }).end(String(error)),
+    );
+    return;
+  }
   const file = path.join(root, path.normalize(decodeURIComponent(pathname)).replace(/^([/\\])+/, ''));
   const target = pathname.endsWith('/') ? path.join(file, 'index.html') : file;
   if (!target.startsWith(root) || !isFile(target)) {

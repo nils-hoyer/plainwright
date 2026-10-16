@@ -1,0 +1,1 @@
+{ "admin": { "email": "admin-{unique}@example.com", "name": "Ada" }, "loop": "{users.loop}" }

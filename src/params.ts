@@ -1,6 +1,7 @@
 import { ParameterType, ParameterTypeRegistry } from '@cucumber/cucumber-expressions';
 import { defineParameterType as defineBddParameterType } from 'playwright-bdd';
 import { ELEMENT_REGEXP, toElementRef } from './elements';
+import { NumberReference } from './values';
 
 export type ParameterTypeOptions<T> = {
   name: string;
@@ -56,10 +57,12 @@ defineBuiltInParameterType({
   useForSnippets: false,
 });
 
-// `"3"` → 3. Numbers are quoted like every other value.
+// `"3"` → 3. Numbers are quoted like every other value. `"{cart.count}"` is filled in when
+// the step runs.
 defineBuiltInParameterType({
   name: 'number',
-  regexp: /"(-?\d+(?:\.\d+)?)"/,
-  transformer: (value: string) => Number(value),
+  regexp: /"(-?\d+(?:\.\d+)?|\{[^"{}\\\s]+\})"/,
+  transformer: (value: string) =>
+    value.startsWith('{') ? new NumberReference(value) : Number(value),
   useForSnippets: false,
 });

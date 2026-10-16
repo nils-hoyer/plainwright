@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Orders from the API</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Orders from the API</h1>
+      <!-- Lists what /api/orders returns, for the test data steps. -->
+      <table>
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Item</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="orders"></tbody>
+      </table>
+      <p>Last updated <span id="updated" data-testid="updated"></span></p>
+    </main>
+    <script>
+      fetch('/api/orders')
+        .then((response) => response.json())
+        .then((orders) => {
+          const body = document.getElementById('orders');
+          for (const order of orders) {
+            const row = document.createElement('tr');
+            for (const value of [`Order ${order.id}`, order.item, order.status]) {
+              const cell = document.createElement('td');
+              cell.textContent = value;
+              row.appendChild(cell);
+            }
+            body.appendChild(row);
+          }
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, '0');
+          document.getElementById('updated').textContent =
+            `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        });
+    </script>
+  </body>
+</html>
