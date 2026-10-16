@@ -57,9 +57,8 @@ step({
 
 step({
   pattern: 'I open the url {string}',
-  level: 'advanced',
-  description:
-    'Opens a web address, absolute or relative to the base URL. Prefer named pages: I open the "..." page.',
+  level: 'core',
+  description: 'Opens a web address, absolute or relative to the base URL.',
   example: 'I open the url "/login.html"',
   fn: async ({ world }, url: string) => {
     world.clearPage();
@@ -99,7 +98,7 @@ step({
 
 step({
   pattern: 'I see the url {string}',
-  level: 'advanced',
+  level: 'core',
   description: 'Checks that the address is exactly this URL (relative URLs use the base URL).',
   example: 'I see the url "/dashboard.html"',
   fn: async ({ world }, url: string) => {

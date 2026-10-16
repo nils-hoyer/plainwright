@@ -20,11 +20,12 @@ npx playwright install chromium
 ```ts
 import { defineConfig, devices } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate } from 'plainwright';
+import { aiFixPromptTemplate, steps } from 'plainwright';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
-  steps: 'steps/**/*.ts',
+  // Your own steps, if any, and Plainwright's ready-made steps.
+  steps: ['steps/**/*.ts', steps],
   // Failed tests get a "Fix with AI" prompt in the report.
   aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
 });
@@ -42,15 +43,17 @@ export default defineConfig({
 });
 ```
 
-**2. Export the test** (`steps/fixtures.ts`). playwright-bdd imports this `test` into the
-tests it generates. To add your own fixtures, see [your own steps](writing-steps.md).
+**2. Add the test command** to `package.json`. `bddgen` turns the feature files into
+Playwright tests, then Playwright runs them:
 
-```ts
-export { test } from 'plainwright';
+```bash
+npm pkg set scripts.test="bddgen && playwright test"
 ```
 
-**3. Name your pages** (`steps/pages.ts`), so tests say `I open the "Login" page` instead of an
-address:
+No step file is needed. To add your own fixtures, see [your own steps](writing-steps.md#your-own-fixtures).
+
+**3. Optional: name your pages** (`steps/pages.ts`), so tests say `I open the "Login" page`
+instead of `I open the url "/login"`. More in [pages, test data and fixtures](pages-and-data.md).
 
 ```ts
 import { definePage } from 'plainwright';
@@ -59,7 +62,7 @@ definePage('Login', { url: '/login' });
 definePage('Orders', { url: '/orders' });
 ```
 
-**4. Write a feature** in `features/` and run it: `npx bddgen && npx playwright test`. More
+**4. Write a feature** in `features/` and run it with `npm test`. More
 commands are in [commands](commands.md).
 
 ## Options

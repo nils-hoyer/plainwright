@@ -102,8 +102,9 @@ the page shows it.
 
 ## Pages
 
-`I open the "Login" page` opens the address the team defined for "Login". Page names keep web
-addresses out of the tests.
+`I open the url "/login"` opens this address of the app. `I open the "Login" page` opens the
+address the team defined for the page "Login", and `I am on the "Dashboard" page` checks it.
+Page names keep web addresses out of the tests.
 
 ## Keywords
 

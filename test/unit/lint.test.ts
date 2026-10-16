@@ -14,7 +14,6 @@ describe('lint', () => {
   it('reports problems as file:line: severity: message', () => {
     expect(messages.map(formatLintMessage)).toEqual([
       `${file}:4: error: "https://example.com/login" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL. (absolute-url)`,
-      `${file}:4: info: "I open the url {string}" is an advanced step. (advanced-step)`,
       `${file}:5: error: "#submit" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
       `${file}:6: error: Unknown step "I clik the "Log in" button". Did you mean "I click the "Log in" button"? (undefined-step)`,
       `${file}:7: error: "[data-testid='username']" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
@@ -26,7 +25,7 @@ describe('lint', () => {
   });
 
   it('summarizes the counts', () => {
-    expect(summarize(messages)).toBe('5 errors, 1 warning, 3 info');
+    expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
   });
 
   it('checks only element names for selectors and only opened addresses for URLs', () => {
