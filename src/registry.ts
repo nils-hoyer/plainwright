@@ -7,9 +7,12 @@ import type {
   PlaywrightWorkerArgs,
   PlaywrightWorkerOptions,
 } from '@playwright/test';
+import { test } from '@playwright/test';
 import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
+import { ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
+import { NumberReference, ResolvedReference, resolveRaw, resolveText } from './values';
 
 export type StepLevel = 'core' | 'advanced';
 export type StepSource = 'built-in' | 'project' | 'keyword';
@@ -68,7 +71,17 @@ export type StepDefinition = {
 
 export type StepMatch = { step: StepDefinition; args: unknown[] };
 
-type RegisterMeta = { source: StepSource; location?: StepLocation; arityCheck?: boolean };
+type RegisterMeta = {
+  source: StepSource;
+  location?: StepLocation;
+  arityCheck?: boolean;
+  /**
+   * How `{references}` in quoted values reach the step: filled into the text (default), as the
+   * value itself when the quotes hold exactly one reference (`raw`), or not at all (`none`, for
+   * keywords, whose steps fill them in).
+   */
+  values?: 'text' | 'raw' | 'none';
+};
 
 const steps: StepDefinition[] = [];
 const expressions = new WeakMap<StepDefinition, CucumberExpression>();
@@ -106,6 +119,7 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   if (steps.some((step) => step.pattern === options.pattern && sameTags(step.tags, tags))) {
     throw new Error(`[plainwright] The step "${options.pattern}" is defined twice.`);
   }
+  const fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
   const step: StepDefinition = Object.freeze({
     pattern: options.pattern,
     description: options.description,
@@ -118,7 +132,7 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
     tags: Object.freeze(tags),
     parameters: parameterNames(options.pattern),
     fixtures: fixtureNames(options.fn),
-    fn: options.fn,
+    fn,
   });
   steps.push(step);
   const providedOptions = {
@@ -128,6 +142,48 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (Step as any)(step.pattern, providedOptions, step.fn);
   return step;
+}
+
+/**
+ * Fills in `{references}` in the step's values before it runs, and lists them as a nested step
+ * in the report. The wrapper keeps the signature of `fn`, from which playwright-bdd reads the
+ * fixtures to pass.
+ */
+function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
+  const wrapped = async function (this: unknown, fixtures: F, ...args: unknown[]) {
+    const used: ResolvedReference[] = [];
+    const values = args.map((arg) => resolveArg(arg, mode, used));
+    if (used.length) {
+      const shown = [...new Map(used.map((u) => [u.reference, u.shown])).entries()]
+        .map(([reference, value]) => `{${reference}} = ${shorten(value)}`)
+        .join(', ');
+      await test.step(shown, () => {});
+    }
+    return fn.call(this, fixtures, ...values);
+  };
+  wrapped.toString = () => fn.toString();
+  Object.defineProperty(wrapped, 'length', { value: fn.length });
+  return wrapped;
+}
+
+function resolveArg(arg: unknown, mode: 'text' | 'raw', used: ResolvedReference[]): unknown {
+  if (typeof arg === 'string')
+    return mode === 'raw' ? resolveRaw(arg, used) : resolveText(arg, used);
+  if (arg instanceof NumberReference) return arg.resolve(used);
+  if (arg instanceof ElementRef) return resolveElement(arg, used);
+  return arg;
+}
+
+function resolveElement(ref: ElementRef, used: ResolvedReference[]): ElementRef {
+  return new ElementRef(
+    resolveText(ref.name, used),
+    ref.type,
+    ref.container && resolveElement(ref.container, used),
+  );
+}
+
+function shorten(text: string) {
+  return text.length > 80 ? `${text.slice(0, 77)}...` : text;
 }
 
 /** All registered steps in registration order. */

@@ -6,7 +6,7 @@ import { renderStepReference } from './docs';
 import { formatInspectResult, inspectPage } from './inspect';
 import { formatLintMessage, lintFeatures, summarize } from './lint';
 import { loadStepFiles, resolveFiles } from './load';
-import { getPageDefinitions } from './pages';
+import { getPageDefinitions, isUrlPattern } from './pages';
 import { renderStubs } from './stubs';
 // Registers the built-in steps.
 import './index';
@@ -16,13 +16,16 @@ const HELP = `Usage: plainwright <command> [options]
 Commands:
   lint      Check feature files: unknown or ambiguous steps, selectors, absolute URLs,
             fixed waits, advanced steps (info) and keyword definitions.
-  catalog   Write all steps, element types and pages as JSON for AI assistants.
+  catalog   Write all steps, element types, pages and data values as JSON for AI assistants.
   docs      Write all steps as a Markdown reference.
   inspect   Open a page and list its elements by type and visible name.
   stubs     Write a step file for editor autocomplete (Cucumber extension "cucumber.glue").
 
+pages.json, data/ and keywords/ in the project folder load by themselves.
+
 Options:
-  --steps <glob>       Your step, page and keyword files. Repeat for several patterns.
+  --steps <glob>       Your step files in TypeScript or JavaScript. Repeat for several
+                       patterns. Default: the files in steps/, if there are any.
   --features <glob>    Feature files to lint (lint). Repeat for several patterns.
   --out <file>         Write to a file instead of the console (catalog, docs, stubs).
   --quiet              Hide info messages (lint).
@@ -32,10 +35,12 @@ Options:
   --help               Show this help.
 
 Examples:
-  npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"
-  npx plainwright catalog --steps "steps/**/*.ts" --out steps.json
-  npx plainwright inspect "Login" --steps "steps/**/*.ts" --base-url http://localhost:3000
+  npx plainwright lint --features "features/**/*.feature"
+  npx plainwright catalog --out steps.json
+  npx plainwright inspect "Login" --base-url http://localhost:3000
 `;
+
+const DEFAULT_STEPS = ['steps/**/*.{ts,js,mjs,cjs}'];
 
 async function main(argv: string[]): Promise<number> {
   const { values, positionals } = parseArgs({
@@ -58,7 +63,8 @@ async function main(argv: string[]): Promise<number> {
     return command || values.help ? 0 : 1;
   }
 
-  if (values.steps?.length) await loadStepFiles(values.steps);
+  const stepFiles = values.steps ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
+  if (stepFiles.length) await loadStepFiles(stepFiles);
 
   switch (command) {
     case 'lint': {
@@ -85,8 +91,8 @@ async function main(argv: string[]): Promise<number> {
         return 1;
       }
       const page = getPageDefinitions().find((p) => p.name === target);
-      if (page && typeof page.url !== 'string') {
-        console.error(`The page "${target}" has no url to open.`);
+      if (page && (typeof page.url !== 'string' || isUrlPattern(page.url))) {
+        console.error(`The page "${target}" has no address to open.`);
         return 1;
       }
       const result = await inspectPage(page ? (page.url as string) : target, {

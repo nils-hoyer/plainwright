@@ -6,8 +6,10 @@ import type {
   Locator,
   Page,
 } from '@playwright/test';
+import { test } from '@playwright/test';
 import { describeMissing, ElementRef, locate, Scope } from './elements';
 import { getPageDefinition, PageDefinition } from './pages';
+import { remember } from './values';
 
 export type WorldOptions = {
   baseURL?: string;
@@ -16,6 +18,9 @@ export type WorldOptions = {
 };
 
 export type DialogRecord = { type: string; message: string };
+
+/** The answer to the last request a step sent: the body as JSON, or as text if it is none. */
+export type ApiResponse = { method: string; url: string; status: number; body: unknown };
 
 type DialogAction = { accept: boolean; promptText?: string };
 
@@ -30,6 +35,8 @@ export class World {
   readonly dialogs: DialogRecord[] = [];
   /** The file from the last "I download the file with the ..." step. */
   download?: Download;
+  /** The answer to the last request sent by a step, e.g. I send a "GET" request to "...". */
+  response?: ApiResponse;
 
   #page: Page;
   #frame: FrameLocator | null = null;
@@ -37,6 +44,7 @@ export class World {
   #nextDialog?: DialogAction;
   #context: BrowserContext;
   #onDialog = (dialog: Dialog) => this.#handleDialog(dialog);
+  #afterTest: { title: string; action: () => Promise<void> }[] = [];
 
   constructor(page: Page, options: WorldOptions) {
     this.#page = page;
@@ -117,6 +125,54 @@ export class World {
     this.#nextDialog = action;
   }
 
+  /** Keeps a value for the rest of the test, so later steps can write `{name}` in quotes. */
+  remember(name: string, value: unknown) {
+    remember(name, value);
+  }
+
+  /**
+   * Sends a request with the browser's cookies, so it is logged in when the browser is.
+   * Addresses are relative to `baseURL`. An object or JSON text is sent as JSON. The answer is
+   * kept in `response` and remembered as `{response}`.
+   */
+  async request(method: string, url: string, body?: unknown): Promise<ApiResponse> {
+    const response = await this.#page.request.fetch(url, {
+      method: method.toUpperCase(),
+      ...(body === undefined ? {} : { data: asRequestBody(body) }),
+      failOnStatusCode: false,
+    });
+    const text = await response.text();
+    let parsed: unknown = text;
+    try {
+      parsed = text ? JSON.parse(text) : text;
+    } catch {
+      // Not JSON: keep the text.
+    }
+    this.response = { method: method.toUpperCase(), url, status: response.status(), body: parsed };
+    remember('response', parsed);
+    return this.response;
+  }
+
+  /** Runs `action` after the test, also when it failed. The last one added runs first. */
+  afterTest(title: string, action: () => Promise<void>) {
+    this.#afterTest.unshift({ title, action });
+  }
+
+  /** Runs the actions added with afterTest(). Called by the `world` fixture. */
+  async runAfterTest() {
+    const errors: unknown[] = [];
+    for (const { title, action } of this.#afterTest.splice(0)) {
+      await test.step(title, action).catch((error) => errors.push(error));
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length) {
+      throw new Error(
+        `[plainwright] ${errors.length} steps after the test failed:\n` +
+          errors.map((e) => (e instanceof Error ? e.message : String(e))).join('\n'),
+      );
+    }
+  }
+
   dispose() {
     this.#context.off('dialog', this.#onDialog);
   }
@@ -167,4 +223,15 @@ export class World {
 function hasDialogListener(page: Page | null): boolean {
   const emitter = page as { listenerCount?: (event: string) => number } | null;
   return (emitter?.listenerCount?.('dialog') ?? 0) > 0;
+}
+
+/** Objects as JSON; text with a JSON object or list as JSON too, so a doc string works. */
+function asRequestBody(body: unknown) {
+  if (typeof body !== 'string') return body;
+  try {
+    const parsed: unknown = JSON.parse(body);
+    return typeof parsed === 'object' && parsed !== null ? parsed : body;
+  } catch {
+    return body;
+  }
 }

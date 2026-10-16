@@ -37,6 +37,7 @@ export type KeywordDefinition = {
 const KEYWORD_FIXTURES = ['page', 'world'];
 
 const keywords: KeywordDefinition[] = [];
+const loadedFiles = new Set<string>();
 const keywordOfStep = new WeakMap<StepDefinition, KeywordDefinition>();
 const warned = new Set<string>();
 let checkRegistered = false;
@@ -49,7 +50,7 @@ let checkRegistered = false;
  *
  * Paths are relative to the current working directory (the project root when you run
  * `npx playwright test`). Problems in the files are reported with file and line before any
- * test runs.
+ * test runs. Files in `keywords/` load by themselves; a file that is already loaded is skipped.
  */
 export function defineKeywords(
   patterns: string | string[],
@@ -65,13 +66,14 @@ export function defineKeywords(
       `[plainwright] defineKeywords() found no files matching ${JSON.stringify(patterns)} in ${cwd}.`,
     );
   }
-  const parsed = files.flatMap(parseKeywordFile);
-  const defined = parsed.map(registerKeyword);
+  const parsed = files.filter((file) => !loadedFiles.has(file)).flatMap(parseKeywordFile);
+  for (const file of files) loadedFiles.add(file);
+  parsed.forEach(registerKeyword);
   if (!checkRegistered) {
     checkRegistered = true;
     BeforeAll({ name: 'check keywords' }, () => assertKeywordsValid());
   }
-  return defined;
+  return keywords.filter((keyword) => files.includes(keyword.file));
 }
 
 /** All loaded keywords. */
@@ -311,6 +313,8 @@ function registerKeyword({ example, description, category, ...rest }: ParsedKeyw
       source: 'keyword',
       location: { file: keyword.file, line: keyword.line, column: keyword.column },
       arityCheck: false,
+      // The steps of the keyword fill in {references}, once the parameters are in place.
+      values: 'none',
     },
   );
   Object.assign(keyword, { step });
@@ -384,7 +388,7 @@ function angleBrackets(text: string): string[] {
  * Quotes in values are escaped, because `{string}` and `{element}` turn `\"` back into `"`.
  * Backslashes stay as they are: they only escape a quote.
  */
-function fillPlaceholders(text: string, values: Record<string, string>) {
+export function fillPlaceholders(text: string, values: Record<string, string>) {
   return text.replace(/<([^<>"]+)>/g, (whole, name: string) =>
     Object.hasOwn(values, name) ? values[name].replace(/"/g, '\\"') : whole,
   );

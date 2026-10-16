@@ -2,8 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { featureSteps, parseGherkin } from './gherkin';
 import { ElementRef } from './elements';
-import { checkKeywords } from './keywords';
+import { checkKeywords, fillPlaceholders, keywordOf } from './keywords';
+import { getPageDefinitions } from './pages';
 import { findSteps, getSteps, getUnusableSteps, StepDefinition, suggestSteps } from './registry';
+import { rememberedName } from './steps/builtin';
+import { checkReference, NumberReference, referencesIn } from './values';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
 
@@ -21,7 +24,9 @@ export type LintMessage = {
     | 'advanced-step'
     | 'keyword'
     | 'step-example'
-    | 'unknown-parameter-type';
+    | 'unknown-parameter-type'
+    | 'unknown-page'
+    | 'unknown-value';
   message: string;
 };
 
@@ -30,6 +35,11 @@ const SELECTOR =
   /^(?:[#.][a-z_-]|\[[a-z_-]|\/\/|\.\/\/|(?:css|xpath|text|role|id|data-testid|internal:\w+)=)|>>|\[data-[\w-]+/i;
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 const OPEN_URL = 'I open the url {string}';
+const PAGE_STEPS = [
+  'I open the {string} page',
+  'I am on the {string} page',
+  'I use the page object {string}',
+];
 
 /**
  * Checks feature files against the registered steps. Also checks loaded keywords and that
@@ -51,6 +61,8 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       messages.push(...fromLocatedErrors(String((error as Error).message), 'syntax', file));
       continue;
     }
+    // Names that steps in this file remember, also inside keywords, for {name} references.
+    const remembered = new Set(steps.flatMap(({ text, tags }) => rememberedNames(text, tags)));
     for (const { text, line, tags } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
       const add = (severity: LintSeverity, rule: LintMessage['rule'], message: string) => {
@@ -107,6 +119,24 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           'absolute-url',
           `"${args[0]}" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL.`,
         );
+      }
+      if (PAGE_STEPS.includes(step.pattern)) {
+        const name = String(args[0]);
+        const pages = getPageDefinitions().map((page) => page.name);
+        if (!referencesIn(name).length && !pages.includes(name)) {
+          add(
+            'error',
+            'unknown-page',
+            `No page named "${name}". ` +
+              (pages.length
+                ? `Defined pages: ${pages.map((page) => `"${page}"`).join(', ')}.`
+                : 'Define it in pages.json, or open the address with I open the url "/...".'),
+          );
+        }
+      }
+      for (const reference of new Set(valueTexts(args).flatMap(referencesIn))) {
+        const problem = checkReference(reference, remembered);
+        if (problem) add('error', 'unknown-value', problem);
       }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {
@@ -169,6 +199,30 @@ function stepLocation(step: StepDefinition, cwd: string) {
     file: step.location ? path.relative(cwd, step.location.file) : '',
     line: step.location?.line ?? 0,
   };
+}
+
+/** The names a step remembers values under, including the steps of a keyword it calls. */
+function rememberedNames(text: string, tags?: readonly string[], depth = 0): string[] {
+  const matches = findSteps(text, tags);
+  if (matches.length !== 1 || depth > 20) return [];
+  const { step, args } = matches[0];
+  const name = rememberedName(step, args);
+  if (name !== undefined) return [name];
+  const keyword = keywordOf(step);
+  if (!keyword) return [];
+  const values = Object.fromEntries(keyword.params.map((param, i) => [param, String(args[i])]));
+  return keyword.steps.flatMap((sub) =>
+    rememberedNames(fillPlaceholders(sub.text, values), undefined, depth + 1),
+  );
+}
+
+/** The quoted values of a step as written: texts, element names and numbers. */
+function valueTexts(args: unknown[]): string[] {
+  return args.flatMap((arg) => {
+    if (typeof arg === 'string') return [arg];
+    if (arg instanceof NumberReference) return [arg.text];
+    return elementNames([arg]);
+  });
 }
 
 /** Names of element parameters and the elements they are in. */

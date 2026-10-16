@@ -1,24 +1,9 @@
-import { definePage } from '../../src/index';
+import { definePage, definePages } from '../../src/index';
 
 // Pages of the test app (test/test-app), served at baseURL by test/server.mjs.
-// Feature files refer to them by name: I open the "Login" page.
-
-definePage('Login', { url: '/login.html' });
-definePage('Dashboard', { url: '/dashboard.html' });
-definePage('Forms', { url: '/forms.html' });
-definePage('Interactions', { url: '/interactions.html' });
-definePage('Assertions', { url: '/assertions.html' });
-definePage('Download', { url: '/download.html' });
-definePage('Drag and drop', { url: '/drag.html' });
-definePage('File upload', { url: '/filechooser.html' });
-definePage('Mouse', { url: '/mouse.html' });
-definePage('Touch', { url: '/touch.html' });
-definePage('Swatch', { url: '/swatch.html' });
-definePage('Widgets', { url: '/widgets.html' });
-definePage('Account settings', { url: '/account/settings.html' });
-definePage('Cookies', { url: '/cookies.html' });
-// Asks "Leave site?" once the notes have unsaved changes.
-definePage('Editor', { url: '/editor.html' });
+// Feature files refer to them by name: I open the "Login" page. Most are in test/pages.json,
+// the way a project writes them in pages.json; this file shows definePage() in TypeScript.
+definePages('test/pages.json');
 
 // A page whose elements have no usable visible names. Aliases give them one.
 definePage('Orders', {

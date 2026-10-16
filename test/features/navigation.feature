@@ -16,6 +16,10 @@ Feature: Pages and navigation
     When I go forward
     Then I am on the "Forms" page
 
+  Scenario: Check a page whose address has a wildcard
+    Given I open the url "/account/settings.html"
+    Then I am on the "Account pages" page
+
   Scenario: Reload the page
     Given I open the "Forms" page
     When I reload the page

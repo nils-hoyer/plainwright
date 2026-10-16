@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { getPageDefinition } from '../pages';
+import { getPageDefinition, isUrlPattern } from '../pages';
 import type { World } from '../world';
 import { category, escapeRegExp } from './builtin';
 
@@ -13,13 +13,15 @@ step({
   example: 'I open the "Login" page',
   fn: async ({ world }, name: string) => {
     const page = world.usePage(name);
-    if (typeof page.url !== 'string') {
+    if (typeof page.url !== 'string' || isUrlPattern(page.url)) {
       throw new Error(
-        `[plainwright] The page "${name}" has no address to open. ` +
-          `Add url: '/...' to definePage('${name}').`,
+        page.url
+          ? `[plainwright] The page "${name}" has the address pattern ${page.url}, which can only ` +
+              `be checked (I am on the "${name}" page). Open it with I open the url "/...".`
+          : `[plainwright] The page "${name}" has no address to open. Add its "url".`,
       );
     }
-    await world.page.goto(page.url);
+    await world.page.goto(page.url as string);
   },
 });
 
@@ -32,10 +34,7 @@ step({
   fn: async ({ world }, name: string) => {
     const page = getPageDefinition(name);
     if (!page.url) {
-      throw new Error(
-        `[plainwright] The page "${name}" has no address to check. ` +
-          `Add url: '/...' to definePage('${name}').`,
-      );
+      throw new Error(`[plainwright] The page "${name}" has no address to check. Add its "url".`);
     }
     await expect(world.page, `Expected to be on the "${name}" page`).toHaveURL(
       urlPattern(page.url, world),
@@ -146,10 +145,17 @@ step({
   },
 });
 
-/** Matches the page URL with any query string or hash. */
+/**
+ * Matches the page URL with any query string or hash. `*` in the address stands for any text
+ * without `/`, `**` for any text.
+ */
 function urlPattern(url: string | RegExp, world: World): RegExp {
   if (url instanceof RegExp) return url;
   const resolved = world.url(url);
   const start = /^[a-z]+:\/\//i.test(resolved) ? '^' : '';
-  return new RegExp(`${start}${escapeRegExp(resolved)}(?:[?#].*)?$`);
+  const pattern = resolved
+    .split(/(\*\*|\*)/)
+    .map((part) => (part === '**' ? '.*' : part === '*' ? '[^/?#]*' : escapeRegExp(part)))
+    .join('');
+  return new RegExp(`${start}${pattern}(?:[?#].*)?$`);
 }

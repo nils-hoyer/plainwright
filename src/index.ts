@@ -4,7 +4,7 @@ export { test, useTest } from './fixtures';
 export type { KeywordsFixtures, KeywordsOptions } from './fixtures';
 export { World } from './world';
 export type { DialogRecord, WorldOptions } from './world';
-export { definePage, getPageDefinition, getPageDefinitions } from './pages';
+export { definePage, definePages, getPageDefinition, getPageDefinitions } from './pages';
 export type { PageDefinition, PageOptions } from './pages';
 export { ElementRef, ELEMENT_TYPES, locate } from './elements';
 export type { ElementAlias, ElementType, Scope } from './elements';
@@ -23,6 +23,7 @@ export { defineParameterType } from './params';
 export type { ParameterTypeOptions } from './params';
 export { defineKeywords, getKeywords, validateKeywords } from './keywords';
 export type { KeywordDefinition, KeywordStep } from './keywords';
+export { defineData, remember } from './values';
 export { aiFixPromptTemplate } from './ai';
 
 /**
@@ -45,3 +46,8 @@ import './steps/wait.steps';
 import './steps/storage.steps';
 import './steps/screenshot.steps';
 import './steps/download.steps';
+import './steps/data.steps';
+import { loadProjectFiles } from './project';
+
+// Loads .env, pages.json, data/ and keywords/ from the project folder.
+loadProjectFiles();
