@@ -1,21 +1,5 @@
-<!-- Header variants for comparison. Keep one and delete the others before merging. -->
-
-<p align="center"><b>Variante 1</b></p>
-
 <p align="center">
   <img src="docs/images/header.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
-</p>
-
-<p align="center"><b>Variante 2</b></p>
-
-<p align="center">
-  <img src="docs/images/header-2.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
-</p>
-
-<p align="center"><b>Variante 3</b></p>
-
-<p align="center">
-  <img src="docs/images/header-3.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
 </p>
 
 # Plainwright
