@@ -10,17 +10,16 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 
 ## Workflow
 
-1. **Look up the vocabulary.** Run
-   `npx plainwright catalog --steps "steps/**/*.ts" --out steps.json` and read
+1. **Look up the vocabulary.** Run `npx plainwright catalog --out steps.json` and read
    `steps.json`. Use only steps listed there. Prefer steps with `"level": "core"`. Use the
-   page names listed under `pages`.
+   page names listed under `pages` and the data listed under `values`.
 2. **Look at the real page.** Run
-   `npx plainwright inspect "<page name or URL>" --steps "steps/**/*.ts" --base-url <base URL>`.
+   `npx plainwright inspect "<page name or URL>" --base-url <base URL>`.
    Use element names exactly as printed (`the "Log in" button`). If an element you need has no
-   name, add an alias to its `definePage()` in `steps/pages.ts` instead of using a selector.
+   name, add an alias to the page in `pages.json` instead of using a selector.
 3. **Write the scenario** in an existing feature file or a new one. One scenario tests one thing;
    its title says what it shows.
-4. **Lint:** `npx plainwright lint --features "features/**/*.feature" --steps "steps/**/*.ts"`.
+4. **Lint:** `npx plainwright lint --features "features/**/*.feature"`.
    Fix every error. Unknown steps come with a suggestion.
 5. **Run:** `npx bddgen && npx playwright test <feature file>`.
 6. **If it fails,** read the error. A missing element lists the names the page offers
@@ -41,8 +40,17 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 - Checks start with `I see` / `I do not see` and wait on their own. Never add fixed waits
   (`I wait "2" seconds`).
 - Every scenario checks something: it ends with at least one `I see` step.
+- Values from elsewhere are written in braces inside the quotes: `"{users.admin.email}"` from
+  `data/users.json`, `"{env.TEST_PASSWORD}"` for secrets, `"{order.id}"` for a value an earlier
+  step remembered, `"{unique}"` for a value that differs in every test. Never write passwords or
+  other secrets into feature or data files.
+- Shared test data goes into JSON files in `data/`; named pages go into `pages.json`.
 - Repeated sequences of steps become a keyword: a `Scenario Outline:` in `keywords/*.feature`
   whose title is the new step, with parameters written `"<name>"`.
+- Data a test needs first is a `Given` keyword such as `there is an order for "<item>"`: it
+  creates the data with `I create "…" at "/api/…" with "{…}"` and removes it with
+  `I delete "…" after the test`. Do not create test data by clicking through other screens when
+  the app has an API for it.
 - Do not invent steps. If nothing fits, propose a keyword. A TypeScript step (`defineStep()` with
   `description` and `example`) is only for what existing steps cannot express; ask first.
 

@@ -5,7 +5,7 @@ or a QA engineer who knows the app's addresses. After that, people write tests i
 without touching any of this.
 
 The quickest way is to start from the [starter](../examples/starter) and change three things:
-`baseURL` in `playwright.config.ts`, the pages in `steps/pages.ts`, and the `webServer` entry
+`baseURL` in `playwright.config.ts`, the pages in `pages.json`, and the `webServer` entry
 (start your app there, or remove it if the app is already running somewhere).
 
 ## Adding Plainwright to an existing project
@@ -52,15 +52,19 @@ npm pkg set scripts.test="bddgen && playwright test"
 
 No step file is needed. To add your own fixtures, see [your own steps](writing-steps.md#your-own-fixtures).
 
-**3. Optional: name your pages** (`steps/pages.ts`), so tests say `I open the "Login" page`
+**3. Optional: name your pages** in `pages.json`, so tests say `I open the "Login" page`
 instead of `I open the url "/login"`. More in [pages, test data and fixtures](pages-and-data.md).
 
-```ts
-import { definePage } from '@nils.hoyer/plainwright';
-
-definePage('Login', { url: '/login' });
-definePage('Orders', { url: '/orders' });
+```json
+{
+  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
+  "Login": "/login",
+  "Orders": "/orders"
+}
 ```
+
+`pages.json`, test data in `data/`, keywords in `keywords/` and a `.env` file load by themselves
+from the project folder.
 
 **4. Write a feature** in `features/` and run it with `npm test`. More
 commands are in [commands](commands.md).
@@ -81,22 +85,25 @@ Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
 ## Elements without a usable name: aliases
 
 A step finds an element by what the user sees. Some elements show nothing usable: an icon-only
-button, a field without a label. Give them a name in the page definition; the alias applies
-while that page is open.
+button, a field without a label. Give them a name in `pages.json`; the alias applies while that
+page is open.
 
-```ts
-definePage('Orders', {
-  url: '/orders',
-  elements: {
-    // a field without label: the "Search" field
-    Search: '[data-testid="search"]',
-    // name plus type, so the "Settings" dialog is still found by its title
-    '"Settings" button': '[data-testid="settings"]',
-    // a function for anything more specific
-    'Order total': (scope) => scope.getByTestId('summary').locator('.total'),
-  },
-});
+```json
+{
+  "Orders": {
+    "url": "/orders",
+    "elements": {
+      "Search": "[data-testid=search]",
+      "\"Settings\" button": "[data-testid=settings]"
+    }
+  }
+}
 ```
+
+`Search` is used as `the "Search" field`. The second key names the type too, so a "Settings"
+dialog is still found by its title. A selector is CSS, or any Playwright selector such as
+`text=Total`; for anything more specific, `definePage()` in TypeScript also takes a function
+(see [pages, test data and fixtures](pages-and-data.md#in-typescript)).
 
 Use aliases sparingly: an element without a visible name is usually also a problem for people
 who use a screen reader, and worth fixing in the app. Several elements with the same name need

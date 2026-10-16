@@ -154,14 +154,48 @@ Feature: Orders
 ```
 
 The report shows the four login steps nested under `I log in as …`, and `lint` and the editor
-know the new sentence like any other. The starter already loads everything in `keywords/`; in
-your own project, add `defineKeywords('keywords/**/*.feature')` to a file in `steps/`.
+know the new sentence like any other. Files in `keywords/` load by themselves.
+
+### Pages and test data
+
+Name your pages in `pages.json`, so tests say `I open the "Orders" page` and an address changes
+in one place:
+
+```json
+{
+  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
+  "Login": "/login",
+  "Orders": "/orders"
+}
+```
+
+Data that many tests share goes into JSON files in `data/`, and a step refers to it in braces
+inside the quotes. Passwords come from environment variables or a `.env` file:
+
+```gherkin
+* I fill "{users.admin.email}" in the "Email" field
+* I fill "{env.TEST_PASSWORD}" in the "Password" field
+```
+
+Data a test needs first, such as an order to refund, is a keyword that creates it through your
+app's API and deletes it after the test:
+
+```gherkin
+Scenario: A paid order can be refunded
+  Given there is an order for "Coffee"
+  When I open the url "/orders/{order.id}"
+  And I click the "Refund" button
+  Then I see the "Order refunded" message
+```
+
+How to write that keyword, and everything else about pages and data, is in
+[pages, test data and fixtures](docs/pages-and-data.md).
 
 ## Learn more
 
 - [Setup](docs/setup.md): connect Plainwright to your app.
-- [Pages, test data and fixtures](docs/pages-and-data.md): named pages, data-driven tests and
-  data prepared in code.
+- [Pages, test data and fixtures](docs/pages-and-data.md): named pages, data files, secrets and
+  test data created through your app's API.
 - [Logging in once](docs/logging-in.md): stay logged in across tests.
 - [Step reference](docs/steps.md): every sentence with an example.
 - [Editor support](docs/ide-support.md): suggestions for sentences in VS Code.

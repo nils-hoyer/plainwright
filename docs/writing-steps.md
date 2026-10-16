@@ -34,12 +34,8 @@ Feature: Account
       | 1234567890 | password123 |
 ```
 
-```ts
-// steps/keywords.ts
-import { defineKeywords } from '@nils.hoyer/plainwright';
-
-defineKeywords('keywords/**/*.feature');
-```
+Files in `keywords/` load by themselves. Keywords in another folder need one line in a step
+file: `defineKeywords('other/folder/**/*.feature')`.
 
 Now `* I log in as "1234567890" with password "password123"` works in any feature. The report
 shows the keyword's steps nested under it, and errors point to the line in the keyword file.
@@ -89,6 +85,10 @@ keywords and `lint` know the type. A step with a type they do not know still run
 and `lint` skip it and say so.
 
 ## Your own fixtures
+
+Test data a scenario needs first is usually a keyword with the steps for test data and APIs, no
+code needed: see [data a test creates first](pages-and-data.md#data-a-test-creates-first). Use a
+fixture for what those steps cannot do.
 
 Extend `test` as usual in Playwright and pass it to `useTest()`, so playwright-bdd runs every
 feature with it. Steps then get your fixtures like `world`:
