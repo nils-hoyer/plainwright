@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/header.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
+  <img src="docs/images/banner.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
 </p>
 
 # Plainwright
