@@ -33,7 +33,7 @@ const sources = new Map<string, string>();
  * Defines a page that feature files can refer to by name:
  *
  *   definePage('Login', {
- *     url: '/login.html',
+ *     url: '/login',
  *     elements: { Username: '[data-testid="input-username"]' },
  *   });
  *

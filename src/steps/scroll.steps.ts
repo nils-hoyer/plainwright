@@ -9,7 +9,7 @@ step({
   pattern: 'I scroll to the {element}',
   level: 'advanced',
   description: 'Scrolls until the element is in view.',
-  example: 'I scroll to the "You scrolled all the way down!" element',
+  example: 'I scroll to the "Contact" section',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.scrollIntoViewIfNeeded());
   },

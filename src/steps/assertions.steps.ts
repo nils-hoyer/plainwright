@@ -271,7 +271,7 @@ step({
   pattern: 'I see the attribute {string} with the value {string} on the {element}',
   level: 'advanced',
   description: 'Checks that the HTML attribute of the element has exactly this value.',
-  example: 'I see the attribute "href" with the value "forms.html" on the "Forms Demo" link',
+  example: 'I see the attribute "href" with the value "/help" on the "Help" link',
   fn: async ({ world }, attribute: string, value: string, element: ElementRef) => {
     await world.withElement(element, (el) => expect(el).toHaveAttribute(attribute, value));
   },
@@ -281,7 +281,7 @@ step({
   pattern: 'I see the attribute {string} containing {string} on the {element}',
   level: 'advanced',
   description: 'Checks that the HTML attribute of the element contains this text.',
-  example: 'I see the attribute "href" containing "forms" on the "Forms Demo" link',
+  example: 'I see the attribute "href" containing "help" on the "Help" link',
   fn: async ({ world }, attribute: string, text: string, element: ElementRef) => {
     await world.withElement(element, (el) =>
       expect(el).toHaveAttribute(attribute, new RegExp(escapeRegExp(text))),

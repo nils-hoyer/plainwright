@@ -1,26 +1,25 @@
 # Editor support
 
-## What the Cucumber extension sees
+In VS Code, the [Cucumber extension](https://marketplace.visualstudio.com/items?itemName=CucumberOpen.cucumber-official)
+suggests steps while you type in a feature file and marks steps that do not exist. Other
+editors that use the Cucumber language server work the same way.
 
-The [Cucumber extension for VS Code](https://marketplace.visualstudio.com/items?itemName=CucumberOpen.cucumber-official)
-(and other editors using the Cucumber language server) offers autocomplete, "go to step
-definition" and warnings for undefined steps. It does not run your code. It reads step
-definition files and looks for two shapes only:
+## In a project set up with init
 
-- calls named `Given`, `When` or `Then` whose first argument is a literal string or regex, and
-- `defineParameterType({ name: '…', regexp: /…/ })` calls.
+`init` has set it up. Open the folder in VS Code and install the Cucumber extension when VS Code
+suggests it. You get:
 
-So by default it does not know:
+- suggestions for every step: built-in steps, your keywords and your steps in TypeScript;
+- a warning on a step that does not exist;
+- suggestions and checks in the files in `pages/` (see [pages](pages.md#suggestions-in-vs-code)).
 
-- steps defined with `defineStep({ pattern: … })`, including all built-in steps,
-- keywords, which live in `.feature` files,
-- steps in compiled packages under `node_modules`.
+After adding keywords or steps in TypeScript, run `npm run stubs` so the editor knows them. Run
+it once after cloning the project too: the file it writes, `.vscode/plainwright.steps.js`, is
+not committed.
 
-## Generated stubs
+## Setting it up by hand
 
-`plainwright stubs` writes a file in exactly the shape the extension reads: one
-`Given('pattern', () => {})` line per step (built-in, project steps and keywords) and the
-`{element}` and `{number}` parameter types. The file is never executed.
+`plainwright stubs` writes the file the extension reads:
 
 ```bash
 npx plainwright stubs --out .vscode/plainwright.steps.js
@@ -36,11 +35,27 @@ npx plainwright stubs --out .vscode/plainwright.steps.js
 
 - Keep the stub file **out of** playwright-bdd's `steps` glob, otherwise steps would be
   registered twice.
-- Regenerate it after adding steps or keywords (for example in a `postinstall` or
-  `pretest` script).
-- "Go to definition" opens the stub, not the real definition. Use `catalog` or the location in
-  `steps.json` to find the source.
+- Regenerate it after adding steps or keywords, for example in a `postinstall` or `pretest`
+  script.
 
-Status: the stub format follows the extension's documented detection rules (tree-sitter queries
-of `@cucumber/language-service`). It has not yet been tried in every editor; please report
-problems.
+## Why a stub file
+
+The Cucumber extension does not run your code. It reads step definition files and looks for two
+shapes only:
+
+- calls named `Given`, `When` or `Then` whose first argument is a literal string or regex, and
+- `defineParameterType({ name: '…', regexp: /…/ })` calls.
+
+So on its own it does not know steps defined with `defineStep({ pattern: … })` (all built-in
+steps), keywords, which live in `.feature` files, or steps in compiled packages under
+`node_modules`. The stub file has one `Given('pattern', () => {})` line per step, built-in,
+project steps and keywords, and the `{element}` and `{number}` parameter types. It is never
+executed.
+
+## Known limits
+
+- "Go to definition" opens the stub, not the real definition. `npm run catalog` writes
+  `steps.json` with the file and line of every project step and keyword.
+- The stub format follows the extension's documented detection rules (the tree-sitter queries of
+  `@cucumber/language-service`). It has not been tried in every editor yet; please
+  [report problems](https://github.com/nils-hoyer/plainwright/issues).

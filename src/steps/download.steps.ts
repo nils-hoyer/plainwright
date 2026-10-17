@@ -11,7 +11,7 @@ step({
   pattern: 'I download the file with the {element}',
   level: 'advanced',
   description: 'Clicks the element and waits until the file it offers has downloaded.',
-  example: 'I download the file with the "Download Test File" button',
+  example: 'I download the file with the "Export" button',
   fn: async ({ world }, element: ElementRef) => {
     const download = world.page.waitForEvent('download');
     // When the click fails, its error is the one to report, not a later one from waiting.
@@ -27,7 +27,7 @@ step({
   pattern: 'I see the downloaded file {string}',
   level: 'advanced',
   description: 'Checks the file name of the last download.',
-  example: 'I see the downloaded file "test-download.txt"',
+  example: 'I see the downloaded file "orders.csv"',
   fn: ({ world }, fileName: string) => {
     expect(lastDownload(world).suggestedFilename()).toBe(fileName);
   },
@@ -37,7 +37,7 @@ step({
   pattern: 'I see the text {string} in the downloaded file',
   level: 'advanced',
   description: 'Checks that the last download contains this text, with the same capitals.',
-  example: 'I see the text "Hello" in the downloaded file',
+  example: 'I see the text "Total" in the downloaded file',
   fn: async ({ world }, text: string) => {
     const file = await lastDownload(world).path();
     expect(

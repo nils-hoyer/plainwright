@@ -58,7 +58,7 @@ step({
   pattern: 'I open the url {string}',
   level: 'core',
   description: 'Opens a web address, absolute or relative to the base URL.',
-  example: 'I open the url "/login.html"',
+  example: 'I open the url "/login"',
   fn: async ({ world }, url: string) => {
     world.clearPage();
     await world.page.goto(url);
@@ -99,7 +99,7 @@ step({
   pattern: 'I see the url {string}',
   level: 'core',
   description: 'Checks that the address is exactly this URL (relative URLs use the base URL).',
-  example: 'I see the url "/dashboard.html"',
+  example: 'I see the url "/dashboard"',
   fn: async ({ world }, url: string) => {
     await expect(world.page).toHaveURL(world.url(url));
   },

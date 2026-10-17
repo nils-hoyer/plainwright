@@ -37,7 +37,7 @@ reload, accept, dismiss, download, take a screenshot.
 
 Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
 menu item, image, section, list, list item, row, cell, message, element. See the
-[reviewer guide](reading-tests.md#element-types).
+[writing tests](writing-tests.md#elements).
 
 An element can be named inside another one: `the "Delete" button in the "Order 1001" row`. Every
 step that takes an element accepts this, so no step needs its own "in the row" variant.
@@ -51,13 +51,13 @@ after reading the [reviewer guide](reading-tests.md). Current core steps:
 
 - `I open the "Login" page`
 - `I am on the "Dashboard" page`
-- `I open the url "/login.html"`
+- `I open the url "/login"`
 - `I go back`
 - `I reload the page`
-- `I see the url "/dashboard.html"`
+- `I see the url "/dashboard"`
 - `I click the "Log in" button`
-- `I double click the "Double click me" button`
-- `I hover over the "Hover over me" element`
+- `I double click the "Order 1001" row`
+- `I hover over the "Help" link`
 - `I fill "1234567890" in the "Username" field`
 - `I clear the "Full Name" field`
 - `I check the "I accept the terms and conditions" checkbox`
@@ -65,8 +65,8 @@ after reading the [reviewer guide](reading-tests.md). Current core steps:
 - `I select "Germany" in the "Country" dropdown`
 - `I press "Enter"`
 - `I press "Enter" in the "Email" field`
-- `I upload the file "test/test-app/test-file.txt" with the "Choose File" button`
-- `I drag the "Drag Me" element to the "Drop Here" element`
+- `I upload the file "files/invoice.pdf" with the "Upload" button`
+- `I drag the "Coffee" list item to the "Cart" list`
 - `I see the "Welcome to your Dashboard" heading`
 - `I do not see the "Close" button`
 - `I see the text "Welcome back!"`
@@ -93,14 +93,10 @@ rules. `lint` lists them as info, so a reviewer can spot them.
 
 ## Adding a step
 
-1. Check that no step covers it. Combine steps into a [keyword](writing-steps.md#keywords)
-   first; a new step is for something steps cannot express.
-2. Word it with the patterns above. Reuse existing verbs; do not add a synonym.
-3. Define it with `defineStep()` including a one-sentence `description` and an `example` that
-   matches this step and no other (the unit tests check this for built-in steps; `lint` checks
-   project steps).
-4. A new **core** step needs an issue and an update to the [reviewer guide](reading-tests.md).
-   Otherwise make it `level: 'advanced'`.
+Combine existing steps into a [keyword](keywords.md) first. A step in TypeScript is for what
+steps cannot express: see [steps in TypeScript](writing-steps.md). Word it with the patterns
+above, and reuse existing verbs. How a new built-in step gets into Plainwright is in
+[contributing](../CONTRIBUTING.md#a-new-built-in-step).
 
 ## What lint checks
 

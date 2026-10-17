@@ -72,7 +72,7 @@ Do not commit real credentials in feature files. Gauge's table-driven data and e
 properties map to JSON files in `data/` and environment variables, both written inside the
 quotes: `I fill "{users.standard.name}" in the "Username" field`,
 `I fill "{env.TEST_PASSWORD}" in the "Password" field`. A `.env` file holds them locally. See
-[test data](pages-and-data.md#data-files).
+[test data](test-data.md#data-files).
 
 ## Migration checklist
 
