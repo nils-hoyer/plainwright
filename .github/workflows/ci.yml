@@ -31,6 +31,16 @@ jobs:
           npx playwright install chromium
           npm run lint
           npm test
+      - name: Set up a new project with init and run its first test
+        run: |
+          PORT=3125 node test/server.mjs &
+          mkdir "$RUNNER_TEMP/new-project" && cd "$RUNNER_TEMP/new-project"
+          # The packed package instead of the one on npm; init installs the rest and Chromium.
+          npm install --save-dev "$GITHUB_WORKSPACE"/nils.hoyer-plainwright-*.tgz
+          npx plainwright init --yes --url http://localhost:3125 --ai agents
+          # The first test checks what the start page of the app shows.
+          grep -F '* I see the "Plainwright test app" heading' features/example.feature
+          npm run lint
       - name: Upload Playwright reports
         if: failure()
         uses: actions/upload-artifact@v7
@@ -39,4 +49,5 @@ jobs:
           path: |
             playwright-report/
             examples/starter/playwright-report/
+            ${{ runner.temp }}/new-project/playwright-report/
           retention-days: 7

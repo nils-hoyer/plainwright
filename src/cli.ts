@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import path from 'node:path';
 import { parseArgs } from 'node:util';
+import { createJiti } from 'jiti';
 import { buildCatalog } from './catalog';
 import { renderStepReference } from './docs';
+import { AiAssistant, init } from './init';
 import { formatInspectResult, inspectPage } from './inspect';
 import { formatLintMessage, lintFeatures, summarize } from './lint';
 import { loadStepFiles, resolveFiles } from './load';
 import { getPageDefinitions, isUrlPattern } from './pages';
+import { runTests } from './run';
 import { renderStubs } from './stubs';
 // Registers the built-in steps.
 import './index';
@@ -14,6 +18,9 @@ import './index';
 const HELP = `Usage: plainwright <command> [options]
 
 Commands:
+  init      Set up this folder for tests: packages, Chromium, configuration, a first test.
+  test      Run the tests (feature files): bddgen, then playwright test. Other options,
+            such as --ui, --headed or a file, go to Playwright.
   lint      Check feature files: unknown or ambiguous steps, selectors, absolute URLs,
             fixed waits, advanced steps (info) and keyword definitions.
   catalog   Write all steps, element types, pages and data values as JSON for AI assistants.
@@ -32,9 +39,17 @@ Options:
   --base-url <url>     Base URL for relative addresses and page names (inspect).
   --storage-state <f>  Playwright storage state, e.g. a logged-in session (inspect).
   --json               Print JSON (inspect).
+  --url <address>      The address of your app (init).
+  --ai <assistant>     Instructions for agents, copilot, claude or none (init).
+  --yes, -y            Take the defaults instead of asking (init).
+  --dry-run            Only list what would change (init).
+  --no-install         Do not install packages and Chromium (init).
+  --no-run             Do not run the first test (init).
   --help               Show this help.
 
 Examples:
+  npx @nils.hoyer/plainwright init
+  npx plainwright test features/login.feature --headed
   npx plainwright lint --features "features/**/*.feature"
   npx plainwright catalog --out steps.json
   npx plainwright inspect "Login" --base-url http://localhost:3000
@@ -43,6 +58,8 @@ Examples:
 const DEFAULT_STEPS = ['steps/**/*.{ts,js,mjs,cjs}'];
 
 async function main(argv: string[]): Promise<number> {
+  // Everything after "test" belongs to Playwright.
+  if (argv[0] === 'test') return runTests(argv.slice(1));
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
@@ -54,6 +71,12 @@ async function main(argv: string[]): Promise<number> {
       'base-url': { type: 'string' },
       'storage-state': { type: 'string' },
       json: { type: 'boolean' },
+      url: { type: 'string' },
+      ai: { type: 'string' },
+      yes: { type: 'boolean', short: 'y' },
+      'dry-run': { type: 'boolean' },
+      'no-install': { type: 'boolean' },
+      'no-run': { type: 'boolean' },
       help: { type: 'boolean', short: 'h' },
     },
   });
@@ -61,6 +84,22 @@ async function main(argv: string[]): Promise<number> {
   if (values.help || !command) {
     console.log(HELP);
     return command || values.help ? 0 : 1;
+  }
+
+  if (command === 'init') {
+    const ai = values.ai as AiAssistant | undefined;
+    if (ai && !['agents', 'copilot', 'claude', 'none'].includes(ai)) {
+      console.error(`Unknown --ai "${ai}". Use agents, copilot, claude or none.`);
+      return 1;
+    }
+    return init({
+      url: values.url,
+      ai,
+      yes: values.yes,
+      dryRun: values['dry-run'],
+      install: !values['no-install'],
+      run: values['no-run'] ? false : values.yes ? true : undefined,
+    });
   }
 
   const stepFiles = values.steps ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
@@ -96,7 +135,7 @@ async function main(argv: string[]): Promise<number> {
         return 1;
       }
       const result = await inspectPage(page ? (page.url as string) : target, {
-        baseURL: values['base-url'],
+        baseURL: values['base-url'] ?? (await configuredBaseURL()),
         storageState: values['storage-state'],
       });
       console.log(values.json ? JSON.stringify(result, null, 2) : formatInspectResult(result));
@@ -105,6 +144,22 @@ async function main(argv: string[]): Promise<number> {
     default:
       console.error(`Unknown command "${command}".\n\n${HELP}`);
       return 1;
+  }
+}
+
+/** `use.baseURL` from playwright.config.*, so inspect needs no --base-url. */
+async function configuredBaseURL(cwd = process.cwd()): Promise<string | undefined> {
+  const file = resolveFiles(['playwright.config.{ts,js,mjs,cjs,mts,cts}'], cwd)[0];
+  if (!file) return undefined;
+  try {
+    const jiti = createJiti(path.join(cwd, 'noop.js'), { interopDefault: true });
+    const config = (await jiti.import(file, { default: true })) as {
+      use?: { baseURL?: string };
+      projects?: { use?: { baseURL?: string } }[];
+    };
+    return config?.use?.baseURL ?? config?.projects?.find((p) => p.use?.baseURL)?.use?.baseURL;
+  } catch {
+    return undefined;
   }
 }
 
