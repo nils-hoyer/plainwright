@@ -6,7 +6,8 @@ page, and fast feedback. The person needs readable tests and a clear report.
 
 ## Set up the assistant
 
-Copy the instructions into your project:
+`npx @nils.hoyer/plainwright init` writes them for the assistant you choose. To copy them by
+hand:
 
 | Assistant           | Template                                                                  | Copy to                               |
 | ------------------- | ------------------------------------------------------------------------- | ------------------------------------- |
@@ -25,7 +26,7 @@ names and aliases, and the values from `data/` a step can write as `{users.admin
 file and line where they are defined. Regenerate it when steps change, or keep it out of git
 (`steps.json` is small and fast to build).
 
-**Inspect.** `npx plainwright inspect "Login" --base-url http://localhost:3000`
+**Inspect.** `npx plainwright inspect "Login"`
 opens the page in Chromium and lists buttons, fields, links, headings, dialogs and so on by the
 names the steps use, plus how many elements of each type have no name. `--json` prints JSON,
 `--storage-state auth.json` opens the page logged in.
@@ -35,7 +36,7 @@ reports unknown steps with the closest existing step, ambiguous steps, unknown p
 selectors, absolute URLs, fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on errors,
 so it can gate CI and agent loops.
 
-**Run.** `npx bddgen && npx playwright test`. When an element is missing, the error lists the
+**Run.** `npx plainwright test`. When an element is missing, the error lists the
 elements of that type the page offers:
 
 ```

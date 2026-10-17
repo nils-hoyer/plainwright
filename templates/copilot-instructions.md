@@ -13,15 +13,14 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 1. **Look up the vocabulary.** Run `npx plainwright catalog --out steps.json` and read
    `steps.json`. Use only steps listed there. Prefer steps with `"level": "core"`. Use the
    page names listed under `pages` and the data listed under `values`.
-2. **Look at the real page.** Run
-   `npx plainwright inspect "<page name or URL>" --base-url <base URL>`.
+2. **Look at the real page.** Run `npx plainwright inspect "<page name or URL>"`.
    Use element names exactly as printed (`the "Log in" button`). If an element you need has no
    name, add an alias to the page's file in `pages/` instead of using a selector.
 3. **Write the scenario** in an existing feature file or a new one. One scenario tests one thing;
    its title says what it shows.
 4. **Lint:** `npx plainwright lint --features "features/**/*.feature"`.
    Fix every error. Unknown steps come with a suggestion.
-5. **Run:** `npx bddgen && npx playwright test <feature file>`.
+5. **Run:** `npx plainwright test <feature file>`.
 6. **If it fails,** read the error. A missing element lists the names the page offers
    (`Buttons on this page: …`). The report has a "Fix with AI" attachment with the page
    structure. Fix the wording of the scenario, or add an alias. Do not change step

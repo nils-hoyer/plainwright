@@ -24,64 +24,36 @@ Feature: Orders
 
 ## Getting started
 
-You need [Node.js](https://nodejs.org/) LTS and a terminal.
+You need [Node.js](https://nodejs.org/) LTS and a terminal. In an empty folder, or in your
+project:
 
 ```bash
-# Copy the starter project into the folder my-tests
-npx degit nils-hoyer/plainwright/examples/starter my-tests
-cd my-tests
+npx @nils.hoyer/plainwright@latest init
+```
 
-# Install Plainwright, Playwright and the browser
-npm install
+It asks for the address of your app and which AI assistant you use, installs Plainwright,
+Playwright and the browser, and writes a first test that checks what your app's start page shows.
+Then:
 
-# Run the tests against the todo app that comes with the starter
+```bash
+# Run the tests
 npm test
 
 # Open the report of the last run
 npm run report
 ```
 
-To add Plainwright to an existing project instead:
+In an existing project, `init` overwrites no file and says what it left out. To set everything
+up by hand instead, see [setup](docs/setup.md).
+
+To try Plainwright first with a small todo app, copy the starter:
 
 ```bash
-# Install Plainwright, Playwright and playwright-bdd
-npm install --save-dev @nils.hoyer/plainwright playwright-bdd @playwright/test
-
-# Install the browser
-npx playwright install chromium
-```
-
-The minimal configuration is one file:
-
-```ts
-// playwright.config.ts
-import { defineConfig } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
-import { steps } from '@nils.hoyer/plainwright';
-
-export default defineConfig({
-  testDir: defineBddConfig({
-    features: 'features/**/*.feature',
-    // Your own steps, if any, and Plainwright's ready-made steps
-    steps: ['steps/**/*.ts', steps],
-  }),
-  use: {
-    // The address of your app. "/login" in a test means http://localhost:3000/login
-    baseURL: 'http://localhost:3000',
-  },
-});
-```
-
-```bash
-# Add "npm test": it turns the feature files into Playwright tests and runs them
-npm pkg set scripts.test="bddgen && playwright test"
-
-# Run the tests
+npx degit nils-hoyer/plainwright/examples/starter my-tests
+cd my-tests
+npm install
 npm test
 ```
-
-More options, such as the "Fix with AI" prompt and replays of failed tests, are in
-[setup](docs/setup.md).
 
 ### Your first test
 
