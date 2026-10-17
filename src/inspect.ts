@@ -63,7 +63,7 @@ export function formatInspectResult(result: InspectResult): string {
   }
   const unnamed = ELEMENT_TYPES.filter((type) => result.unnamed[type]);
   if (unnamed.length) {
-    lines.push('Without a visible name (add an alias with definePage):');
+    lines.push('Without a visible name (give them an alias in their page file in pages/):');
     for (const type of unnamed) lines.push(`  ${result.unnamed[type]} × ${type}`);
     lines.push('');
   }

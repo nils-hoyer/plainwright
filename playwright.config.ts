@@ -1,20 +1,15 @@
-import { defineConfig, devices } from '@playwright/test';
-import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate, type KeywordsOptions } from './src/index';
+import { devices } from '@playwright/test';
+import { defineConfig } from './src/config';
 
 const port = 3123;
 // Read by "{env.PLAINWRIGHT_TEST_PASSWORD}" in test/features/data.feature.
 process.env.PLAINWRIGHT_TEST_PASSWORD ??= 'password123';
 
-const testDir = defineBddConfig({
+// The configuration helper projects use (docs/setup.md), with the folders of this repository.
+export default defineConfig({
+  baseURL: `http://localhost:${port}`,
   features: 'test/features/**/*.feature',
   steps: 'test/steps/**/*.ts',
-  // Failed tests get a prompt attachment for AI assistants in the report.
-  aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
-});
-
-export default defineConfig<KeywordsOptions>({
-  testDir,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
@@ -22,13 +17,7 @@ export default defineConfig<KeywordsOptions>({
   // Baselines for "matches the screenshot" steps. The swatch page has no text, so one
   // baseline works on every operating system.
   snapshotPathTemplate: 'test/snapshots/{arg}{ext}',
-  use: {
-    baseURL: `http://localhost:${port}`,
-    // Fail a click or fill after 10 s, so the error can list what the page offers.
-    actionTimeout: 10_000,
-    screenshot: 'only-on-failure',
-    trace: 'retain-on-failure',
-  },
+  use: { screenshot: 'only-on-failure' },
   webServer: {
     command: 'node test/server.mjs',
     url: `http://localhost:${port}/login.html`,
