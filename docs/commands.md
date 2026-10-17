@@ -1,22 +1,22 @@
 # Commands
 
-Every command runs in a terminal in your project folder. In the
-[starter](../examples/starter), the short `npm run …` names in the second column do the same with
-the starter's folders filled in.
+Every command runs in a terminal in your project folder. A project set up with `init` (and the
+[starter](../examples/starter)) has short `npm run …` names for them, in the second column.
 
 ## Running tests
 
-| Command                                      | Starter                | What it does                                                           |
-| -------------------------------------------- | ---------------------- | ---------------------------------------------------------------------- |
-| `npx bddgen && npx playwright test`          | `npm test`             | Turns the feature files into Playwright tests and runs all of them.    |
-| `npx bddgen && npx playwright test login`    | `npm test -- login`    | Runs only feature files whose path contains "login".                   |
-| `npx bddgen && npx playwright test --headed` | `npm test -- --headed` | Runs with a visible browser window.                                    |
-| `npx bddgen && npx playwright test --ui`     | `npm test -- --ui`     | Opens Playwright's UI mode: pick tests, watch them, step through them. |
-| `npx playwright show-report`                 | `npm run report`       | Opens the report of the last run in the browser.                       |
-| `npx playwright show-trace <trace.zip>`      |                        | Replays a failed test step by step (the report links the trace).       |
+| Command                                 | Short                  | What it does                                                           |
+| --------------------------------------- | ---------------------- | ---------------------------------------------------------------------- |
+| `npx plainwright test`                  | `npm test`             | Turns the feature files into Playwright tests and runs all of them.    |
+| `npx plainwright test login`            | `npm test -- login`    | Runs only feature files whose path contains "login".                   |
+| `npx plainwright test --headed`         | `npm test -- --headed` | Runs with a visible browser window.                                    |
+| `npx plainwright test --ui`             | `npm test -- --ui`     | Opens Playwright's UI mode: pick tests, watch them, step through them. |
+| `npx playwright show-report`            | `npm run report`       | Opens the report of the last run in the browser.                       |
+| `npx playwright show-trace <trace.zip>` |                        | Replays a failed test step by step (the report links the trace).       |
 
-`bddgen` comes with playwright-bdd, the rest with Playwright. Their own documentation lists all
-options: [Playwright command line](https://playwright.dev/docs/test-cli),
+`plainwright test` runs playwright-bdd's `bddgen` and then `playwright test`, and passes every
+option on to Playwright. Their own documentation lists all options:
+[Playwright command line](https://playwright.dev/docs/test-cli),
 [playwright-bdd](https://vitalets.github.io/playwright-bdd/).
 
 ## Plainwright's commands
@@ -28,6 +28,16 @@ npx plainwright <command> [options]
 `pages/`, `data/`, `keywords/` and `.env` in the current folder load by themselves, and so
 do your step files in `steps/`. Pass `--steps "<glob>"` for step files elsewhere. Repeat `--steps`
 and `--features` for several patterns.
+
+### init: set up a project
+
+```bash
+npx @nils.hoyer/plainwright@latest init
+```
+
+Installs Plainwright, Playwright and Chromium, writes the configuration, a first test against
+your app, AI instructions and editor settings, and adds the npm scripts. It never overwrites a
+file. Options and details are in [setup](setup.md).
 
 ### lint: check feature files before running them
 
@@ -56,7 +66,7 @@ exits with code 1 if there is an error, so it can stop a CI run.
 ### inspect: list the names on a page
 
 ```bash
-npx plainwright inspect "Login" --base-url http://localhost:3000
+npx plainwright inspect "Login"
 ```
 
 Starter: `npm run app` in one terminal, then `npm run inspect -- "Todos"` in another. Opens the
@@ -66,7 +76,7 @@ steps use (`the "Log in" button`), and how many elements of each type have no na
 | Option                   | Meaning                                                        |
 | ------------------------ | -------------------------------------------------------------- |
 | `<page name or URL>`     | A page from `pages/`, or an address.                           |
-| `--base-url <url>`       | Where relative addresses and page addresses start.             |
+| `--base-url <url>`       | Where addresses start. Default: `baseURL` from the config.     |
 | `--storage-state <file>` | Open the page logged in, see [logging in once](logging-in.md). |
 | `--json`                 | Print JSON instead of a list.                                  |
 

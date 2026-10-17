@@ -4,12 +4,12 @@
   "description": "Starter project for readable, keyword-driven Playwright tests.",
   "scripts": {
     "postinstall": "playwright install chromium",
-    "test": "bddgen && playwright test",
+    "test": "plainwright test",
     "report": "playwright show-report",
     "app": "node app/server.mjs",
     "lint": "plainwright lint --features 'features/**/*.feature' --quiet",
     "catalog": "plainwright catalog --out steps.json",
-    "inspect": "plainwright inspect --base-url http://localhost:3210",
+    "inspect": "plainwright inspect",
     "stubs": "plainwright stubs --out .vscode/plainwright.steps.js"
   },
   "devDependencies": {

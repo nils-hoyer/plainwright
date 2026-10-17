@@ -4,21 +4,92 @@ This page is for whoever connects Plainwright to an app, usually once per projec
 or a QA engineer who knows the app's addresses. After that, people write tests in feature files
 without touching any of this.
 
-The quickest way is to start from the [starter](../examples/starter) and change three things:
-`baseURL` in `playwright.config.ts`, the pages in `pages/`, and the `webServer` entry
-(start your app there, or remove it if the app is already running somewhere).
+The quickest way is one command, in an empty folder or in your project:
 
-## Adding Plainwright to an existing project
+```bash
+npx @nils.hoyer/plainwright@latest init
+```
+
+It asks two questions, the address of your app and which AI assistant you use, and then:
+
+- installs `@nils.hoyer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
+  the package manager of the project (npm, pnpm, Yarn or Bun);
+- writes `playwright.config.ts`, a page `pages/start.json`, a first test
+  `features/example.feature` that checks what your start page shows, a commented example in
+  `keywords/`, the instructions for your AI assistant, VS Code settings and `.gitignore`
+  entries;
+- adds the scripts `test`, `report`, `lint`, `inspect`, `catalog` and `stubs` to `package.json`;
+- runs the first test.
+
+It never overwrites a file. Running it again adds only what is missing and says what it
+skipped. In a project with its own Playwright configuration, it prints the lines to add.
+
+| Option             | Meaning                                                       |
+| ------------------ | ------------------------------------------------------------- |
+| `--url <address>`  | The address of your app, instead of asking.                   |
+| `--ai <assistant>` | `agents` (AGENTS.md), `copilot`, `claude` or `none`.          |
+| `--yes`, `-y`      | Take the defaults for everything not given, and run the test. |
+| `--dry-run`        | Only list what would change.                                  |
+| `--no-install`     | Do not install packages and Chromium.                         |
+| `--no-run`         | Do not run the first test.                                    |
+
+`npx @nils.hoyer/plainwright init --yes --url http://localhost:3000 --ai agents` sets up a
+project without questions, for CI or an AI assistant.
+
+To try Plainwright with an example app first, the [starter](../examples/starter) is a complete
+project with a small todo app.
+
+## The configuration
+
+`playwright.config.ts` needs one line besides the address of your app:
+
+```ts
+import { defineConfig } from '@nils.hoyer/plainwright/config';
+
+export default defineConfig({
+  // The address of your app. "/login" in a test means http://localhost:3000/login
+  baseURL: 'http://localhost:3000',
+});
+```
+
+`defineConfig()` sets up what Plainwright needs: tests in `features/`, your own steps (if any) in
+`steps/`, Plainwright's ready-made steps, Chromium, the options below, and a "Fix with AI" prompt
+for failed tests in the report. Every [Playwright option](https://playwright.dev/docs/test-configuration)
+can be added or changed, for example starting your app:
+
+```ts
+export default defineConfig({
+  baseURL: 'http://localhost:3000',
+  webServer: { command: 'npm run start', url: 'http://localhost:3000' },
+  use: { exactNames: false },
+});
+```
+
+| Option     | Default                 | Meaning                                                                                           |
+| ---------- | ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `baseURL`  | none                    | Address of the app.                                                                               |
+| `features` | `features/**/*.feature` | Where the tests are.                                                                              |
+| `steps`    | `steps/**/*.{ts,js}`    | Your steps in TypeScript or JavaScript.                                                           |
+| `bdd`      | none                    | More [playwright-bdd options](https://vitalets.github.io/playwright-bdd/#/configuration/options). |
+
+`npm test` runs `plainwright test`: it turns the feature files into Playwright tests (playwright-bdd's
+`bddgen`) and runs them (`playwright test`). Options such as `--headed`, `--ui` or a file name go
+to Playwright: `npm test -- --headed`.
+
+Pages in `pages/`, test data in `data/`, keywords in `keywords/` and a `.env` file load by
+themselves from the project folder. More in [pages, test data and fixtures](pages-and-data.md).
+
+## With your own Playwright configuration
+
+A project that already has a `playwright.config.ts` can keep it and add playwright-bdd:
 
 ```bash
 npm install --save-dev @nils.hoyer/plainwright playwright-bdd @playwright/test
 npx playwright install chromium
 ```
 
-**1. Configure Playwright** (`playwright.config.ts`):
-
 ```ts
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 import { aiFixPromptTemplate, steps } from '@nils.hoyer/plainwright';
 
@@ -32,51 +103,23 @@ const testDir = defineBddConfig({
 
 export default defineConfig({
   testDir,
-  reporter: [['list'], ['html', { open: 'never' }]],
-  use: {
-    baseURL: 'http://localhost:3000',
-    // A click or fill that finds nothing fails after 10 s and lists what the page offers.
-    actionTimeout: 10_000,
-    trace: 'retain-on-failure',
-  },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  use: { baseURL: 'http://localhost:3000', actionTimeout: 10_000, trace: 'retain-on-failure' },
 });
 ```
 
-**2. Add the test command** to `package.json`. `bddgen` turns the feature files into
-Playwright tests, then Playwright runs them:
-
-```bash
-npm pkg set scripts.test="bddgen && playwright test"
-```
-
-No step file is needed. To add your own fixtures, see [your own steps](writing-steps.md#your-own-fixtures).
-
-**3. Optional: name your pages,** one file each in `pages/`, so tests say
-`I open the "Login" page` instead of `I open the url "/login"`. More, including the VS Code
-setting that checks these files, in [pages, test data and fixtures](pages-and-data.md).
-
-```json
-// pages/login.json
-{ "name": "Login", "url": "/login" }
-```
-
-Pages in `pages/`, test data in `data/`, keywords in `keywords/` and a `.env` file load by
-themselves from the project folder.
-
-**4. Write a feature** in `features/` and run it with `npm test`. More
-commands are in [commands](commands.md).
+Then run the tests with `npx plainwright test`. To keep other Playwright tests next to the
+feature files, give each its own entry in `projects`, with its own `testDir`.
 
 ## Options
 
 Set them under `use` in `playwright.config.ts`.
 
-| Option          | Default            | Meaning                                                                                                                             |
-| --------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `baseURL`       | none               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                                    |
-| `exactNames`    | `true`             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.                        |
-| `actionTimeout` | none (Playwright)  | How long a click or fill waits for its element. Set 10 s, so a missing element fails soon and the error lists what the page offers. |
-| `trace`         | `off` (Playwright) | `retain-on-failure` keeps a replay of every failed test in the report.                                                              |
+| Option          | Default                                            | Meaning                                                                                                                |
+| --------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `baseURL`       | none                                               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                       |
+| `exactNames`    | `true`                                             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.           |
+| `actionTimeout` | 10 s (`defineConfig()`), else none                 | How long a click or fill waits for its element. A missing element fails soon and the error lists what the page offers. |
+| `trace`         | `retain-on-failure` (`defineConfig()`), else `off` | `retain-on-failure` keeps a replay of every failed test in the report.                                                 |
 
 Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
 
