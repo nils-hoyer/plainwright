@@ -18,7 +18,7 @@ const agentBody = agentInstructions.replace(/^# .*\n+/, '');
 type Target = { file: string; sections?: Record<string, string>; content?: string };
 
 const targets: Target[] = [
-  { file: 'docs/setup.md', sections: { 'element-types': renderElementTypes() } },
+  { file: 'docs/writing-tests.md', sections: { 'element-types': renderElementTypes() } },
   {
     file: 'docs/steps.md',
     content: [
@@ -27,7 +27,7 @@ const targets: Target[] = [
       [
         'Every built-in step, with what it does and an example. Your own steps and keywords are',
         'listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements',
-        'is in [reading tests](reading-tests.md#how-a-step-is-built).',
+        'is in [writing tests](writing-tests.md#how-a-step-is-built).',
       ].join('\n'),
       renderStepReference(builtIn, 2),
     ].join('\n\n'),

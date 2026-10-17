@@ -19,7 +19,7 @@ step({
   pattern: 'I double click the {element}',
   level: 'core',
   description: 'Double-clicks the element.',
-  example: 'I double click the "Double click me" button',
+  example: 'I double click the "Order 1001" row',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.dblclick());
   },
@@ -30,7 +30,7 @@ step({
   level: 'advanced',
   description:
     'Clicks the element with the right mouse button, which usually opens a context menu.',
-  example: 'I right click the "Right click me" element',
+  example: 'I right click the "Order 1001" row',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.click({ button: 'right' }));
   },
@@ -40,7 +40,7 @@ step({
   pattern: 'I hover over the {element}',
   level: 'core',
   description: 'Moves the mouse over the element without clicking.',
-  example: 'I hover over the "Hover over me" element',
+  example: 'I hover over the "Help" link',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.hover());
   },
@@ -143,7 +143,7 @@ step({
   level: 'core',
   description:
     'Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens.',
-  example: 'I upload the file "test/test-app/test-file.txt" with the "Choose File" button',
+  example: 'I upload the file "files/invoice.pdf" with the "Upload" button',
   fn: async ({ world }, file: string, element: ElementRef) => {
     await upload(world, element, [file]);
   },
@@ -154,7 +154,7 @@ step({
   level: 'advanced',
   description:
     'Chooses several files, separated by commas, in the file field or in the file dialog the element opens.',
-  example: 'I upload the files "a.txt, b.txt" with the "Choose Multiple Files" button',
+  example: 'I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button',
   fn: async ({ world }, files: string, element: ElementRef) => {
     await upload(
       world,
@@ -168,7 +168,7 @@ step({
   pattern: 'I drag the {element} to the {element}',
   level: 'core',
   description: 'Drags the first element with the mouse and drops it onto the second.',
-  example: 'I drag the "Drag Me" element to the "Drop Here" element',
+  example: 'I drag the "Coffee" list item to the "Cart" list',
   fn: async ({ world }, source: ElementRef, target: ElementRef) => {
     const targetElement = world.element(target);
     await world.withElement(source, (el) => el.dragTo(targetElement));

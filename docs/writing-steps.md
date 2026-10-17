@@ -1,60 +1,13 @@
-# Your own steps
+# Steps in TypeScript
 
-The built-in steps cover what a user does and sees in a browser. For everything specific to your
-app there are two ways to add steps:
+This page is for developers. The built-in steps cover what a user does and sees in a browser,
+and [keywords](keywords.md) combine them without code; use those first. A step in TypeScript is
+for what existing steps cannot express, such as reading a file or talking to a database.
 
-- **Keywords**, written in Gherkin: a new step made of existing steps. Reviewers can read them.
-  Use these first.
-- **Steps in TypeScript** with `defineStep()`: for what existing steps cannot express, such as
-  calling an API or reading a file.
+Steps in TypeScript appear in `catalog`, `lint`, `docs` and the editor like the built-in steps,
+and follow the [vocabulary rules](vocabulary.md). Step files in `steps/` load by themselves.
 
-Both appear in `catalog`, `lint`, `docs` and editor stubs like the built-in steps, and follow
-the [vocabulary rules](vocabulary.md).
-
-## Keywords
-
-A keyword is a `Scenario Outline:` whose title is the new step; parameters are written
-`"<name>"`. The description under the title becomes the step's documentation, and the first
-`Examples` row its example.
-
-```gherkin
-# keywords/account.feature
-Feature: Account
-
-  Scenario Outline: I log in as "<username>" with password "<password>"
-    Opens the login page and logs in.
-
-    * I open the "Login" page
-    * I fill "<username>" in the "Username" field
-    * I fill "<password>" in the "Password" field
-    * I click the "Log in" button
-
-    Examples:
-      | username   | password    |
-      | 1234567890 | password123 |
-```
-
-Files in `keywords/` load by themselves. Keywords in another folder need one line in a step
-file: `defineKeywords('other/folder/**/*.feature')`.
-
-Now `* I log in as "1234567890" with password "password123"` works in any feature. The report
-shows the keyword's steps nested under it, and errors point to the line in the keyword file.
-
-**Parameters.** A `<name>` in the keyword's steps is replaced by the value only when `name` is a
-parameter in the title. Any other `<…>`, such as `"<b>bold</b>"`, is text and stays as written;
-`lint` warns when it looks like a misspelled parameter. Values arrive unchanged, backslashes
-included.
-
-**Checks before any test runs.** Each step of a keyword must match exactly one step, every
-parameter must be used, keywords must not call each other in a loop, and the title must not
-match another step. A broken keyword fails with its file and line; `lint` reports the same.
-
-**Limits.** Steps inside keywords must be built-in, keywords, or defined with `defineStep()`
-(steps defined directly with playwright-bdd's `Given`/`When`/`Then` are unknown to keywords and
-lint). They may use only the `page` and `world` fixtures, which is true for all built-in steps.
-Data tables in keywords are not supported yet.
-
-## Steps in TypeScript
+## defineStep
 
 ```ts
 // steps/cart.steps.ts
@@ -72,23 +25,65 @@ defineStep({
 });
 ```
 
-`description` is one sentence that says exactly what the step does; `example` is a complete step
-text that matches this step and no other (`lint` checks it).
+| Option        | Meaning                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| `pattern`     | The step text, a [Cucumber expression](https://github.com/cucumber/cucumber-expressions) |
+| `description` | One sentence that says exactly what the step does                                        |
+| `example`     | A complete step text that matches this step and no other (`lint` checks it)              |
+| `category`    | The heading it is listed under in the step reference                                     |
+| `level`       | `'core'` or `'advanced'`; advanced steps show as info in `lint`                          |
+| `fn`          | The code; gets the fixtures, then one argument per parameter                             |
 
-The `world` fixture holds the active tab (`world.page`), the active frame, the current page
-definition and `world.element(ref)` to resolve an `{element}` parameter, honouring aliases and
-containers. `world.withElement(ref, action)` runs an action and, when the element is missing,
-adds the list of what the page offers to the error.
+Values in quotes arrive already filled in: `"{users.admin.email}"` reaches `fn` as
+`admin@example.com`.
 
-**Parameter types.** Use `defineParameterType()` from this package, not from playwright-bdd, so
-keywords and `lint` know the type. A step with a type they do not know still runs, but keywords
-and `lint` skip it and say so.
+## The world fixture
 
-## Your own fixtures
+`world` is what built-in steps use, and what makes your step behave like them:
 
-Test data a scenario needs first is usually a keyword with the steps for test data and APIs, no
-code needed: see [data a test creates first](pages-and-data.md#data-a-test-creates-first). Use a
-fixture for what those steps cannot do.
+| Member                              | What it is                                                                                |
+| ----------------------------------- | ----------------------------------------------------------------------------------------- |
+| `world.page`                        | the active browser tab                                                                    |
+| `world.scope`                       | where elements are looked up: the active frame, or else the tab                           |
+| `world.currentPage`                 | the [page](pages.md) whose aliases are in use                                             |
+| `world.element(ref)`                | a Locator for an `{element}` parameter, using aliases and `in the "…" row`                |
+| `world.withElement(ref, action)`    | runs `action` on the element; when it is missing, the error lists what the page offers    |
+| `world.url(path)`                   | an address relative to `baseURL`                                                          |
+| `world.remember(name, value)`       | keeps a value, so later steps can write `"{name}"`                                        |
+| `world.request(method, url, body?)` | sends a request with the browser's cookies; the answer is also remembered as `{response}` |
+| `world.afterTest(title, action)`    | runs `action` when the test is over, also when it failed                                  |
+
+A step that takes an element:
+
+```ts
+// steps/tooltip.steps.ts
+import { expect } from '@playwright/test';
+import { defineStep, type ElementRef } from '@nils.hoyer/plainwright';
+
+defineStep({
+  pattern: 'I see the tooltip {string} on the {element}',
+  description: 'Hovers over the element and checks the text of the tooltip it shows.',
+  example: 'I see the tooltip "Delete order" on the "Delete" button',
+  fn: async ({ world }, text: string, ref: ElementRef) => {
+    await world.withElement(ref, (element) => element.hover());
+    await expect(world.page.getByRole('tooltip')).toHaveText(text);
+  },
+});
+```
+
+## Parameter types
+
+Use `defineParameterType()` from this package, not from playwright-bdd, so keywords and `lint`
+know the type. A step with a type they do not know still runs, but keywords and `lint` skip it
+and say so (`unknown-parameter-type`).
+
+## Fixtures
+
+Test data a scenario needs first is usually a keyword, no code needed: see
+[data a test creates first](test-data.md#data-a-test-creates-first). A fixture is for what
+those steps cannot do: data the API cannot create, a database connection, a mock server. It
+prepares something before the scenario and removes it afterwards, and reviewers only see the
+step that uses it.
 
 Extend `test` as usual in Playwright and pass it to `useTest()`, so playwright-bdd runs every
 feature with it. Steps then get your fixtures like `world`:
@@ -97,35 +92,60 @@ feature with it. Steps then get your fixtures like `world`:
 // steps/fixtures.ts
 import { test as base, useTest, type StepFixtures } from '@nils.hoyer/plainwright';
 
-type ProjectFixtures = { account: Account };
+type ProjectFixtures = { order: { id: string } };
 export type Fixtures = StepFixtures & ProjectFixtures;
 
 export const test = useTest(
   base.extend<ProjectFixtures>({
-    account: async ({}, use) => use(await createAccount()),
+    order: async ({ request }, use) => {
+      const response = await request.post('/api/orders', { data: { item: 'Coffee' } });
+      const order = await response.json();
+      await use(order);
+      await request.delete(`/api/orders/${order.id}`);
+    },
   }),
 );
 ```
 
 ```ts
-// steps/account.steps.ts
+// steps/orders.steps.ts
 import { defineStep } from '@nils.hoyer/plainwright';
 import type { Fixtures } from './fixtures';
 
 defineStep<Fixtures>({
-  pattern: 'I log in with a new account',
-  description: 'Logs in on the open login page with a freshly created account.',
-  example: 'I log in with a new account',
-  fn: async ({ world, account }) => {
-    await world.page.getByLabel('Email').fill(account.email);
-    // …
+  pattern: 'I open a new order',
+  description: 'Creates an order through the API and opens its page.',
+  example: 'I open a new order',
+  fn: async ({ world, order }) => {
+    await world.page.goto(`/orders/${order.id}`);
   },
 });
 ```
 
-Without `useTest()`, playwright-bdd cannot tell which `test` to import and stops with "Can't
-guess test instance". Steps that use your fixtures cannot be used inside keywords, which only
-pass `page` and `world`.
+The fixture only runs in scenarios that use `I open a new order`. Without `useTest()`,
+playwright-bdd cannot tell which `test` to import and stops with "Can't guess test instance".
+Steps that use your fixtures cannot be used inside keywords, which only pass `page` and
+`world`.
+
+## Pages and data in TypeScript
+
+[Pages](pages.md) and [test data](test-data.md) are JSON files. In TypeScript the same is
+possible, plus what JSON cannot say:
+
+```ts
+// steps/pages.ts
+import { definePage, definePages, defineData } from '@nils.hoyer/plainwright';
+
+definePage('Order', { url: /\/orders\/\d+$/ }); // a RegExp is possible here
+definePage('Orders', {
+  url: '/orders',
+  // an alias can be a function that returns a Locator
+  elements: { 'Order total': (scope) => scope.getByTestId('summary').locator('.total') },
+});
+
+definePages('e2e/pages'); // page files in another folder
+defineData('fixtures/data'); // data files somewhere else
+```
 
 ## Steps for some features only
 

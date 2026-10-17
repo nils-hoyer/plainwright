@@ -90,7 +90,8 @@ contains "Order 1001". This can go further: `the "Edit" link in the "Total" cell
 1001" row`.
 
 A team can give an element a name when the screen shows none (for example an icon-only button).
-Such names are defined once per page by the developers.
+Such a name, an alias, is defined once in the page's file in `pages/`, which anyone on the team
+can read and change.
 
 ## What the checks mean
 
@@ -141,8 +142,8 @@ with `I create "…" at "/api/…"`, and removes it after the test with `I delet
 
 ## Opening the report
 
-After a test run, open the report with `npx playwright show-report` (or the `playwright-report`
-folder your team shares).
+After a test run, open the report with `npm run report` (or `npx playwright show-report`, or the
+`playwright-report` folder your team shares, for example from a CI run).
 
 - Every scenario is listed with ✓ (passed) or ✗ (failed).
 - Open a scenario to see each step with its duration. A failed step is red and shows the error,

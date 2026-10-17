@@ -4,7 +4,7 @@
 
 Every built-in step, with what it does and an example. Your own steps and keywords are
 listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements
-is in [reading tests](reading-tests.md#how-a-step-is-built).
+is in [writing tests](writing-tests.md#how-a-step-is-built).
 
 ## Core steps
 
@@ -12,31 +12,31 @@ The everyday vocabulary. Prefer these steps.
 
 ### Pages and navigation
 
-| Step                        | What it does                                                                                      | Example                           |
-| --------------------------- | ------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `I open the {string} page`  | Opens the address of the page defined with this name and uses the element names defined for it.   | `I open the "Login" page`         |
-| `I am on the {string} page` | Checks that the browser shows the address of this page and uses the element names defined for it. | `I am on the "Dashboard" page`    |
-| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL.                                        | `I open the url "/login.html"`    |
-| `I go back`                 | Goes back to the previous page, like the browser back button.                                     | `I go back`                       |
-| `I reload the page`         | Reloads the current page.                                                                         | `I reload the page`               |
-| `I see the url {string}`    | Checks that the address is exactly this URL (relative URLs use the base URL).                     | `I see the url "/dashboard.html"` |
+| Step                        | What it does                                                                                      | Example                        |
+| --------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `I open the {string} page`  | Opens the address of the page defined with this name and uses the element names defined for it.   | `I open the "Login" page`      |
+| `I am on the {string} page` | Checks that the browser shows the address of this page and uses the element names defined for it. | `I am on the "Dashboard" page` |
+| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL.                                        | `I open the url "/login"`      |
+| `I go back`                 | Goes back to the previous page, like the browser back button.                                     | `I go back`                    |
+| `I reload the page`         | Reloads the current page.                                                                         | `I reload the page`            |
+| `I see the url {string}`    | Checks that the address is exactly this URL (relative URLs use the base URL).                     | `I see the url "/dashboard"`   |
 
 ### Clicking and typing
 
-| Step                                            | What it does                                                                                                        | Example                                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `I click the {element}`                         | Clicks the element once with the left mouse button.                                                                 | `I click the "Log in" button`                                                   |
-| `I double click the {element}`                  | Double-clicks the element.                                                                                          | `I double click the "Double click me" button`                                   |
-| `I hover over the {element}`                    | Moves the mouse over the element without clicking.                                                                  | `I hover over the "Hover over me" element`                                      |
-| `I fill {string} in the {element}`              | Replaces the content of the field with the text.                                                                    | `I fill "1234567890" in the "Username" field`                                   |
-| `I clear the {element}`                         | Removes all text from the field.                                                                                    | `I clear the "Full Name" field`                                                 |
-| `I check the {element}`                         | Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.                            | `I check the "I accept the terms and conditions" checkbox`                      |
-| `I uncheck the {element}`                       | Unticks the checkbox. Nothing changes if it is already unticked.                                                    | `I uncheck the "Subscribe to newsletter" checkbox`                              |
-| `I select {string} in the {element}`            | Chooses the option with this visible text in the dropdown.                                                          | `I select "Germany" in the "Country" dropdown`                                  |
-| `I press {string}`                              | Presses a key or key combination, such as "Enter", "Tab" or "Control+A", on the focused element.                    | `I press "Enter"`                                                               |
-| `I press {string} in the {element}`             | Focuses the element and presses a key or key combination there.                                                     | `I press "Enter" in the "Email" field`                                          |
-| `I upload the file {string} with the {element}` | Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens. | `I upload the file "test/test-app/test-file.txt" with the "Choose File" button` |
-| `I drag the {element} to the {element}`         | Drags the first element with the mouse and drops it onto the second.                                                | `I drag the "Drag Me" element to the "Drop Here" element`                       |
+| Step                                            | What it does                                                                                                        | Example                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `I click the {element}`                         | Clicks the element once with the left mouse button.                                                                 | `I click the "Log in" button`                                    |
+| `I double click the {element}`                  | Double-clicks the element.                                                                                          | `I double click the "Order 1001" row`                            |
+| `I hover over the {element}`                    | Moves the mouse over the element without clicking.                                                                  | `I hover over the "Help" link`                                   |
+| `I fill {string} in the {element}`              | Replaces the content of the field with the text.                                                                    | `I fill "1234567890" in the "Username" field`                    |
+| `I clear the {element}`                         | Removes all text from the field.                                                                                    | `I clear the "Full Name" field`                                  |
+| `I check the {element}`                         | Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.                            | `I check the "I accept the terms and conditions" checkbox`       |
+| `I uncheck the {element}`                       | Unticks the checkbox. Nothing changes if it is already unticked.                                                    | `I uncheck the "Subscribe to newsletter" checkbox`               |
+| `I select {string} in the {element}`            | Chooses the option with this visible text in the dropdown.                                                          | `I select "Germany" in the "Country" dropdown`                   |
+| `I press {string}`                              | Presses a key or key combination, such as "Enter", "Tab" or "Control+A", on the focused element.                    | `I press "Enter"`                                                |
+| `I press {string} in the {element}`             | Focuses the element and presses a key or key combination there.                                                     | `I press "Enter" in the "Email" field`                           |
+| `I upload the file {string} with the {element}` | Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens. | `I upload the file "files/invoice.pdf" with the "Upload" button` |
+| `I drag the {element} to the {element}`         | Drags the first element with the mouse and drops it onto the second.                                                | `I drag the "Coffee" list item to the "Cart" list`               |
 
 ### Checking what you see
 
@@ -82,12 +82,12 @@ For special cases. `lint` lists where they are used.
 
 ### Clicking and typing
 
-| Step                                             | What it does                                                                                           | Example                                                                     |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
-| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                    | `I right click the "Right click me" element`                                |
-| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                            | `I focus on the "Full Name" field`                                          |
-| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                  | `I select option "3" in the "Country" dropdown`                             |
-| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens. | `I upload the files "a.txt, b.txt" with the "Choose Multiple Files" button` |
+| Step                                             | What it does                                                                                           | Example                                                                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                    | `I right click the "Order 1001" row`                                                 |
+| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                            | `I focus on the "Full Name" field`                                                   |
+| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                  | `I select option "3" in the "Country" dropdown`                                      |
+| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens. | `I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button` |
 
 ### Checking what you see
 
@@ -103,8 +103,8 @@ For special cases. `lint` lists where they are used.
 | `I see the {element} with the error message {string}`                   | Checks the error message screen readers announce for the element (aria-errormessage). | `I see the "Required field" field with the error message "This field is required."` |
 | `I see the attribute {string} on the {element}`                         | Checks that the element has this HTML attribute, with any value.                      | `I see the attribute "disabled" on the "Coming Soon" button`                        |
 | `I do not see the attribute {string} on the {element}`                  | Checks that the element does not have this HTML attribute.                            | `I do not see the attribute "disabled" on the "Transfer Money" button`              |
-| `I see the attribute {string} with the value {string} on the {element}` | Checks that the HTML attribute of the element has exactly this value.                 | `I see the attribute "href" with the value "forms.html" on the "Forms Demo" link`   |
-| `I see the attribute {string} containing {string} on the {element}`     | Checks that the HTML attribute of the element contains this text.                     | `I see the attribute "href" containing "forms" on the "Forms Demo" link`            |
+| `I see the attribute {string} with the value {string} on the {element}` | Checks that the HTML attribute of the element has exactly this value.                 | `I see the attribute "href" with the value "/help" on the "Help" link`              |
+| `I see the attribute {string} containing {string} on the {element}`     | Checks that the HTML attribute of the element contains this text.                     | `I see the attribute "href" containing "help" on the "Help" link`                   |
 | `I see the class {string} on the {element}`                             | Checks that the element has this CSS class (among others).                            | `I see the class "highlighted" on the "Styled box" element`                         |
 | `I do not see the class {string} on the {element}`                      | Checks that the element does not have this CSS class.                                 | `I do not see the class "hidden" on the "Styled box" element`                       |
 
@@ -141,18 +141,18 @@ For special cases. `lint` lists where they are used.
 | `I press the {string} mouse button`                 | Presses the "left", "right" or "middle" mouse button and keeps it pressed.                                           | `I press the "left" mouse button`           |
 | `I release the mouse button`                        | Releases the mouse button that was pressed.                                                                          | `I release the mouse button`                |
 | `I scroll the mouse wheel by x {number} y {number}` | Turns the mouse wheel by this many pixels sideways (x) and down (y).                                                 | `I scroll the mouse wheel by x "0" y "100"` |
-| `I tap the {element}`                               | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                   | `I tap the "Tap me" button`                 |
+| `I tap the {element}`                               | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                   | `I tap the "Menu" button`                   |
 | `I tap at x {number} y {number}`                    | Taps at this position on a touch screen. Needs a browser with touch enabled (hasTouch).                              | `I tap at x "300" y "200"`                  |
 
 ### Scrolling
 
-| Step                                 | What it does                               | Example                                                    |
-| ------------------------------------ | ------------------------------------------ | ---------------------------------------------------------- |
-| `I scroll to the {element}`          | Scrolls until the element is in view.      | `I scroll to the "You scrolled all the way down!" element` |
-| `I scroll to the bottom of the page` | Scrolls to the end of the page.            | `I scroll to the bottom of the page`                       |
-| `I scroll to the top of the page`    | Scrolls to the start of the page.          | `I scroll to the top of the page`                          |
-| `I scroll down by {number} pixels`   | Scrolls the page down by this many pixels. | `I scroll down by "500" pixels`                            |
-| `I scroll up by {number} pixels`     | Scrolls the page up by this many pixels.   | `I scroll up by "200" pixels`                              |
+| Step                                 | What it does                               | Example                              |
+| ------------------------------------ | ------------------------------------------ | ------------------------------------ |
+| `I scroll to the {element}`          | Scrolls until the element is in view.      | `I scroll to the "Contact" section`  |
+| `I scroll to the bottom of the page` | Scrolls to the end of the page.            | `I scroll to the bottom of the page` |
+| `I scroll to the top of the page`    | Scrolls to the start of the page.          | `I scroll to the top of the page`    |
+| `I scroll down by {number} pixels`   | Scrolls the page down by this many pixels. | `I scroll down by "500" pixels`      |
+| `I scroll up by {number} pixels`     | Scrolls the page up by this many pixels.   | `I scroll up by "200" pixels`        |
 
 ### Waiting
 
@@ -190,12 +190,12 @@ For special cases. `lint` lists where they are used.
 
 ### Downloads
 
-| Step                                             | What it does                                                              | Example                                                    |
-| ------------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `I download the file with the {element}`         | Clicks the element and waits until the file it offers has downloaded.     | `I download the file with the "Download Test File" button` |
-| `I see the downloaded file {string}`             | Checks the file name of the last download.                                | `I see the downloaded file "test-download.txt"`            |
-| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals. | `I see the text "Hello" in the downloaded file`            |
-| `I save the downloaded file to {string}`         | Saves the last download at this path, relative to the project folder.     | `I save the downloaded file to "test-results/report.csv"`  |
+| Step                                             | What it does                                                              | Example                                                   |
+| ------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------- |
+| `I download the file with the {element}`         | Clicks the element and waits until the file it offers has downloaded.     | `I download the file with the "Export" button`            |
+| `I see the downloaded file {string}`             | Checks the file name of the last download.                                | `I see the downloaded file "orders.csv"`                  |
+| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals. | `I see the text "Total" in the downloaded file`           |
+| `I save the downloaded file to {string}`         | Saves the last download at this path, relative to the project folder.     | `I save the downloaded file to "test-results/report.csv"` |
 
 ### Test data and APIs
 

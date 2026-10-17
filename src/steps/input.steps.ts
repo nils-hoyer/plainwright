@@ -140,7 +140,7 @@ step({
   pattern: 'I tap the {element}',
   level: 'advanced',
   description: 'Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).',
-  example: 'I tap the "Tap me" button',
+  example: 'I tap the "Menu" button',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.tap());
   },

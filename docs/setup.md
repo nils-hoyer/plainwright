@@ -1,10 +1,12 @@
-# Setting up Plainwright for your app
+# Setup
 
-This page is for whoever connects Plainwright to an app, usually once per project: a developer
-or a QA engineer who knows the app's addresses. After that, people write tests in feature files
-without touching any of this.
+This page is for whoever sets up Plainwright for a project, usually once: a developer or a QA
+engineer. After that, people write tests in feature files without touching any of this.
 
-The quickest way is one command, in an empty folder or in your project:
+## What init does
+
+[Getting started](../README.md#getting-started) is one command, in an empty folder or in your
+project:
 
 ```bash
 npx @nils.hoyer/plainwright@latest init
@@ -14,11 +16,20 @@ It asks two questions, the address of your app and which AI assistant you use, a
 
 - installs `@nils.hoyer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
   the package manager of the project (npm, pnpm, Yarn or Bun);
-- writes `playwright.config.ts`, a page `pages/start.json`, a first test
-  `features/example.feature` that checks what your start page shows, a commented example in
-  `keywords/`, the instructions for your AI assistant, VS Code settings and `.gitignore`
-  entries;
-- adds the scripts `test`, `report`, `lint`, `inspect`, `catalog` and `stubs` to `package.json`;
+- writes these files:
+
+  | File                        | Contains                                                                |
+  | --------------------------- | ----------------------------------------------------------------------- |
+  | `playwright.config.ts`      | the address of your app, see [the configuration](#the-configuration)    |
+  | `features/example.feature`  | a first test that checks what your start page shows                     |
+  | `pages/start.json`          | the start page, see [pages](pages.md)                                   |
+  | `keywords/example.feature`  | a commented example, see [keywords](keywords.md)                        |
+  | `AGENTS.md` or another file | instructions for your AI assistant, see [AI authoring](ai-authoring.md) |
+  | `.vscode/`                  | editor settings, see [editor support](ide-support.md)                   |
+  | `.gitignore`                | report folders, the login session and `.env`                            |
+
+- adds the scripts `test`, `report`, `lint`, `inspect`, `catalog` and `stubs` to `package.json`
+  (see [commands](commands.md));
 - runs the first test.
 
 It never overwrites a file. Running it again adds only what is missing and says what it
@@ -77,7 +88,70 @@ export default defineConfig({
 to Playwright: `npm test -- --headed`.
 
 Pages in `pages/`, test data in `data/`, keywords in `keywords/` and a `.env` file load by
-themselves from the project folder. More in [pages, test data and fixtures](pages-and-data.md).
+themselves from the project folder. More in [pages](pages.md), [test data](test-data.md) and [keywords](keywords.md).
+
+## Options
+
+Set them under `use` in `playwright.config.ts`.
+
+| Option          | Default                                            | Meaning                                                                                                                |
+| --------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `baseURL`       | none                                               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                       |
+| `exactNames`    | `true`                                             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.           |
+| `actionTimeout` | 10 s (`defineConfig()`), else none                 | How long a click or fill waits for its element. A missing element fails soon and the error lists what the page offers. |
+| `trace`         | `retain-on-failure` (`defineConfig()`), else `off` | `retain-on-failure` keeps a replay of every failed test in the report.                                                 |
+
+Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
+
+## Other environments
+
+Addresses are relative to `baseURL`. Read it from an environment variable to run the same tests
+against another environment:
+
+```ts
+export default defineConfig({
+  baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+});
+```
+
+```bash
+BASE_URL=https://staging.example.com npm test
+```
+
+## Running in CI
+
+The tests run like any Playwright tests. A GitHub Actions workflow:
+
+```yaml
+# .github/workflows/tests.yml
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run lint
+      - run: npm test
+        env:
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+```
+
+Secrets come from the repository's secrets, as environment variables; there is no `.env` file
+in CI. The report does not open by itself in CI: download the `playwright-report` artifact of
+the run and open its `index.html`. If your app must run for the tests, start it with
+`webServer` in the configuration (see above).
 
 ## With your own Playwright configuration
 
@@ -109,75 +183,6 @@ export default defineConfig({
 
 Then run the tests with `npx plainwright test`. To keep other Playwright tests next to the
 feature files, give each its own entry in `projects`, with its own `testDir`.
-
-## Options
-
-Set them under `use` in `playwright.config.ts`.
-
-| Option          | Default                                            | Meaning                                                                                                                |
-| --------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `baseURL`       | none                                               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                       |
-| `exactNames`    | `true`                                             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.           |
-| `actionTimeout` | 10 s (`defineConfig()`), else none                 | How long a click or fill waits for its element. A missing element fails soon and the error lists what the page offers. |
-| `trace`         | `retain-on-failure` (`defineConfig()`), else `off` | `retain-on-failure` keeps a replay of every failed test in the report.                                                 |
-
-Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
-
-## Elements without a usable name: aliases
-
-A step finds an element by what the user sees. Some elements show nothing usable: an icon-only
-button, a field without a label. Give them a name in the page's file; the alias applies while
-that page is open.
-
-```json
-// pages/orders.json
-{
-  "name": "Orders",
-  "url": "/orders",
-  "elements": {
-    "Search": "[data-testid=search]",
-    "\"Settings\" button": "[data-testid=settings]"
-  }
-}
-```
-
-`Search` is used as `the "Search" field`. The second key names the type too, so a "Settings"
-dialog is still found by its title. A selector is CSS, or any Playwright selector such as
-`text=Total`; for anything more specific, `definePage()` in TypeScript also takes a function
-(see [pages, test data and fixtures](pages-and-data.md#in-typescript)).
-
-Use aliases sparingly: an element without a visible name is usually also a problem for people
-who use a screen reader, and worth fixing in the app. Several elements with the same name need
-no alias: `the "Delete" button in the "Order 1001" row`.
-
-## How element types are found
-
-What each type word looks up in Playwright:
-
-<!-- generated:element-types -->
-
-| Written as             | Finds                                                                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
-| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
-| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)         |
-| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
-| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
-| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
-| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
-| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
-| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
-| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
-| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
-| `the "…" section`      | an area of the page (landmark region) with this name (`getByRole('region')`)                                               |
-| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
-| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                              |
-| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                           |
-| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                            |
-| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                   |
-| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)                    |
-
-<!-- /generated:element-types -->
 
 ## Logging in
 

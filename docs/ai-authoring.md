@@ -1,13 +1,13 @@
 # AI authoring
 
-Plainwright is built so that an AI assistant can write tests and a person can review
-them. The assistant needs three things: the list of steps that exist, the names on the real
-page, and fast feedback. The person needs readable tests and a clear report.
+Plainwright is built so that an AI assistant can write tests and a person can review them. The
+assistant needs three things: the list of steps that exist, the names on the real page, and
+fast feedback. The person needs readable tests and a clear report.
 
 ## Set up the assistant
 
-`npx @nils.hoyer/plainwright init` writes them for the assistant you choose. To copy them by
-hand:
+`npx @nils.hoyer/plainwright init` asks which assistant you use and writes its instructions.
+They tell the assistant the workflow below and the rules for steps. To copy them by hand:
 
 | Assistant           | Template                                                                  | Copy to                               |
 | ------------------- | ------------------------------------------------------------------------- | ------------------------------------- |
@@ -18,26 +18,57 @@ hand:
 The templates are in the installed package too: `node_modules/@nils.hoyer/plainwright/templates/`.
 Adjust the `features/` and `steps/` paths if yours differ.
 
-## The workflow: inspect → write → lint → run → review
+## Asking for a test
+
+Describe what the test should show, as you would to a colleague. The page and the expected
+result are enough:
+
+> Write a test for the login page: a wrong password shows the error "Email or password is
+> incorrect.". The app runs on http://localhost:3000.
+
+The assistant then looks up the steps, opens the page, writes the scenario, lints and runs it,
+and fixes what fails. It shows you the feature file to review:
+
+```gherkin
+Feature: Login
+
+  Scenario: A wrong password shows an error
+    * I open the "Login" page
+    * I fill "jane@example.com" in the "Email" field
+    * I fill "wrong" in the "Password" field
+    * I click the "Log in" button
+    * I see the text "Email or password is incorrect."
+```
+
+Larger requests work the same way: "Cover the checkout: an order with two products, a wrong
+voucher code, and an empty cart." For steps that repeat, ask for a [keyword](keywords.md).
+
+## The workflow: catalog → inspect → write → lint → run → review
 
 **Catalog.** `npx plainwright catalog --out steps.json` writes every step with pattern,
-description, example, level and parameters, plus element types, the design rules, your page
-names and aliases, and the values from `data/` a step can write as `{users.admin.email}`. Project steps and keywords are included, with the
-file and line where they are defined. Regenerate it when steps change, or keep it out of git
-(`steps.json` is small and fast to build).
+description, example, level and parameters, plus element types, the wording rules, your page
+names and aliases, and the values from `data/` a step can write as `{users.admin.email}`.
+Project steps and keywords are included, with the file and line where they are defined.
+Regenerate it when steps change, or keep it out of git (`steps.json` is small and fast to
+build).
 
-**Inspect.** `npx plainwright inspect "Login"`
-opens the page in Chromium and lists buttons, fields, links, headings, dialogs and so on by the
-names the steps use, plus how many elements of each type have no name. `--json` prints JSON,
-`--storage-state auth.json` opens the page logged in.
+**Inspect.** `npx plainwright inspect "Login"` opens the page in Chromium and lists buttons,
+fields, links, headings, dialogs and so on by the names the steps use, plus how many elements of
+each type have no name. `--json` prints JSON, `--storage-state auth.json` opens the page logged
+in.
 
-**Lint.** `npx plainwright lint --features "features/**/*.feature"`
-reports unknown steps with the closest existing step, ambiguous steps, unknown pages and values,
-selectors, absolute URLs, fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on errors,
-so it can gate CI and agent loops.
+**Write.** The assistant writes the scenario with steps from the catalog and names from
+`inspect`, following the rules in its instructions: values in quotes, elements by their visible
+name, checks with `I see`, no selectors and no fixed waits. An element without a name gets an
+alias in its [page file](pages.md), not a selector in the test.
 
-**Run.** `npx plainwright test`. When an element is missing, the error lists the
-elements of that type the page offers:
+**Lint.** `npx plainwright lint --features "features/**/*.feature"` reports unknown steps with
+the closest existing step, ambiguous steps, unknown pages and values, selectors, absolute URLs,
+fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on
+errors, so it can gate CI and agent loops.
+
+**Run.** `npx plainwright test`. When an element is missing, the error lists the elements of
+that type the page offers:
 
 ```
 No "Sign in" button found on the "Login" page.
@@ -47,28 +78,25 @@ Buttons on this page: "Accept Cookies", "Log in".
 **Review.** The person reads the feature file and opens the report. The
 [reviewer guide](reading-tests.md) explains both in one page.
 
-## "Fix with AI" attachment (evaluation)
+## "Fix with AI" in the report
 
-playwright-bdd can attach a prompt to every failed test (`aiFix.promptAttachment`). We tried it
-with Plainwright:
+Every failed test in the report has a "Fix with AI" prompt: the scenario, the error and the
+structure of the page, ready to paste into an assistant. With Plainwright the error already
+includes the "Buttons on this page" hint, so the prompt is usually enough to fix a wrong
+element name. Plainwright's prompt keeps the assistant on the feature file and the visible
+names, instead of changing step code.
 
-- **What it contains:** the scenario, the error, a code snippet of the failing step definition
-  and the ARIA snapshot of the page. With Plainwright the error already includes the
-  "Buttons on this page" hint, so the prompt is enough to fix a wrong element name.
-- **Problem with the default prompt:** it tells the AI to change the step definition code and to
-  use `getByRole` locators. For keyword tests the fix belongs in the feature file (wording) or in
-  an alias, and the step code shown is library code.
-- **Recommendation:** enable it with the template from this package, which keeps the AI on the
-  feature file and the visible names, and drops the code snippet:
+`defineConfig()` turns it on. With your own Playwright configuration, add it to
+`defineBddConfig()`:
 
-  ```ts
-  import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
+```ts
+import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
 
-  defineBddConfig({
-    // ...
-    aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
-  });
-  ```
+defineBddConfig({
+  // ...
+  aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
+});
+```
 
-- **Limitation:** the snapshot is taken from the test's first tab. After `I switch to tab "2"`
-  it may show the wrong tab.
+Limitation: the page structure is taken from the test's first tab. After `I switch to tab "2"`
+it may show the wrong tab.

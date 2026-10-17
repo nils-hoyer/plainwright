@@ -48,20 +48,20 @@ npx plainwright lint --features "features/**/*.feature"
 Short: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
 exits with code 1 if there is an error, so it can stop a CI run.
 
-| Rule                     | Severity | Reports                                                                             |
-| ------------------------ | -------- | ----------------------------------------------------------------------------------- |
-| `undefined-step`         | error    | A step that matches no step, with the closest existing one.                         |
-| `ambiguous-step`         | error    | A step that matches several steps.                                                  |
-| `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                       |
-| `unknown-value`          | error    | A `{value}` in quotes that no data file, earlier step or built-in value provides.   |
-| `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                            |
-| `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                |
-| `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.       |
-| `syntax`                 | error    | A feature file Gherkin cannot read.                                                 |
-| `step-example`           | error    | A step definition whose `example` does not match it.                                |
-| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                              |
-| `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [your own steps](writing-steps.md). |
-| `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                            |
+| Rule                     | Severity | Reports                                                                                                  |
+| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------- |
+| `undefined-step`         | error    | A step that matches no step, with the closest existing one.                                              |
+| `ambiguous-step`         | error    | A step that matches several steps.                                                                       |
+| `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                            |
+| `unknown-value`          | error    | A `{value}` in quotes that no data file, earlier step or built-in value provides.                        |
+| `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                                                 |
+| `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                                     |
+| `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                            |
+| `syntax`                 | error    | A feature file Gherkin cannot read.                                                                      |
+| `step-example`           | error    | A step definition whose `example` does not match it.                                                     |
+| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                                                   |
+| `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [steps in TypeScript](writing-steps.md#parameter-types). |
+| `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                                                 |
 
 | Option              | Meaning                                                     |
 | ------------------- | ----------------------------------------------------------- |
