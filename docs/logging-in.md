@@ -5,9 +5,6 @@ slow and repeats the same steps everywhere. Playwright can log in once per run, 
 browser session (cookies and local storage) to a file, and start other tests with it. This
 works with Plainwright unchanged, because the tests run on the Playwright runner.
 
-This repository runs the example below in its own test suite: see `test/setup/login.setup.ts`,
-`test/features/logged-in.feature` and the projects in `playwright.config.ts`.
-
 ## 1. A setup file that logs in
 
 The setup is plain Playwright code. It runs once per run, before the scenarios that need it,
@@ -29,19 +26,21 @@ setup('log in', async ({ page }) => {
 ```
 
 Keep the session file out of git: add `playwright/.auth/` to `.gitignore`. Take the password
-from the environment or your CI secrets, not from the code.
+from the environment, a `.env` file or your CI secrets, not from the code.
 
 ## 2. Projects that use the session
 
-`defineBddConfig()` puts the generated tests into `testDir`. The setup project overrides
-`testDir`, so it only runs the setup file. A second project depends on it and starts every test
-with the saved session.
+Add `projects` to `playwright.config.ts`. The setup project has its own `testDir`, so it only
+runs the setup file. A second project depends on it and starts every test with the saved
+session. Your `projects` replace the default one, so each names its browser.
 
 ```ts
 // playwright.config.ts
+import { devices } from '@playwright/test';
+import { defineConfig } from '@nils.hoyer/plainwright/config';
+
 export default defineConfig({
-  testDir, // from defineBddConfig()
-  use: { baseURL: 'http://localhost:3000' },
+  baseURL: 'http://localhost:3000',
   projects: [
     { name: 'setup', testDir: 'setup', testMatch: /\.setup\.ts$/ },
     {
@@ -59,6 +58,9 @@ export default defineConfig({
 });
 ```
 
+With [your own Playwright configuration](setup.md#with-your-own-playwright-configuration), the
+`projects` are the same; keep `testDir` from `defineBddConfig()` at the top level.
+
 Scenarios now start logged in. Scenarios that test the login itself are tagged `@logged-out`
 and run in a fresh browser:
 
@@ -72,7 +74,7 @@ Feature: Login
     …
 ```
 
-If only some features need the session, turn it around as this repository does: tag those
+If only some features need the session, turn it around: tag those
 `@logged-in`, give the `logged-in` project `grep: /@logged-in/` and the default project
 `grepInvert: /@logged-in/`.
 
@@ -88,7 +90,7 @@ tag (`@admin`, `@customer`). Step files in a folder named after the same tag
 `inspect` takes the same session, so it lists the elements a logged-in user sees:
 
 ```bash
-npx playwright test --project setup
+npm test -- --project setup
 npx plainwright inspect "Dashboard" \
   --base-url http://localhost:3000 --storage-state playwright/.auth/user.json
 ```

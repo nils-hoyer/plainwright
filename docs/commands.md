@@ -1,7 +1,7 @@
 # Commands
 
 Every command runs in a terminal in your project folder. A project set up with `init` (and the
-[starter](../examples/starter)) has short `npm run …` names for them, in the second column.
+[starter](../examples/starter)) has short `npm run …` names for them.
 
 ## Running tests
 
@@ -45,7 +45,7 @@ file. Options and details are in [setup](setup.md).
 npx plainwright lint --features "features/**/*.feature"
 ```
 
-Starter: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
+Short: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
 exits with code 1 if there is an error, so it can stop a CI run.
 
 | Rule                     | Severity | Reports                                                                             |
@@ -63,15 +63,20 @@ exits with code 1 if there is an error, so it can stop a CI run.
 | `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [your own steps](writing-steps.md). |
 | `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                            |
 
+| Option              | Meaning                                                     |
+| ------------------- | ----------------------------------------------------------- |
+| `--features <glob>` | The feature files to check. Default: every `.feature` file. |
+| `--quiet`           | Hide info messages.                                         |
+
 ### inspect: list the names on a page
 
 ```bash
 npx plainwright inspect "Login"
 ```
 
-Starter: `npm run app` in one terminal, then `npm run inspect -- "Todos"` in another. Opens the
-page in Chromium and lists its buttons, fields, links, headings, rows and so on, by the names
-steps use (`the "Log in" button`), and how many elements of each type have no name.
+Short: `npm run inspect -- "Login"`, while your app is running. Opens the page in Chromium and
+lists its buttons, fields, links, headings, rows and so on, by the names steps use
+(`the "Log in" button`), and how many elements of each type have no name.
 
 | Option                   | Meaning                                                        |
 | ------------------------ | -------------------------------------------------------------- |
@@ -86,7 +91,7 @@ steps use (`the "Log in" button`), and how many elements of each type have no na
 npx plainwright catalog --out steps.json
 ```
 
-Starter: `npm run catalog`. Writes every step with its description, example, level and
+Short: `npm run catalog`. Writes every step with its description, example, level and
 parameters, plus the element types, the wording rules, and your pages and aliases. Made for AI
 assistants, see [AI authoring](ai-authoring.md).
 
@@ -97,6 +102,7 @@ npx plainwright docs --out STEPS.md
 ```
 
 The same list as the [step reference](steps.md), including your own steps and keywords.
+`--out <file>` writes to a file instead of the terminal, also for `catalog` and `stubs`.
 
 ### stubs: autocomplete in the editor
 
@@ -104,11 +110,7 @@ The same list as the [step reference](steps.md), including your own steps and ke
 npx plainwright stubs --out .vscode/plainwright.steps.js
 ```
 
-Starter: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
+Short: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
 suggests steps while you type. See [editor support](ide-support.md).
 
-| Option         | Commands             | Meaning                                     |
-| -------------- | -------------------- | ------------------------------------------- |
-| `--out <file>` | catalog, docs, stubs | Write to this file instead of the terminal. |
-| `--quiet`      | lint                 | Hide info messages.                         |
-| `--help`       | all                  | Show the built-in help.                     |
+Every command shows its options with `--help`.

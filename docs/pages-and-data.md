@@ -217,11 +217,13 @@ Addresses are relative to `baseURL` in `playwright.config.ts`. Read it from an e
 variable to run the same tests against another environment:
 
 ```ts
-use: { baseURL: process.env.BASE_URL ?? 'http://localhost:3000' },
+export default defineConfig({
+  baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+});
 ```
 
 ```bash
-BASE_URL=https://staging.example.com npx playwright test
+BASE_URL=https://staging.example.com npm test
 ```
 
 To stay logged in across tests, log in once in a setup file: see [logging in once](logging-in.md).
