@@ -46,15 +46,6 @@ npm run report
 In an existing project, `init` overwrites no file and says what it left out. To set everything
 up by hand instead, see [setup](docs/setup.md).
 
-To try Plainwright first with a small todo app, copy the starter:
-
-```bash
-npx degit nils-hoyer/plainwright/examples/starter my-tests
-cd my-tests
-npm install
-npm test
-```
-
 ### Your first test
 
 A test is a `.feature` file in `features/`:
@@ -128,18 +119,39 @@ Feature: Orders
 The report shows the four login steps nested under `I log in as …`, and `lint` and the editor
 know the new sentence like any other. Files in `keywords/` load by themselves.
 
-### Pages and test data
+### Pages
 
-Name your pages with one small file each in `pages/`, so tests say `I open the "Orders" page`
-and an address changes in one place:
+Give your pages a name, one small file each in `pages/`. An address then changes in one place,
+and an element without a visible name, such as a search field without a label, gets one:
 
 ```json
 // pages/orders.json
-{ "name": "Orders", "url": "/orders" }
+{
+  "name": "Orders",
+  "url": "/orders",
+  "elements": { "Search": "[data-testid=search]" }
+}
 ```
 
-Data that many tests share goes into JSON files in `data/`, and a step refers to it in braces
-inside the quotes. Passwords come from environment variables or a `.env` file:
+Tests use the names, and the selector stays in the page file:
+
+```gherkin
+* I open the "Orders" page
+* I fill "1001" in the "Search" field
+* I see the text "Order 1001"
+```
+
+### Test data
+
+Data that many tests share goes into JSON files in `data/`:
+
+```json
+// data/users.json
+{ "admin": { "email": "admin@example.com" } }
+```
+
+A step refers to it in braces inside the quotes. Passwords come from environment variables or a
+`.env` file:
 
 ```gherkin
 * I fill "{users.admin.email}" in the "Email" field
