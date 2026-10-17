@@ -21,7 +21,7 @@ Commands:
   inspect   Open a page and list its elements by type and visible name.
   stubs     Write a step file for editor autocomplete (Cucumber extension "cucumber.glue").
 
-pages.json, data/ and keywords/ in the project folder load by themselves.
+pages/, data/ and keywords/ in the project folder load by themselves.
 
 Options:
   --steps <glob>       Your step files in TypeScript or JavaScript. Repeat for several

@@ -25,7 +25,7 @@ options: [Playwright command line](https://playwright.dev/docs/test-cli),
 npx plainwright <command> [options]
 ```
 
-`pages.json`, `data/`, `keywords/` and `.env` in the current folder load by themselves, and so
+`pages/`, `data/`, `keywords/` and `.env` in the current folder load by themselves, and so
 do your step files in `steps/`. Pass `--steps "<glob>"` for step files elsewhere. Repeat `--steps`
 and `--features` for several patterns.
 
@@ -42,7 +42,7 @@ exits with code 1 if there is an error, so it can stop a CI run.
 | ------------------------ | -------- | ----------------------------------------------------------------------------------- |
 | `undefined-step`         | error    | A step that matches no step, with the closest existing one.                         |
 | `ambiguous-step`         | error    | A step that matches several steps.                                                  |
-| `unknown-page`           | error    | A page name that is not in `pages.json` (or defined in TypeScript).                 |
+| `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                       |
 | `unknown-value`          | error    | A `{value}` in quotes that no data file, earlier step or built-in value provides.   |
 | `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                            |
 | `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                |
@@ -65,7 +65,7 @@ steps use (`the "Log in" button`), and how many elements of each type have no na
 
 | Option                   | Meaning                                                        |
 | ------------------------ | -------------------------------------------------------------- |
-| `<page name or URL>`     | A page from `pages.json`, or an address.                       |
+| `<page name or URL>`     | A page from `pages/`, or an address.                           |
 | `--base-url <url>`       | Where relative addresses and page addresses start.             |
 | `--storage-state <file>` | Open the page logged in, see [logging in once](logging-in.md). |
 | `--json`                 | Print JSON instead of a list.                                  |

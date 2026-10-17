@@ -1,0 +1,7 @@
+{
+  "name": "Orders",
+  "url": "/orders",
+  "elements": {
+    "Search": "[data-testid=search]"
+  }
+}

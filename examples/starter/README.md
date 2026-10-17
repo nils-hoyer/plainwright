@@ -12,14 +12,14 @@ npm run report    # open the report anytime
 
 ## What is where
 
-| Path         | Contains                                                      |
-| ------------ | ------------------------------------------------------------- |
-| `features/`  | The tests, in plain sentences.                                |
-| `keywords/`  | Your own steps, written in Gherkin (`I add the todo "…"`).    |
-| `pages.json` | Page names, and aliases for elements without a visible name.  |
-| `data/`      | Test data, written `"{todos.shopping}"` in steps.             |
-| `AGENTS.md`  | Instructions for AI assistants writing tests here.            |
-| `app/`       | The example app the tests run against. Replace it with yours. |
+| Path        | Contains                                                      |
+| ----------- | ------------------------------------------------------------- |
+| `features/` | The tests, in plain sentences.                                |
+| `keywords/` | Your own steps, written in Gherkin (`I add the todo "…"`).    |
+| `pages/`    | One file per page: its name, address and aliases.             |
+| `data/`     | Test data, written `"{todos.shopping}"` in steps.             |
+| `AGENTS.md` | Instructions for AI assistants writing tests here.            |
+| `app/`      | The example app the tests run against. Replace it with yours. |
 
 There is no code to write. Steps in TypeScript, for what other steps cannot express, would go
 into `steps/`.
@@ -35,6 +35,6 @@ npm run stubs                 # step file for editor autocomplete (see .vscode/s
 ```
 
 To test your own app, set `baseURL` in `playwright.config.ts` to it, remove `webServer` (or
-let it start your app) and change the pages in `pages.json`. Then delete `app/`. Secrets such as
+let it start your app) and change the pages in `pages/`. Then delete `app/`. Secrets such as
 passwords go into a `.env` file (not committed) and are written `"{env.TEST_PASSWORD}"`.
 See the [Plainwright README](https://github.com/nils-hoyer/plainwright#readme).

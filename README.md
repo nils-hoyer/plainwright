@@ -158,15 +158,12 @@ know the new sentence like any other. Files in `keywords/` load by themselves.
 
 ### Pages and test data
 
-Name your pages in `pages.json`, so tests say `I open the "Orders" page` and an address changes
-in one place:
+Name your pages with one small file each in `pages/`, so tests say `I open the "Orders" page`
+and an address changes in one place:
 
 ```json
-{
-  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
-  "Login": "/login",
-  "Orders": "/orders"
-}
+// pages/orders.json
+{ "name": "Orders", "url": "/orders" }
 ```
 
 Data that many tests share goes into JSON files in `data/`, and a step refers to it in braces

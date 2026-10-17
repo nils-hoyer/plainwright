@@ -9,7 +9,7 @@ import { defineData } from './values';
  * Loads the files a project keeps in the usual places, so it needs no step file for them:
  *
  * - `.env`: environment variables for `{env.NAME}`. Variables already set win.
- * - `pages.json`: named pages, see definePages().
+ * - `pages/**\/*.json`: named pages, one per file, see definePages().
  * - `data/**\/*.json`: test data, see defineData().
  * - `keywords/**\/*.feature`: keywords, see defineKeywords().
  *
@@ -18,11 +18,27 @@ import { defineData } from './values';
 export function loadProjectFiles(cwd = process.cwd()) {
   const env = path.join(cwd, '.env');
   if (isFile(env)) process.loadEnvFile(env);
-  if (isFile(path.join(cwd, 'pages.json'))) definePages('pages.json', { cwd });
+  if (isDirectory(path.join(cwd, 'pages'))) loadPages(cwd);
   if (isDirectory(path.join(cwd, 'data'))) defineData('data', { cwd });
   if (globSync('keywords/**/*.feature', { cwd }).length) {
     defineKeywords('keywords/**/*.feature', { cwd });
   }
+}
+
+/** App source files: a `pages/` folder with them belongs to Next.js, Nuxt, Astro and the like. */
+const APP_PAGES = 'pages/**/*.{js,jsx,ts,tsx,mjs,cjs,vue,svelte,astro,md,mdx}';
+
+function loadPages(cwd: string) {
+  const app = globSync(APP_PAGES, { cwd, ignore: ['**/node_modules/**'] });
+  if (app.length) {
+    console.warn(
+      `[plainwright] pages/ holds app files such as ${app[0]}, so Plainwright does not load ` +
+        `pages from it. Keep your page files in another folder and load it with ` +
+        `definePages('<folder>') in a file in steps/.`,
+    );
+    return;
+  }
+  definePages('pages', { cwd });
 }
 
 function isFile(file: string) {

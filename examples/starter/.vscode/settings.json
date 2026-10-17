@@ -1,4 +1,11 @@
 {
   "cucumber.features": ["features/**/*.feature"],
-  "cucumber.glue": [".vscode/plainwright.steps.js"]
+  "cucumber.glue": [".vscode/plainwright.steps.js"],
+  // Suggestions and checks for the files in pages/.
+  "json.schemas": [
+    {
+      "fileMatch": ["**/pages/**/*.json"],
+      "url": "./node_modules/@nils.hoyer/plainwright/schema/page.json"
+    }
+  ]
 }

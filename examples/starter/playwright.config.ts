@@ -18,7 +18,7 @@ export default defineConfig({
   // The report opens by itself when a test fails (not in CI); npm run report opens it anytime.
   reporter: [['list'], ['html']],
   use: {
-    // The app under test. Page addresses in pages.json are relative to it.
+    // The app under test. Page addresses in pages/ are relative to it.
     baseURL: `http://localhost:${port}`,
     // A click or fill that finds nothing fails after 10 s and lists what the page offers.
     actionTimeout: 10_000,
