@@ -104,18 +104,5 @@ rules. `lint` lists them as info, so a reviewer can spot them.
 
 ## What lint checks
 
-`npx plainwright lint` prints `file:line: severity: message (rule)`:
-
-| Rule               | Severity | Reports                                                  |
-| ------------------ | -------- | -------------------------------------------------------- |
-| `syntax`           | error    | invalid Gherkin                                          |
-| `undefined-step`   | error    | a step that matches nothing, with the closest suggestion |
-| `ambiguous-step`   | error    | a step that matches more than one definition             |
-| `selector`         | error    | a quoted value that looks like CSS, XPath or a test ID   |
-| `absolute-url`     | error    | a quoted absolute URL; use a page name or a relative URL |
-| `keyword`          | error    | a broken keyword definition                              |
-| `step-example`     | error    | a step whose example does not match it alone             |
-| `discouraged-step` | warning  | fixed waits and other steps marked as discouraged        |
-| `advanced-step`    | info     | an advanced step (hide with `--quiet`)                   |
-
-The exit code is 1 when there are errors.
+`npx plainwright lint` checks feature files and keywords against these rules before a test runs.
+Every rule is listed in [commands](commands.md#lint-check-feature-files-before-running-them).

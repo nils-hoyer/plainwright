@@ -19,7 +19,7 @@ values in double quotes. Most of a migration is renaming files and adjusting ste
 | Data store, environment properties        | `data/*.json` and environment variables, written `"{users.admin.email}"`    |
 | Step implementation (Java, Python, …)     | Built-in steps; your own with `defineStep()` in TypeScript                  |
 | Page object with selectors                | A file per page in `pages/`; selectors only as aliases for unnamed elements |
-| Tags                                      | Tags (`@smoke`), run with `npx playwright test --grep @smoke`               |
+| Tags                                      | Tags (`@smoke`), run with `npm test -- --grep @smoke`                       |
 | Gauge HTML report                         | Playwright HTML report with traces                                          |
 
 ## Step wording
@@ -74,9 +74,9 @@ quotes: `I fill "{users.standard.name}" in the "Username" field`,
 `I fill "{env.TEST_PASSWORD}" in the "Password" field`. A `.env` file holds them locally. See
 [test data](pages-and-data.md#data-files).
 
-## Steps
+## Migration checklist
 
-1. Install and configure: see the [README quick start](../README.md#quick-start).
+1. Set up the project: see [getting started](../README.md#getting-started).
 2. Add a file in `pages/` for every Gauge page object. Keep selectors only where the
    element has no visible name.
 3. Convert specs to features (`#` → `Feature:`, `##` → `Scenario:`), concepts to keywords.
