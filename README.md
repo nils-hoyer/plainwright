@@ -46,6 +46,10 @@ npm run report
 In an existing project, `init` overwrites no file and says what it left out. To set everything
 up by hand instead, see [setup](docs/setup.md).
 
+Open the folder in VS Code and install the Cucumber extension when VS Code suggests it. It
+suggests steps while you type and marks sentences that don't exist. More in
+[editor support](docs/ide-support.md).
+
 ### Your first test
 
 A test is a `.feature` file in `features/`:
