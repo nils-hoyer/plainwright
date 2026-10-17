@@ -15,7 +15,7 @@ Feature: Helpful error messages
       """
 
   Scenario: An unknown page lists the defined pages
-    * I see this step fail with "No page named \"Logon\". Defined pages: \"Login\"":
+    * I see this step fail with "No page named \"Logon\". Defined pages: \"Account pages\", \"Account settings\"":
       """
       I open the "Logon" page
       """

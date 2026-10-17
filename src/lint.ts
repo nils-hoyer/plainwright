@@ -130,7 +130,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
             `No page named "${name}". ` +
               (pages.length
                 ? `Defined pages: ${pages.map((page) => `"${page}"`).join(', ')}.`
-                : 'Define it in pages.json, or open the address with I open the url "/...".'),
+                : 'Add it as a file in pages/, or open the address with I open the url "/...".'),
           );
         }
       }

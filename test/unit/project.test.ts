@@ -1,9 +1,11 @@
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 const cwd = path.join(__dirname, 'fixtures/project');
 
-/** The package as a project in fixtures/project loads it: with .env, pages.json, data/, keywords/. */
+/** The package as a project in fixtures/project loads it: with .env, pages/, data/, keywords/. */
 async function load() {
   vi.resetModules();
   const spy = vi.spyOn(process, 'cwd').mockReturnValue(cwd);
@@ -31,7 +33,7 @@ describe('project files', () => {
     expect(process.env.PLAINWRIGHT_UNIT_SET).toBe('from-environment');
   });
 
-  it('loads pages.json', () => {
+  it('loads pages/, one page per file', () => {
     const pages = loaded.library.getPageDefinitions();
     expect(pages.map((page) => [page.name, page.url])).toEqual([
       ['Login', '/login'],
@@ -50,7 +52,7 @@ describe('project files', () => {
   it('skips keyword and page files that are already loaded', () => {
     loaded.library.defineKeywords('keywords/**/*.feature', { cwd });
     expect(loaded.library.getKeywords()).toHaveLength(1);
-    expect(loaded.library.definePages('pages.json', { cwd })).toEqual([]);
+    expect(loaded.library.definePages('pages', { cwd })).toEqual([]);
   });
 
   it('skips data files whose names a step cannot write', () => {
@@ -62,6 +64,60 @@ describe('project files', () => {
       'shop.products',
       'users',
     ]);
+  });
+});
+
+describe('page files', () => {
+  /** A folder with these files, and a fresh copy of the package. */
+  async function folder(files: Record<string, string>) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'plainwright-pages-'));
+    for (const [file, content] of Object.entries(files)) {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), content);
+    }
+    vi.resetModules();
+    return { dir, library: await import('../../src/index') };
+  }
+
+  it('need a name and nothing but name, url and elements', async () => {
+    const noName = await folder({ 'pages/login.json': '{ "url": "/login" }' });
+    expect(() => noName.library.definePages('pages', { cwd: noName.dir })).toThrow(
+      'The page needs a "name"',
+    );
+    const extra = await folder({ 'pages/login.json': '{ "name": "Login", "path": "/login" }' });
+    expect(() => extra.library.definePages('pages', { cwd: extra.dir })).toThrow(
+      '"path" is not part of a page. A page has "name", "url" and "elements".',
+    );
+  });
+
+  it('name both files when two pages have the same name', async () => {
+    const { dir, library } = await folder({
+      'pages/login.json': '{ "name": "Login", "url": "/login" }',
+      'pages/sign-in.json': '{ "name": "Login", "url": "/sign-in" }',
+    });
+    const spy = vi.spyOn(process, 'cwd').mockReturnValue(dir);
+    try {
+      expect(() => library.definePages('pages', { cwd: dir })).toThrow(
+        `The page "Login" is defined twice (${path.join('pages', 'login.json')}, ${path.join('pages', 'sign-in.json')}).`,
+      );
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it("are not loaded from an app's pages/ folder", async () => {
+    const { dir } = await folder({
+      'pages/index.tsx': 'export default function Home() {}',
+      'pages/data.json': '{ "title": "not a page" }',
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.resetModules();
+    const { loadProjectFiles } = await import('../../src/project');
+    const { getPageDefinitions } = await import('../../src/pages');
+    loadProjectFiles(dir);
+    expect(getPageDefinitions()).toEqual([]);
+    expect(warn.mock.calls[0][0]).toContain('pages/ holds app files such as pages/index.tsx');
+    warn.mockRestore();
   });
 });
 

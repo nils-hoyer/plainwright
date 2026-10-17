@@ -49,5 +49,5 @@ import './steps/download.steps';
 import './steps/data.steps';
 import { loadProjectFiles } from './project';
 
-// Loads .env, pages.json, data/ and keywords/ from the project folder.
+// Loads .env, pages/, data/ and keywords/ from the project folder.
 loadProjectFiles();

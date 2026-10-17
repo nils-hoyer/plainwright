@@ -9,12 +9,12 @@ library, see `templates/AGENTS.md`.)
 ```
 src/
   index.ts          public API; importing it registers the built-in steps and loads project files
-  project.ts        loads .env, pages.json, data/ and keywords/ from the project folder
+  project.ts        loads .env, pages/, data/ and keywords/ from the project folder
   registry.ts       defineStep / findStep: the single source of truth for steps; fills in {values}
   values.ts         defineData, remembered values and {references} inside quotes
   params.ts         {element} and {number} parameter types, defineParameterType
   elements.ts       element types and how each is located; missing-element hints
-  pages.ts          definePage, definePages (pages.json) and aliases
+  pages.ts          definePage, definePages (a folder of page files) and aliases
   world.ts          per-scenario state: active tab, frame, page definition, dialogs, download,
                     last API response, actions after the test
   fixtures.ts       the Playwright `test` with the `world` fixture
@@ -25,7 +25,7 @@ test/
   features/         end-to-end tests; they double as examples (no selectors allowed)
   keywords/         keywords used by the tests
   steps/            test setup: exported test, page definitions, keywords, data, a test helper step
-  pages.json, data/ pages and test data, loaded by test/steps/
+  pages/, data/     pages and test data, loaded by test/steps/
   test-app/         static pages served by test/server.mjs, which also has a small /api/orders
   unit/             vitest unit tests
 ```

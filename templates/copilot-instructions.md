@@ -16,7 +16,7 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 2. **Look at the real page.** Run
    `npx plainwright inspect "<page name or URL>" --base-url <base URL>`.
    Use element names exactly as printed (`the "Log in" button`). If an element you need has no
-   name, add an alias to the page in `pages.json` instead of using a selector.
+   name, add an alias to the page's file in `pages/` instead of using a selector.
 3. **Write the scenario** in an existing feature file or a new one. One scenario tests one thing;
    its title says what it shows.
 4. **Lint:** `npx plainwright lint --features "features/**/*.feature"`.
@@ -44,7 +44,8 @@ Adjust the paths below if this project keeps features or steps elsewhere.
   `data/users.json`, `"{env.TEST_PASSWORD}"` for secrets, `"{order.id}"` for a value an earlier
   step remembered, `"{unique}"` for a value that differs in every test. Never write passwords or
   other secrets into feature or data files.
-- Shared test data goes into JSON files in `data/`; named pages go into `pages.json`.
+- Shared test data goes into JSON files in `data/`. A named page is one file in `pages/`:
+  `{ "name": "Orders", "url": "/orders" }`.
 - Repeated sequences of steps become a keyword: a `Scenario Outline:` in `keywords/*.feature`
   whose title is the new step, with parameters written `"<name>"`.
 - Data a test needs first is a `Given` keyword such as `there is an order for "<item>"`: it

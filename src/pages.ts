@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { globSync } from 'tinyglobby';
 import type { ElementAlias } from './elements';
 
 export type PageOptions = {
@@ -25,6 +26,8 @@ export type PageDefinition = {
 
 const pages = new Map<string, PageDefinition>();
 const loadedFiles = new Set<string>();
+/** The file of each page defined in a pages folder. */
+const sources = new Map<string, string>();
 
 /**
  * Defines a page that feature files can refer to by name:
@@ -36,11 +39,22 @@ const loadedFiles = new Set<string>();
  *
  *   * I open the "Login" page
  */
-export function definePage(name: string, options: PageOptions = {}): PageDefinition {
+export function definePage(
+  name: string,
+  options: PageOptions = {},
+  /** Internal: the file the page comes from, for messages. */
+  source?: string,
+): PageDefinition {
   if (!name.trim()) throw new Error('[plainwright] definePage() needs a page name.');
   if (pages.has(name)) {
-    throw new Error(`[plainwright] The page "${name}" is defined twice.`);
+    const files = [sources.get(name), source].filter(Boolean);
+    throw new Error(
+      `[plainwright] The page "${name}" is defined twice` +
+        (files.length ? ` (${files.join(', ')}).` : '.') +
+        ' Page names must be different.',
+    );
   }
+  if (source) sources.set(name, source);
   const page: PageDefinition = Object.freeze({
     name,
     url: options.url,
@@ -56,7 +70,7 @@ export function getPageDefinition(name: string): PageDefinition {
   const known = [...pages.keys()].map((n) => `"${n}"`).join(', ') || '(none)';
   throw new Error(
     `[plainwright] No page named "${name}". Defined pages: ${known}. ` +
-      `Define it with definePage('${name}', { url: '...' }).`,
+      `Add it as a file in pages/: { "name": "${name}", "url": "/..." }.`,
   );
 }
 
@@ -65,65 +79,58 @@ export function getPageDefinitions(): PageDefinition[] {
 }
 
 /**
- * Defines the pages in a JSON file. The key is the page name, the value its address, or an
- * object with `url` and `elements` (aliases as selectors):
+ * Defines the pages in a folder of JSON files, one page per file:
  *
- *   {
- *     "Login": "/login",
- *     "Order": "/orders/*",
- *     "Orders": { "url": "/orders", "elements": { "Search": "[data-testid=search]" } }
- *   }
+ *   // pages/orders.json
+ *   { "name": "Orders", "url": "/orders", "elements": { "Search": "[data-testid=search]" } }
  *
- * `pages.json` in the project folder loads by itself. The path is relative to the current
- * working directory, like defineKeywords(); a file that is already loaded is skipped.
+ * `url` may contain `*` (any text without `/`) and `**` (any text); such a page can only be
+ * checked. `pages/` in the project folder loads by itself. The path is relative to the current
+ * working directory, like defineKeywords(); files that are already loaded are skipped.
  */
-export function definePages(file: string, options: { cwd?: string } = {}): PageDefinition[] {
-  const absolute = path.resolve(options.cwd ?? process.cwd(), file);
-  if (loadedFiles.has(absolute)) return [];
-  const rel = path.relative(process.cwd(), absolute) || absolute;
-  let content: unknown;
-  try {
-    content = JSON.parse(fs.readFileSync(absolute, 'utf8'));
-  } catch (error) {
-    throw new Error(`[plainwright] ${rel}: ${(error as Error).message}`);
-  }
-  if (!isObject(content)) {
-    throw new Error(`[plainwright] ${rel}: Write the pages as { "Page name": "/address" }.`);
-  }
-  loadedFiles.add(absolute);
-  const defined: PageDefinition[] = [];
-  for (const [name, entry] of Object.entries(content)) {
-    if (name === '$schema') continue;
-    const where = `[plainwright] ${rel}: The page "${name}"`;
-    if (typeof entry === 'string') {
-      defined.push(definePage(name, { url: entry }));
-      continue;
-    }
-    if (!isObject(entry)) {
-      throw new Error(`${where} needs an address ("/...") or { "url": "/..." }.`);
-    }
-    const unknown = Object.keys(entry).filter((key) => key !== 'url' && key !== 'elements');
-    if (unknown.length) {
-      throw new Error(`${where} has "${unknown[0]}". A page has only "url" and "elements".`);
-    }
-    if (entry.url !== undefined && typeof entry.url !== 'string') {
-      throw new Error(`${where} needs its "url" as text.`);
-    }
-    if (entry.elements !== undefined) {
-      const elements = entry.elements;
-      if (!isObject(elements) || Object.values(elements).some((v) => typeof v !== 'string')) {
-        throw new Error(`${where} needs "elements" as { "Name": "selector" }.`);
-      }
-    }
-    defined.push(
-      definePage(name, {
-        url: entry.url as string | undefined,
-        elements: entry.elements as Record<string, string> | undefined,
-      }),
-    );
-  }
-  return defined;
+export function definePages(folder: string, options: { cwd?: string } = {}): PageDefinition[] {
+  const root = path.resolve(options.cwd ?? process.cwd(), folder);
+  const files = globSync('**/*.json', { cwd: root, absolute: true }).sort();
+  return files.filter((file) => !loadedFiles.has(file)).map(definePageFile);
 }
+
+function definePageFile(file: string): PageDefinition {
+  const rel = path.relative(process.cwd(), file) || file;
+  let page: unknown;
+  try {
+    page = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (error) {
+    throw new Error(`[plainwright] ${rel}: Not valid JSON. ${(error as Error).message}`);
+  }
+  const fail = (message: string) => {
+    throw new Error(`[plainwright] ${rel}: ${message}`);
+  };
+  if (!isObject(page)) return fail('Write the page as { "name": "Login", "url": "/login" }.');
+  const unknown = Object.keys(page).find((key) => !PAGE_KEYS.includes(key));
+  if (unknown) return fail(`"${unknown}" is not part of a page. A page has ${PAGE_KEYS_TEXT}.`);
+  if (typeof page.name !== 'string' || !page.name.trim()) {
+    return fail('The page needs a "name", the name tests use: I open the "Login" page.');
+  }
+  if (page.url !== undefined && typeof page.url !== 'string') {
+    return fail('The "url" of the page must be text, e.g. "/login".');
+  }
+  const elements = page.elements;
+  if (
+    elements !== undefined &&
+    (!isObject(elements) || Object.values(elements).some((value) => typeof value !== 'string'))
+  ) {
+    return fail('Write "elements" as { "Name": "selector" }.');
+  }
+  loadedFiles.add(file);
+  return definePage(
+    page.name,
+    { url: page.url, elements: elements as Record<string, string> | undefined },
+    rel,
+  );
+}
+
+const PAGE_KEYS = ['$schema', 'name', 'url', 'elements'];
+const PAGE_KEYS_TEXT = '"name", "url" and "elements"';
 
 /** Whether the address has `*`, so it can only be checked, not opened. */
 export function isUrlPattern(url: string | RegExp | undefined): boolean {

@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://unpkg.com/@nils.hoyer/plainwright/schema/page.json",
+  "title": "Plainwright page",
+  "description": "One named page for feature files: I open the \"Login\" page. One file per page in pages/.",
+  "type": "object",
+  "required": ["name"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The name tests use: I open the \"Login\" page, I am on the \"Login\" page.",
+      "examples": ["Login", "Account settings"]
+    },
+    "url": {
+      "type": "string",
+      "description": "Address of the page, relative to baseURL (\"/login\") or absolute. * stands for any text without /, ** for any text; such a page can only be checked (I am on the \"...\" page), not opened.",
+      "examples": ["/login", "/orders/*"]
+    },
+    "elements": {
+      "type": "object",
+      "description": "Names for elements without a usable visible name (aliases). The key is the name used in feature files, or name and type as written in the step (\"\\\"Settings\\\" button\"); the value is a selector.",
+      "additionalProperties": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}

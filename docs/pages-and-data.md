@@ -15,19 +15,22 @@ that a test creates first is a keyword. TypeScript stays possible, at the end of
 
 ## Named pages
 
-Give pages a name and their address in `pages.json` in the project folder:
+Each page is a small JSON file in `pages/`, with its name and its address:
 
-```json
-{
-  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
-  "Login": "/login",
-  "Dashboard": "/dashboard",
-  "Order": "/orders/*"
-}
+```
+pages/
+  login.json
+  dashboard.json
+  order.json
 ```
 
-The `$schema` line lets VS Code suggest and check what you write. Tests then use the name instead
-of the address:
+```json
+// pages/login.json
+{ "name": "Login", "url": "/login" }
+```
+
+`name` is what tests write, with the same spelling and capitals; the file name is up to you.
+Tests then use the name instead of the address:
 
 ```gherkin
 * I open the "Login" page
@@ -43,8 +46,27 @@ of the address:
 | `I use the page object "Login"` | makes it the current page without opening or checking (advanced) |
 
 When an address changes, you change it in one place. In an address, `*` stands for any text
-without `/` and `**` for any text. Such a page, like `"Order": "/orders/*"`, can only be checked
-with `I am on the "Order" page`, not opened.
+without `/` and `**` for any text. Such a page, like `{ "name": "Order", "url": "/orders/*" }`,
+can only be checked with `I am on the "Order" page`, not opened.
+
+VS Code suggests and checks what you write in these files with one setting, which the starter
+already has:
+
+```jsonc
+// .vscode/settings.json
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["**/pages/**/*.json"],
+      "url": "./node_modules/@nils.hoyer/plainwright/schema/page.json",
+    },
+  ],
+}
+```
+
+If your app has its own `pages/` folder with source files (Next.js, Nuxt, Astro), Plainwright
+leaves it alone and says so; keep the page files in another folder and load it with
+`definePages('<folder>')` (see [in TypeScript](#in-typescript)).
 
 ### The current page and aliases
 
@@ -52,11 +74,11 @@ Some elements have no visible name, such as an icon-only button. A page can give
 alias:
 
 ```json
+// pages/orders.json
 {
-  "Orders": {
-    "url": "/orders",
-    "elements": { "Search": "[data-testid=search]" }
-  }
+  "name": "Orders",
+  "url": "/orders",
+  "elements": { "Search": "[data-testid=search]" }
 }
 ```
 
@@ -69,7 +91,7 @@ visible name work on any page. More about aliases in [setup](setup.md#elements-w
 
 A classic page object is a class per page with selectors and methods. In Plainwright:
 
-- **Addresses** go into `pages.json`.
+- **Addresses** go into a file per page in `pages/`, like a page object per page.
 - **Selectors** are only needed as aliases for elements without a visible name.
 - **Methods** such as `login()` become keywords: a new sentence made of existing steps, in
   `keywords/*.feature`, that reviewers can read. See [your own steps](writing-steps.md#keywords).
@@ -106,7 +128,8 @@ A `Scenario Outline` in `features/` is a test; in `keywords/` it defines a new s
 
 ### Data files
 
-Data that many tests share, such as users or products, goes into JSON files in `data/`:
+Data that many tests share, such as users or products, goes into JSON files in `data/` (what
+Cypress calls fixtures; in Playwright, fixtures are something else, see [fixtures](#fixtures)):
 
 ```json
 // data/users.json
@@ -280,7 +303,7 @@ definePage('Orders', {
   elements: { 'Order total': (scope) => scope.getByTestId('summary').locator('.total') },
 });
 
-definePages('config/pages.json'); // a pages file somewhere else
+definePages('e2e/pages'); // page files in another folder
 defineData('fixtures/data'); // data files somewhere else
 ```
 
@@ -334,7 +357,7 @@ cannot be used inside keywords. A step in TypeScript can remember a value for la
 | -------------------- | --------------------------------------------------------- | ----------------- |
 | `features/*.feature` | the tests                                                 | by playwright-bdd |
 | `keywords/*.feature` | your own sentences made of existing steps                 | by itself         |
-| `pages.json`         | named pages and aliases                                   | by itself         |
+| `pages/*.json`       | named pages and aliases, one page per file                | by itself         |
 | `data/*.json`        | test data, written `{file.key}` in steps                  | by itself         |
 | `.env`               | secrets and settings, written `{env.NAME}`; not committed | by itself         |
 | `steps/*.ts`         | steps, pages and fixtures in TypeScript (optional)        | by playwright-bdd |

@@ -5,7 +5,7 @@ or a QA engineer who knows the app's addresses. After that, people write tests i
 without touching any of this.
 
 The quickest way is to start from the [starter](../examples/starter) and change three things:
-`baseURL` in `playwright.config.ts`, the pages in `pages.json`, and the `webServer` entry
+`baseURL` in `playwright.config.ts`, the pages in `pages/`, and the `webServer` entry
 (start your app there, or remove it if the app is already running somewhere).
 
 ## Adding Plainwright to an existing project
@@ -52,19 +52,17 @@ npm pkg set scripts.test="bddgen && playwright test"
 
 No step file is needed. To add your own fixtures, see [your own steps](writing-steps.md#your-own-fixtures).
 
-**3. Optional: name your pages** in `pages.json`, so tests say `I open the "Login" page`
-instead of `I open the url "/login"`. More in [pages, test data and fixtures](pages-and-data.md).
+**3. Optional: name your pages,** one file each in `pages/`, so tests say
+`I open the "Login" page` instead of `I open the url "/login"`. More, including the VS Code
+setting that checks these files, in [pages, test data and fixtures](pages-and-data.md).
 
 ```json
-{
-  "$schema": "./node_modules/@nils.hoyer/plainwright/schema/pages.json",
-  "Login": "/login",
-  "Orders": "/orders"
-}
+// pages/login.json
+{ "name": "Login", "url": "/login" }
 ```
 
-`pages.json`, test data in `data/`, keywords in `keywords/` and a `.env` file load by themselves
-from the project folder.
+Pages in `pages/`, test data in `data/`, keywords in `keywords/` and a `.env` file load by
+themselves from the project folder.
 
 **4. Write a feature** in `features/` and run it with `npm test`. More
 commands are in [commands](commands.md).
@@ -85,17 +83,17 @@ Checks (`I see …`) wait up to 5 seconds, Playwright's `expect.timeout`.
 ## Elements without a usable name: aliases
 
 A step finds an element by what the user sees. Some elements show nothing usable: an icon-only
-button, a field without a label. Give them a name in `pages.json`; the alias applies while that
-page is open.
+button, a field without a label. Give them a name in the page's file; the alias applies while
+that page is open.
 
 ```json
+// pages/orders.json
 {
-  "Orders": {
-    "url": "/orders",
-    "elements": {
-      "Search": "[data-testid=search]",
-      "\"Settings\" button": "[data-testid=settings]"
-    }
+  "name": "Orders",
+  "url": "/orders",
+  "elements": {
+    "Search": "[data-testid=search]",
+    "\"Settings\" button": "[data-testid=settings]"
   }
 }
 ```
