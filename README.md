@@ -11,7 +11,8 @@
 Plainwright is built on [Playwright](https://playwright.dev/) and comes with more than 100
 ready-made steps for what you do in a browser. You put these sentences together into tests, or
 let an AI assistant do it, and anyone on the team can check what a test does, without
-programming.
+programming. Unlike Cucumber, you write no code behind the steps: they exist already, find
+elements by what the user sees, and run on the Playwright runner with its report and traces.
 
 ```gherkin
 Feature: Orders
@@ -47,7 +48,7 @@ In an existing project, `init` overwrites no file and says what it left out. To 
 up by hand instead, see [setup](docs/setup.md).
 
 Open the folder in VS Code and install the Cucumber extension when VS Code suggests it. It
-suggests steps while you type and marks sentences that don't exist. More in
+suggests steps while you type and marks steps that don't exist. More in
 [editor support](docs/ide-support.md).
 
 ### Your first test
@@ -81,14 +82,14 @@ All these steps are ready-made. The ones you will use most:
 | check a state          | `I see the "Log in" button is disabled`          |
 | check where you are    | `I see the url "/dashboard"`                     |
 
-Every sentence is in the [step reference](docs/steps.md), and VS Code can suggest them while you
-type ([editor support](docs/ide-support.md)).
+Every step is in the [step reference](docs/steps.md). How tests are built, how elements are
+found and how checks wait is in [writing tests](docs/writing-tests.md).
 
-### Your own sentences
+### Keywords: your own steps
 
-Steps you repeat become a keyword: a new sentence made of existing steps, written in a feature
-file in `keywords/`. The title is the new sentence, and each `"<name>"` in it is a value you
-fill in when you use it.
+Steps you repeat become a keyword: your own step, made of existing steps, written in a feature
+file in `keywords/`. The title is the new step, and each `"<name>"` in it is a value you fill
+in when you use it.
 
 ```gherkin
 # keywords/account.feature
@@ -121,7 +122,8 @@ Feature: Orders
 ```
 
 The report shows the four login steps nested under `I log in as …`, and `lint` and the editor
-know the new sentence like any other. Files in `keywords/` load by themselves.
+know the new step like any other. Files in `keywords/` load by themselves. More in
+[keywords](docs/keywords.md).
 
 ### Pages
 
@@ -145,6 +147,8 @@ Tests use the names, and the selector stays in the page file:
 * I see the text "Order 1001"
 ```
 
+More in [pages](docs/pages.md).
+
 ### Test data
 
 Data that many tests share goes into JSON files in `data/`:
@@ -162,48 +166,46 @@ A step refers to it in braces inside the quotes. Passwords come from environment
 * I fill "{env.TEST_PASSWORD}" in the "Password" field
 ```
 
-Data a test needs first, such as an order to refund, is a keyword that creates it through your
-app's API and deletes it after the test:
-
-```gherkin
-Scenario: A paid order can be refunded
-  Given there is an order for "Coffee"
-  When I open the url "/orders/{order.id}"
-  And I click the "Refund" button
-  Then I see the "Order refunded" message
-```
-
-How to write that keyword, and everything else about pages and data, is in
-[pages, test data and fixtures](docs/pages-and-data.md).
+Data a test needs first, such as an order to refund, can be created through your app's API and
+deleted after the test. How, and everything else about data, is in [test data](docs/test-data.md).
 
 ## Learn more
 
-- [Setup](docs/setup.md): connect Plainwright to your app.
-- [Pages, test data and fixtures](docs/pages-and-data.md): named pages, data files, secrets and
-  test data created through your app's API.
-- [Logging in once](docs/logging-in.md): stay logged in across tests.
-- [Step reference](docs/steps.md): every sentence with an example.
-- [Editor support](docs/ide-support.md): suggestions for sentences in VS Code.
+**Write tests**
+
+- [Writing tests](docs/writing-tests.md): scenarios, elements, checks, tags.
+- [Pages](docs/pages.md): named pages, and names for elements that have none.
+- [Test data](docs/test-data.md): data files, passwords, data created through your app's API.
+- [Keywords](docs/keywords.md): your own steps, made of existing steps.
 - [AI authoring](docs/ai-authoring.md): let an assistant write tests.
-- [Reading tests](docs/reading-tests.md): one page for reviewers.
+
+**Review tests**
+
+- [Reading tests](docs/reading-tests.md): one page for reviewers, about tests and the report.
+
+**Set up and run**
+
+- [Setup](docs/setup.md): what `init` wrote, the configuration, other environments, CI.
+- [Logging in once](docs/logging-in.md): start tests logged in.
 - [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.
-- [Your own steps](docs/writing-steps.md): keywords, steps in TypeScript, fixtures.
-- [Vocabulary rules](docs/vocabulary.md): how sentences are worded.
-- Coming from another tool: [Gauge](docs/migrating-from-gauge.md) ·
-  [Robot Framework](docs/coming-from-robot-framework.md)
+- [Editor support](docs/ide-support.md): suggestions for steps in VS Code.
+
+**Extend**
+
+- [Steps in TypeScript](docs/writing-steps.md): your own steps in code, fixtures.
+
+**Reference**
+
+- [Step reference](docs/steps.md): every step with an example.
+- [Vocabulary rules](docs/vocabulary.md): how steps are worded.
+- [Versioning](docs/versioning.md): what counts as a breaking change, before and after 1.0.
+
+**Coming from another tool:** [Gauge](docs/migrating-from-gauge.md) ·
+[Robot Framework](docs/coming-from-robot-framework.md)
 
 ## Contributing
 
-1. Open an issue that describes the problem and the expected behaviour. A new core step also
-   needs an update to the [reviewer guide](docs/reading-tests.md).
-2. Install dependencies with `npm ci` and the browser with `npx playwright install chromium`.
-3. Make your change in `src/` (built-in steps in `src/steps/`), with tests: unit tests in
-   `test/unit/`, feature files in `test/features/` against the app in `test/test-app/`.
-4. Run `npm run verify` (format, types, generated docs, feature lint, unit and end-to-end tests).
-   It must pass; `npm run docs` updates the generated docs.
-5. Open a pull request with the implementation and tests. Its title appears in the release
-   notes, so describe the change for users. Don't change the version in `package.json`: the
-   maintainer releases from GitHub Actions, which increases it.
+Issues and pull requests are welcome: see [contributing](CONTRIBUTING.md).
 
 ## License
 
