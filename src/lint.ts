@@ -109,7 +109,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           add(
             'error',
             'selector',
-            `"${name}" looks like a selector. Name the element by what the user sees, or add an alias with definePage().`,
+            `"${name}" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/.`,
           );
         }
       }

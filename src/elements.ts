@@ -321,7 +321,12 @@ export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Loc
  * the page, or of the container the element is named in.
  * Example: `No "Log in" button found. Buttons on this page: "Sign in", "Forgot password?"`.
  */
-export function describeMissing(ref: ElementRef, snapshot: string, pageName?: string): string {
+export function describeMissing(
+  ref: ElementRef,
+  snapshot: string,
+  pageName?: string,
+  pageFile?: string,
+): string {
   const where = ref.container
     ? ` in the ${ref.container}`
     : pageName
@@ -343,10 +348,13 @@ export function describeMissing(ref: ElementRef, snapshot: string, pageName?: st
     const offered = ref.container ? `in the ${ref.container}` : 'on this page';
     lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? shown.join(', ') : '(none)'}.`);
   }
+  const alias = `"elements": { ${JSON.stringify(ref.name)}: "<selector>" }`;
   lines.push(
-    pageName
-      ? `If the element has no visible name, add an alias: definePage('${pageName}', { elements: { '${ref.name}': '<selector>' } }).`
-      : 'If the element has no visible name, define the page with definePage() and add an alias.',
+    pageFile
+      ? `If the element has no visible name, add an alias to ${pageFile}: ${alias}.`
+      : pageName
+        ? `If the element has no visible name, add an alias: definePage('${pageName}', { elements: { '${ref.name}': '<selector>' } }).`
+        : `If the element has no visible name, add an alias in the page's file in pages/, ${alias}, and open the page by name: I open the "…" page.`,
   );
   return lines.join('\n');
 }

@@ -64,6 +64,11 @@ export function definePage(
   return page;
 }
 
+/** The file in a pages folder the page comes from, relative to the project folder, if any. */
+export function getPageSource(name: string): string | undefined {
+  return sources.get(name);
+}
+
 export function getPageDefinition(name: string): PageDefinition {
   const page = pages.get(name);
   if (page) return page;

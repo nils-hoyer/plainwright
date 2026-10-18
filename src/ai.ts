@@ -17,8 +17,8 @@ Rules:
 - Take element names exactly from the ARIA snapshot below. Never use CSS, XPath or test IDs.
 - When several elements share a name, name the element they are in:
   the "Delete" button in the "Order 1001" row.
-- If the element has no visible name, suggest an alias in the page definition instead:
-  definePage('<Page>', { elements: { '<Name>': '<selector>' } }).
+- If the element has no visible name, suggest an alias in the page's file in pages/ instead:
+  "elements": { "<Name>": "<selector>" }.
 - Checks start with "I see" or "I do not see" and already wait. Do not add fixed waits.
 - If the scenario looks right and the page behaves wrongly, say that it may be a bug in the app.
 

@@ -8,7 +8,7 @@ import type {
 } from '@playwright/test';
 import { test } from '@playwright/test';
 import { describeMissing, ElementRef, locate, Scope } from './elements';
-import { getPageDefinition, PageDefinition } from './pages';
+import { getPageDefinition, getPageSource, PageDefinition } from './pages';
 import { remember } from './values';
 
 export type WorldOptions = {
@@ -212,7 +212,8 @@ export class World {
       ? this.element(missing.container).first()
       : this.scope.locator('body');
     const snapshot = await where.ariaSnapshot({ timeout: 2000 }).catch(() => '');
-    const hint = describeMissing(missing, snapshot, this.#currentPage?.name);
+    const page = this.#currentPage?.name;
+    const hint = describeMissing(missing, snapshot, page, page && getPageSource(page));
     const original = error.message;
     error.message = `${hint}\n\n${original}`;
     if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
