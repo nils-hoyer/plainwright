@@ -1,12 +1,17 @@
 <p align="center">
-  <img src="docs/images/banner.svg" alt="Plainwright: browser tests as plain English sentences" width="720">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/wordmark-dark.png">
+    <img src="docs/images/wordmark-light.png" alt="Plainwright" height="44">
+  </picture>
 </p>
 
-# Plainwright
+<p align="center">Browser tests as plain English sentences</p>
 
-[![npm](https://img.shields.io/npm/v/@nils.hoyer/plainwright)](https://www.npmjs.com/package/@nils.hoyer/plainwright)
-[![CI](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg)](https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml)
-[![Sponsor](https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub)](https://github.com/sponsors/nils-hoyer)
+<p align="center">
+  <a href="https://www.npmjs.com/package/@nils.hoyer/plainwright"><img src="https://img.shields.io/npm/v/@nils.hoyer/plainwright" alt="npm"></a>
+  <a href="https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml"><img src="https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/sponsors/nils-hoyer"><img src="https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub" alt="Sponsor"></a>
+</p>
 
 Plainwright is built on [Playwright](https://playwright.dev/) and comes with more than 100
 ready-made steps for what you do in a browser. You put these sentences together into tests, or

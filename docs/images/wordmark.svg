@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="48" viewBox="0 0 260 48" role="img" aria-labelledby="title">
+  <!-- Source of wordmark-light.png and wordmark-dark.png: npm run images -->
+  <title id="title">Plainwright</title>
+  <style>
+    .name { font-family: Inter, sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.5px; fill: #1f2328; }
+    .plain { fill: #2a9d30; }
+    svg.dark .name { fill: #f0f6fc; }
+    svg.dark .plain { fill: #4cc552; }
+  </style>
+  <image href="logo.svg" x="0" y="2" width="44" height="44"/>
+  <text class="name" x="52" y="36"><tspan class="plain">Plain</tspan>wright</text>
+</svg>

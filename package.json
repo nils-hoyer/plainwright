@@ -39,6 +39,7 @@
     "typecheck": "tsc --noEmit",
     "docs": "jiti scripts/docs.ts",
     "docs:check": "jiti scripts/docs.ts --check",
+    "images": "jiti scripts/images.ts",
     "lint:features": "jiti src/cli.ts lint --features 'test/features/**/*.feature' --steps 'test/steps/**/*.ts' --quiet",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",
