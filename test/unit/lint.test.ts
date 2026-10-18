@@ -14,13 +14,13 @@ describe('lint', () => {
   it('reports problems as file:line: severity: message', () => {
     expect(messages.map(formatLintMessage)).toEqual([
       `${file}:4: error: "https://example.com/login" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL. (absolute-url)`,
-      `${file}:5: error: "#submit" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
+      `${file}:5: error: "#submit" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
       `${file}:6: error: Unknown step "I clik the "Log in" button". Did you mean "I click the "Log in" button"? (undefined-step)`,
-      `${file}:7: error: "[data-testid='username']" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
+      `${file}:7: error: "[data-testid='username']" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
       `${file}:8: warning: Fixed waits slow tests down and still break on slow days. Check for what the user waits for instead, e.g. I see the text "...". (discouraged-step)`,
       `${file}:8: info: "I wait {number} second(s)" is an advanced step. (advanced-step)`,
       `${file}:9: info: "I focus on the {element}" is an advanced step. (advanced-step)`,
-      `${file}:10: error: ".order-row" looks like a selector. Name the element by what the user sees, or add an alias with definePage(). (selector)`,
+      `${file}:10: error: ".order-row" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
     ]);
   });
 

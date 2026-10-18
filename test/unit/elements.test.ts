@@ -228,6 +228,20 @@ describe('aria snapshot', () => {
     );
   });
 
+  it('points to the file of the page for an alias', () => {
+    expect(
+      describeMissing(new ElementRef('Log on', 'button'), snapshot, 'Login', 'pages/login.json'),
+    ).toContain(
+      'If the element has no visible name, add an alias to pages/login.json: "elements": { "Log on": "<selector>" }.',
+    );
+  });
+
+  it('points to the pages folder when no page is open', () => {
+    expect(describeMissing(new ElementRef('Log on', 'button'), snapshot)).toContain(
+      `add an alias in the page's file in pages/, "elements": { "Log on": "<selector>" }, and open the page by name`,
+    );
+  });
+
   it('says when the page has no element of that type', () => {
     expect(describeMissing(new ElementRef('Agree', 'checkbox'), snapshot)).toContain(
       'Checkboxes on this page: (none).',
