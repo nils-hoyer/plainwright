@@ -5,6 +5,14 @@ what a test checks and confirm the result in the report.
 
 ## A test is a list of sentences
 
+- **Feature** names the area being tested. **Scenario** is one test. Its title says what it shows.
+- **Background** steps run before every scenario of the feature.
+- Each line starting with `*` is a **step**. Steps run from top to bottom. The test stops at the
+  first step that fails.
+- `Given`, `When`, `Then`, `And` may appear instead of `*`. They mean the same; they only help
+  reading.
+- Lines starting with `#` are comments.
+
 ```gherkin
 Feature: Login
 
@@ -18,28 +26,22 @@ Feature: Login
     * I see the text "Username and password are incorrect."
 ```
 
-- **Feature** names the area being tested. **Scenario** is one test. Its title says what it shows.
-- **Background** steps run before every scenario of the feature.
-- Each line starting with `*` is a **step**. Steps run from top to bottom. The test stops at the
-  first step that fails.
-- `Given`, `When`, `Then`, `And` may appear instead of `*`. They mean the same; they only help
-  reading.
-- Lines starting with `#` are comments.
-
 ## How a step is built
 
 Everything in double quotes is **data**: text to type, a name on the screen, an expected value.
-The rest of the sentence is **fixed** and means the same everywhere.
-
-> I fill **"wrongpassword"** in the **"Password" field**
+The rest of the sentence is **fixed** and means the same everywhere. In the step below:
 
 - `I fill … in …` is the action.
 - `"wrongpassword"` is the text typed.
 - `the "Password" field` is the element: its visible name, then its type.
 
-A name in braces inside the quotes is a **value from somewhere else**:
+> I fill **"wrongpassword"** in the **"Password" field**
 
-> I fill **"{users.admin.email}"** in the **"Email" field**
+### Values from somewhere else
+
+A name in braces inside the quotes is a **value from somewhere else**. In the report, a line
+under the step shows the value used: `{users.admin.email} = "admin@example.com"`. Secrets show
+as `(hidden)`.
 
 - `{users.admin.email}` comes from the team's data file `data/users.json`: the `email` of
   `admin`.
@@ -49,8 +51,7 @@ A name in braces inside the quotes is a **value from somewhere else**:
   order.
 - `{unique}` is a text that differs in every test; `{today}` is today's date.
 
-In the report, a line under the step shows the value used: `{users.admin.email} =
-"admin@example.com"`. Secrets show as `(hidden)`.
+> I fill **"{users.admin.email}"** in the **"Email" field**
 
 ## Element types
 
@@ -58,6 +59,15 @@ The word after the name says what kind of element is meant. The test looks for a
 that kind whose visible name is exactly the text in quotes (same spelling and capitals). Rows,
 list items and messages are the exception: they are found by text they contain, because
 their full text is long.
+
+When several elements have the same name, the step says which one by naming the element it is
+in: `the "Delete" button in the "Order 1001" row` is the "Delete" button in the table row that
+contains "Order 1001". This can go further: `the "Edit" link in the "Total" cell in the "Order
+1001" row`.
+
+A team can give an element a name when the screen shows none (for example an icon-only button).
+Such a name, an alias, is defined once in the page's file in `pages/`, which anyone on the team
+can read and change.
 
 <!-- generated:element-types -->
 
@@ -84,19 +94,16 @@ their full text is long.
 
 <!-- /generated:element-types -->
 
-When several elements have the same name, the step says which one by naming the element it is
-in: `the "Delete" button in the "Order 1001" row` is the "Delete" button in the table row that
-contains "Order 1001". This can go further: `the "Edit" link in the "Total" cell in the "Order
-1001" row`.
-
-A team can give an element a name when the screen shows none (for example an icon-only button).
-Such a name, an alias, is defined once in the page's file in `pages/`, which anyone on the team
-can read and change.
-
 ## What the checks mean
 
 Steps that start with **`I see`** or **`I do not see`** are checks. They wait up to 5 seconds for
 the page to get there, so a slow page does not fail the test by itself.
+
+"Contains" means the text can be part of a longer text, with the same spelling and capitals:
+`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a field
+value, a page address or "exactly the text" compare the whole value. Because capitals count, a
+negative check passes when only the capitals differ: `I do not see the text "error"` passes on a
+page that shows "Error". Write the text exactly as the page shows it.
 
 | Step                                          | Passes when                                      |
 | --------------------------------------------- | ------------------------------------------------ |
@@ -107,14 +114,6 @@ the page to get there, so a slow page does not fail the test by itself.
 | `I see the value "Jane" in the "Name" field`  | the field contains exactly this value            |
 | `I see the "Log in" button is disabled`       | the button is shown but cannot be used           |
 | `I am on the "Dashboard" page`                | the browser shows the address of that page       |
-
-"Contains" means the text can be part of a longer text, with the same spelling and capitals:
-`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a field
-value, a page address or "exactly the text" compare the whole value.
-
-Because capitals count, a negative check passes when only the capitals differ:
-`I do not see the text "error"` passes on a page that shows "Error". Write the text exactly as
-the page shows it.
 
 ## Pages
 

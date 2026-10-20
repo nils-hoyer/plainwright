@@ -8,7 +8,9 @@ works with Plainwright unchanged, because the tests run on the Playwright runner
 ## 1. A setup file that logs in
 
 The setup is plain Playwright code. It runs once per run, before the scenarios that need it,
-and reviewers do not need to read it.
+and reviewers do not need to read it. Keep the session file out of git: add
+`playwright/.auth/` to `.gitignore`. Take the password from the environment, a `.env` file or
+your CI secrets, not from the code.
 
 ```ts
 // setup/login.setup.ts
@@ -25,14 +27,13 @@ setup('log in', async ({ page }) => {
 });
 ```
 
-Keep the session file out of git: add `playwright/.auth/` to `.gitignore`. Take the password
-from the environment, a `.env` file or your CI secrets, not from the code.
-
 ## 2. Projects that use the session
 
 Add `projects` to `playwright.config.ts`. The setup project has its own `testDir`, so it only
 runs the setup file. A second project depends on it and starts every test with the saved
-session. Your `projects` replace the default one, so each names its browser.
+session. Your `projects` replace the default one, so each names its browser. With
+[your own Playwright configuration](setup.md#with-your-own-playwright-configuration), the
+`projects` are the same; keep `testDir` from `defineBddConfig()` at the top level.
 
 ```ts
 // playwright.config.ts
@@ -58,11 +59,12 @@ export default defineConfig({
 });
 ```
 
-With [your own Playwright configuration](setup.md#with-your-own-playwright-configuration), the
-`projects` are the same; keep `testDir` from `defineBddConfig()` at the top level.
+## 3. Scenarios that test the login
 
 Scenarios now start logged in. Scenarios that test the login itself are tagged `@logged-out`
-and run in a fresh browser:
+and run in a fresh browser. If only some features need the session, turn it around: tag those
+`@logged-in`, give the `logged-in` project `grep: /@logged-in/` and the default project
+`grepInvert: /@logged-in/`.
 
 ```gherkin
 @logged-out
@@ -74,10 +76,6 @@ Feature: Login
     …
 ```
 
-If only some features need the session, turn it around: tag those
-`@logged-in`, give the `logged-in` project `grep: /@logged-in/` and the default project
-`grepInvert: /@logged-in/`.
-
 ## Several users
 
 Save one file per user (`playwright/.auth/admin.json`, `playwright/.auth/customer.json`) from
@@ -87,12 +85,11 @@ tag (`@admin`, `@customer`). Step files in a folder named after the same tag
 
 ## Inspecting pages behind the login
 
-`inspect` takes the same session, so it lists the elements a logged-in user sees:
+`inspect` takes the same session, so it lists the elements a logged-in user sees. The session
+is saved for the address it was made on: use the same `--base-url` as the tests.
 
 ```bash
 npm test -- --project setup
 npx plainwright inspect "Dashboard" \
   --base-url http://localhost:3000 --storage-state playwright/.auth/user.json
 ```
-
-The session is saved for the address it was made on: use the same `--base-url` as the tests.

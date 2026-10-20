@@ -41,9 +41,12 @@ syntax and in how elements are named.
 | `Location Should Contain    /dashboard`              | `I see the url containing "/dashboard"`        |
 | `Sleep    2s`                                        | Avoid. Every `I see` step waits automatically. |
 
-Robot's wording is short; Plainwright reads as a sentence and every value is quoted.
-
 ## User keywords
+
+A user keyword becomes a keyword: a `Scenario Outline:` in `keywords/`, with its arguments as
+parameters in quotes. Keywords can call other keywords. They are checked before tests run:
+every step must exist, every parameter must be used, and keywords must not call each other in a
+loop. In the report, a keyword shows its steps nested, like Robot's keyword tree in `log.html`.
 
 ```robotframework
 *** Keywords ***
@@ -65,10 +68,6 @@ Feature: Account
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
 ```
-
-Keywords can call other keywords. They are checked before tests run: every step must exist,
-every parameter must be used, and keywords must not call each other in a loop. In the report,
-a keyword shows its steps nested, like Robot's keyword tree in `log.html`.
 
 ## Getting started
 

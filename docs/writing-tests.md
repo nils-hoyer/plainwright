@@ -5,7 +5,15 @@ element, and what checks do. Which steps exist is in the [step reference](steps.
 
 ## A test is a list of steps
 
-A test is a `.feature` file in `features/`:
+A test is a `.feature` file in `features/`. Addresses such as `"/login"` are relative to the
+address of your app, `baseURL` in `playwright.config.ts`.
+
+- **Feature** names the area being tested. A file has one.
+- **Scenario** is one test. Its title says what it shows.
+- Each line starting with `*` is a **step**. Steps run from top to bottom; the test stops at
+  the first step that fails.
+- **Background** steps run before every scenario of the file.
+- Lines starting with `#` are comments.
 
 ```gherkin
 Feature: Login
@@ -24,21 +32,11 @@ Feature: Login
     * I see the "Reset your password" heading
 ```
 
-- **Feature** names the area being tested. A file has one.
-- **Scenario** is one test. Its title says what it shows.
-- Each line starting with `*` is a **step**. Steps run from top to bottom; the test stops at
-  the first step that fails.
-- **Background** steps run before every scenario of the file.
-- Lines starting with `#` are comments.
-
-Addresses such as `"/login"` are relative to the address of your app, `baseURL` in
-`playwright.config.ts`.
-
 ### Given, When, Then
 
 `Given`, `When`, `Then` and `And` may stand instead of `*`. They mean the same and only help
 reading: `Given` says what is there before the test, `When` what the user does, `Then` what
-they see.
+they see. Use one style per project. `*` is the default in these docs.
 
 ```gherkin
 Scenario: A paid order can be refunded
@@ -48,12 +46,11 @@ Scenario: A paid order can be refunded
   Then I see the "Order refunded" message
 ```
 
-Use one style per project. `*` is the default in these docs.
-
 ### The same steps with different data
 
 A `Scenario Outline` runs once for every row of its `Examples` table. Each row is its own test
-in the report.
+in the report. A `Scenario Outline` in `features/` is a test. In `keywords/` it defines a new
+step instead, see [keywords](keywords.md).
 
 ```gherkin
 Scenario Outline: A wrong login shows an error
@@ -69,12 +66,9 @@ Scenario Outline: A wrong login shows an error
     | jane@example     | secret   | Enter a valid email address.    |
 ```
 
-A `Scenario Outline` in `features/` is a test. In `keywords/` it defines a new step instead,
-see [keywords](keywords.md).
-
 ### Tags
 
-A word with `@` above a feature or scenario is a tag. Run only the tests with a tag:
+A word with `@` above a feature or scenario is a tag. `--grep` runs only the tests with a tag.
 
 ```gherkin
 @smoke
@@ -90,7 +84,9 @@ npm test -- --grep @smoke
 ## How a step is built
 
 Everything in double quotes is **data**: text to type, a name on the screen, an expected value.
-The rest of the sentence is fixed and means the same in every test.
+The rest of the sentence is fixed and means the same in every test. A name in braces inside the
+quotes, such as `"{users.admin.email}"`, is a value from a data file, the environment or an
+earlier step: see [test data](test-data.md).
 
 > I fill **"jane@example.com"** in the **"Email" field**
 
@@ -98,15 +94,17 @@ The rest of the sentence is fixed and means the same in every test.
 - `"jane@example.com"` is the text typed.
 - `the "Email" field` is the element: its name on the screen, then its type.
 
-A name in braces inside the quotes, such as `"{users.admin.email}"`, is a value from a data
-file, the environment or an earlier step: see [test data](test-data.md).
-
 ## Elements
 
 A step finds an element the way a user does: by the name on the screen and the kind of
 element. The name is the button's text, the field's label, the link's text. If you are not sure
 what the name is, `npm run inspect -- "/login"` lists every element of a page by the names
 steps use.
+
+Names must match exactly, with the same capitals. Rows, list items and messages are the
+exception: they are found by text they contain, because their full text is long. To accept
+part of a name and any capitals everywhere, set `exactNames: false` (see
+[setup](setup.md#options)).
 
 <!-- generated:element-types -->
 
@@ -133,21 +131,15 @@ steps use.
 
 <!-- /generated:element-types -->
 
-Names must match exactly, with the same capitals. Rows, list items and messages are the
-exception: they are found by text they contain, because their full text is long. To accept
-part of a name and any capitals everywhere, set `exactNames: false` (see
-[setup](setup.md#options)).
-
 ### Elements with the same name
 
-When several elements have the same name, name the element they are in:
+When several elements have the same name, name the element they are in. Every step that takes
+an element accepts this.
 
 ```gherkin
 * I click the "Delete" button in the "Order 1001" row
 * I click the "Edit" link in the "Total" cell in the "Order 1001" row
 ```
-
-Every step that takes an element accepts this.
 
 ### Elements without a name
 
@@ -162,6 +154,12 @@ Steps that start with `I see` or `I do not see` are checks. They wait up to 5 se
 page to get there, so a slow page does not fail the test by itself, and no test needs a fixed
 pause.
 
+"Contains" means the text can be part of a longer text, with the same spelling and capitals:
+`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a
+field value, an address or "exactly the text" compare the whole value. Because capitals count,
+a negative check passes when only the capitals differ: `I do not see the text "error"` passes on
+a page that shows "Error". Write the text exactly as the page shows it.
+
 | Step                                          | Passes when                                      |
 | --------------------------------------------- | ------------------------------------------------ |
 | `I see the "Log in" button`                   | the button is visible on screen                  |
@@ -172,23 +170,13 @@ pause.
 | `I see the "Log in" button is disabled`       | the button is shown but cannot be used           |
 | `I see the url "/dashboard"`                  | the browser shows exactly this address           |
 
-"Contains" means the text can be part of a longer text, with the same spelling and capitals:
-`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a
-field value, an address or "exactly the text" compare the whole value.
-
-Because capitals count, a negative check passes when only the capitals differ:
-`I do not see the text "error"` passes on a page that shows "Error". Write the text exactly as
-the page shows it.
-
 ## Before you run
 
 `npm run lint` checks every feature file without opening a browser: steps that do not exist
 (with the closest one that does), unknown pages and values, selectors in quotes and fixed
 waits. VS Code marks steps that do not exist while you type, see
-[editor support](ide-support.md).
-
-`npm test` runs the tests, and `npm run report` opens the report. When an element is missing,
-the error lists what the page offers:
+[editor support](ide-support.md). `npm test` runs the tests, and `npm run report` opens the
+report. When an element is missing, the error lists what the page offers:
 
 ```
 No "Sign in" button found on the "Login" page.

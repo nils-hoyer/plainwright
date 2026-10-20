@@ -6,7 +6,18 @@ feature file, so no programming is needed, and reviewers can read it like any te
 ## Writing a keyword
 
 A keyword is a `Scenario Outline:` in a file in `keywords/`. The title is the new step, and each
-`"<name>"` in it is a value you fill in when you use it:
+`"<name>"` in it is a value you fill in when you use it. Any test can then use it like a
+built-in step. The report shows the four login steps nested under `I log in as …`, and errors
+point to the line in the keyword file.
+
+- The text under the title says what the keyword does. It appears in the
+  [step reference](commands.md#docs-all-steps-as-markdown), the catalog for AI assistants and
+  the editor.
+- The first `Examples` row is the keyword's example. The `Examples` table is optional.
+- Files in `keywords/` load by themselves.
+- Keywords can use other keywords, [pages](pages.md) and [test data](test-data.md), such as
+  `"{users.admin.email}"`. A keyword that creates data through your app's API is shown in
+  [data a test creates first](test-data.md#data-a-test-creates-first).
 
 ```gherkin
 # keywords/account.feature
@@ -25,14 +36,6 @@ Feature: Account
       | jane     | secret   |
 ```
 
-- The text under the title says what the keyword does. It appears in the
-  [step reference](commands.md#docs-all-steps-as-markdown), the catalog for AI assistants and
-  the editor.
-- The first `Examples` row is the keyword's example. The `Examples` table is optional.
-- Files in `keywords/` load by themselves.
-
-Any test can now use it like a built-in step:
-
 ```gherkin
 # features/orders.feature
 Feature: Orders
@@ -43,13 +46,6 @@ Feature: Orders
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
 ```
-
-The report shows the four login steps nested under `I log in as …`, and errors point to the
-line in the keyword file.
-
-Keywords can use other keywords, [pages](pages.md) and [test data](test-data.md), such as
-`"{users.admin.email}"`. A keyword that creates data through your app's API is shown in
-[data a test creates first](test-data.md#data-a-test-creates-first).
 
 ## Parameters
 
