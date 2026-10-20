@@ -9,6 +9,9 @@ and follow the [vocabulary rules](vocabulary.md). Step files in `steps/` load by
 
 ## defineStep
 
+`defineStep()` takes the step text, what it does, an example and the code. Values in quotes
+arrive already filled in: `"{users.admin.email}"` reaches `fn` as `admin@example.com`.
+
 ```ts
 // steps/cart.steps.ts
 import { expect } from '@playwright/test';
@@ -34,12 +37,11 @@ defineStep({
 | `level`       | `'core'` or `'advanced'`; advanced steps show as info in `lint`                          |
 | `fn`          | The code; gets the fixtures, then one argument per parameter                             |
 
-Values in quotes arrive already filled in: `"{users.admin.email}"` reaches `fn` as
-`admin@example.com`.
-
 ## The world fixture
 
-`world` is what built-in steps use, and what makes your step behave like them:
+`world` is what built-in steps use, and what makes your step behave like them. The example
+after the table is a step that takes an element: `world.withElement()` finds it with aliases
+and `in the "…" row`, and lists what the page offers when it is missing.
 
 | Member                              | What it is                                                                                |
 | ----------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -52,8 +54,6 @@ Values in quotes arrive already filled in: `"{users.admin.email}"` reaches `fn` 
 | `world.remember(name, value)`       | keeps a value, so later steps can write `"{name}"`                                        |
 | `world.request(method, url, body?)` | sends a request with the browser's cookies; the answer is also remembered as `{response}` |
 | `world.afterTest(title, action)`    | runs `action` when the test is over, also when it failed                                  |
-
-A step that takes an element:
 
 ```ts
 // steps/tooltip.steps.ts
@@ -86,7 +86,10 @@ prepares something before the scenario and removes it afterwards, and reviewers 
 step that uses it.
 
 Extend `test` as usual in Playwright and pass it to `useTest()`, so playwright-bdd runs every
-feature with it. Steps then get your fixtures like `world`:
+feature with it. Steps then get your fixtures like `world`. The fixture only runs in scenarios
+that use a step that needs it, here `I open a new order`. Without `useTest()`, playwright-bdd
+cannot tell which `test` to import and stops with "Can't guess test instance". Steps that use
+your fixtures cannot be used inside keywords, which only pass `page` and `world`.
 
 ```ts
 // steps/fixtures.ts
@@ -121,11 +124,6 @@ defineStep<Fixtures>({
   },
 });
 ```
-
-The fixture only runs in scenarios that use `I open a new order`. Without `useTest()`,
-playwright-bdd cannot tell which `test` to import and stops with "Can't guess test instance".
-Steps that use your fixtures cannot be used inside keywords, which only pass `page` and
-`world`.
 
 ## Pages and data in TypeScript
 

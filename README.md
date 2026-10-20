@@ -16,8 +16,7 @@
 Plainwright is built on [Playwright](https://playwright.dev/) and comes with more than 100
 ready-made steps for what you do in a browser. You put these sentences together into tests, or
 let an AI assistant do it, and anyone on the team can check what a test does, without
-programming. Unlike Cucumber, you write no code behind the steps: they exist already, find
-elements by what the user sees, and run on the Playwright runner with its report and traces.
+programming.
 
 ```gherkin
 Feature: Orders
@@ -30,18 +29,18 @@ Feature: Orders
 
 ## Getting started
 
-You need [Node.js](https://nodejs.org/) LTS and a terminal. In an empty folder, or in your
-project:
+### Project setup
+
+You need [Node.js](https://nodejs.org/) LTS and a terminal. Run `init` in an empty folder or in
+your project: it asks for the address of your app and which AI assistant you use, installs
+Plainwright, Playwright and the browser, and writes a first test that checks what your app's
+start page shows. In an existing project it overwrites no file and says what it left out. To set
+everything up by hand instead, see [setup](docs/setup.md).
 
 ```bash
+# Set up the project
 npx @nils.hoyer/plainwright@latest init
-```
 
-It asks for the address of your app and which AI assistant you use, installs Plainwright,
-Playwright and the browser, and writes a first test that checks what your app's start page shows.
-Then:
-
-```bash
 # Run the tests
 npm test
 
@@ -49,16 +48,21 @@ npm test
 npm run report
 ```
 
-In an existing project, `init` overwrites no file and says what it left out. To set everything
-up by hand instead, see [setup](docs/setup.md).
+### Editor setup
 
 Open the folder in VS Code and install the Cucumber extension when VS Code suggests it. It
-suggests steps while you type and marks steps that don't exist. More in
-[editor support](docs/ide-support.md).
+suggests steps while you type and marks steps that don't exist; `init` has already written the
+settings it needs. More in [editor support](docs/ide-support.md). For IntelliJ IDEA, WebStorm,
+Neovim and other editors, see [other editors](docs/other-editors.md).
 
-### Your first test
+## Your first test
 
-A test is a `.feature` file in `features/`:
+A test is a `.feature` file in `features/`. `Feature` names the area, `Scenario` is one test, and
+each `*` line is a step. The address `"/login"` is relative to the address of your app. An
+element is its name on the screen followed by its type: `the "Log in" button`. All these steps
+are ready-made; the table below has the ones you will use most, and every step is in the
+[step reference](docs/steps.md). How tests are built, how elements are found and how checks wait
+is in [writing tests](docs/writing-tests.md).
 
 ```gherkin
 Feature: Login
@@ -71,12 +75,6 @@ Feature: Login
     * I see the text "Email or password is incorrect."
 ```
 
-`Feature` names the area, `Scenario` is one test, and each `*` line is a step. The address
-`"/login"` is relative to the address of your app. An element is its name on the screen followed
-by its type: `the "Log in" button`.
-
-All these steps are ready-made. The ones you will use most:
-
 | To …                   | write                                            |
 | ---------------------- | ------------------------------------------------ |
 | open a page            | `I open the url "/login"`                        |
@@ -87,14 +85,19 @@ All these steps are ready-made. The ones you will use most:
 | check a state          | `I see the "Log in" button is disabled`          |
 | check where you are    | `I see the url "/dashboard"`                     |
 
-Every step is in the [step reference](docs/steps.md). How tests are built, how elements are
-found and how checks wait is in [writing tests](docs/writing-tests.md).
+## Going further (optional)
+
+A test needs none of this, but once tests repeat the same steps, addresses or values, keywords,
+pages and test data keep each in one place, as good test suites do: a change in the app then
+means one change in the tests, and the suite stays easy to maintain and extend.
 
 ### Keywords: your own steps
 
 Steps you repeat become a keyword: your own step, made of existing steps, written in a feature
-file in `keywords/`. The title is the new step, and each `"<name>"` in it is a value you fill
-in when you use it.
+file in `keywords/`. The title is the new step, and each `"<name>"` in it is a value you fill in
+when you use it. Files in `keywords/` load by themselves, and any test can then use the keyword
+like a built-in step. The report shows the four login steps nested under `I log in as …`, and
+the editor knows the new step like any other. More in [keywords](docs/keywords.md).
 
 ```gherkin
 # keywords/account.feature
@@ -113,8 +116,6 @@ Feature: Account
       | jane     | secret   |
 ```
 
-Any test can now use it like a built-in step:
-
 ```gherkin
 # features/orders.feature
 Feature: Orders
@@ -126,25 +127,22 @@ Feature: Orders
     * I see the "Order 1001 deleted" message
 ```
 
-The report shows the four login steps nested under `I log in as …`, and `lint` and the editor
-know the new step like any other. Files in `keywords/` load by themselves. More in
-[keywords](docs/keywords.md).
-
 ### Pages
 
 Give your pages a name, one small file each in `pages/`. An address then changes in one place,
-and an element without a visible name, such as a search field without a label, gets one:
+and an element without a visible name, such as a search field without a label, gets one. Tests
+use the names, and the selector stays in the page file. More in [pages](docs/pages.md).
 
 ```json
 // pages/orders.json
 {
   "name": "Orders",
   "url": "/orders",
-  "elements": { "Search": "[data-testid=search]" }
+  "elements": {
+    "Search": "[data-testid=search]"
+  }
 }
 ```
-
-Tests use the names, and the selector stays in the page file:
 
 ```gherkin
 * I open the "Orders" page
@@ -152,27 +150,26 @@ Tests use the names, and the selector stays in the page file:
 * I see the text "Order 1001"
 ```
 
-More in [pages](docs/pages.md).
-
 ### Test data
 
-Data that many tests share goes into JSON files in `data/`:
+Data that many tests share goes into JSON files in `data/`. A step refers to it in braces inside
+the quotes, and passwords come from environment variables or a `.env` file. Data a test needs
+first, such as an order to refund, can be created through your app's API and deleted after the
+test. How, and everything else about data, is in [test data](docs/test-data.md).
 
 ```json
 // data/users.json
-{ "admin": { "email": "admin@example.com" } }
+{
+  "admin": {
+    "email": "admin@example.com"
+  }
+}
 ```
-
-A step refers to it in braces inside the quotes. Passwords come from environment variables or a
-`.env` file:
 
 ```gherkin
 * I fill "{users.admin.email}" in the "Email" field
 * I fill "{env.TEST_PASSWORD}" in the "Password" field
 ```
-
-Data a test needs first, such as an order to refund, can be created through your app's API and
-deleted after the test. How, and everything else about data, is in [test data](docs/test-data.md).
 
 ## Learn more
 
@@ -194,6 +191,7 @@ deleted after the test. How, and everything else about data, is in [test data](d
 - [Logging in once](docs/logging-in.md): start tests logged in.
 - [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.
 - [Editor support](docs/ide-support.md): suggestions for steps in VS Code.
+- [Other editors](docs/other-editors.md): IntelliJ IDEA, WebStorm, Neovim and more.
 
 **Extend**
 

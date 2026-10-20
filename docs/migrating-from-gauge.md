@@ -26,6 +26,8 @@ values in double quotes. Most of a migration is renaming files and adjusting ste
 
 Typical Gauge + Selenium setups name elements by page-object field (`"input user"`) and use
 `type`. Plainwright names elements by what the user sees and uses `fill`.
+`npx plainwright lint` suggests the closest existing step for every line that does not
+match, which makes a first pass quick.
 
 | Gauge                                                        | Plainwright                                     |
 | ------------------------------------------------------------ | ----------------------------------------------- |
@@ -37,10 +39,10 @@ Typical Gauge + Selenium setups name elements by page-object field (`"input user
 | `* I see the attribute "disabled" in element "button login"` | `* I see the "Log in" button is disabled`       |
 | `* I see the url "/de"`                                      | `* I see the url "/de"`                         |
 
-`npx plainwright lint` suggests the closest existing step for every line that does not
-match, which makes a first pass quick.
-
 ## Concepts become keywords
+
+A Gauge concept becomes a keyword: a `Scenario Outline:` in `keywords/`, with the concept's
+parameters in quotes. Files in `keywords/` load by themselves.
 
 ```markdown
 # Login concepts (Gauge, login.cpt)
@@ -63,8 +65,6 @@ Feature: Login
     * I fill "secret" in the "Password" field
     * I click the "Log in" button
 ```
-
-Files in `keywords/` load by themselves.
 
 ## Test data and secrets
 

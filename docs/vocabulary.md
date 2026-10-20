@@ -21,6 +21,18 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 
 ## Sentence patterns
 
+Every step follows one of the patterns in the table. Verbs in use: click, double click, right
+click, hover over, focus on, fill … in, clear, check, uncheck, select … in, press, upload …
+with, drag … to, tap, scroll, switch to, open, go back, reload, accept, dismiss, download, take
+a screenshot.
+
+Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
+menu item, image, section, list, list item, row, cell, message, element. See the
+[writing tests](writing-tests.md#elements).
+
+An element can be named inside another one: `the "Delete" button in the "Order 1001" row`. Every
+step that takes an element accepts this, so no step needs its own "in the row" variant.
+
 | Kind              | Pattern                                      | Example                                                 |
 | ----------------- | -------------------------------------------- | ------------------------------------------------------- |
 | Action on element | `I <verb> the <element>`                     | `I click the "Log in" button`                           |
@@ -31,21 +43,16 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 | Page              | `I open / am on the "<page>" page`           | `I am on the "Dashboard" page`                          |
 | Announcement      | `I <verb> the next <thing>`                  | `I accept the next dialog` (before the step causing it) |
 
-Verbs in use: click, double click, right click, hover over, focus on, fill … in, clear, check,
-uncheck, select … in, press, upload … with, drag … to, tap, scroll, switch to, open, go back,
-reload, accept, dismiss, download, take a screenshot.
-
-Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
-menu item, image, section, list, list item, row, cell, message, element. See the
-[writing tests](writing-tests.md#elements).
-
-An element can be named inside another one: `the "Delete" button in the "Order 1001" row`. Every
-step that takes an element accepts this, so no step needs its own "in the row" variant.
-
 ## Core and advanced
 
 **Core** steps are the everyday vocabulary (about 35). A reviewer must understand all of them
-after reading the [reviewer guide](reading-tests.md). Current core steps:
+after reading the [reviewer guide](reading-tests.md).
+
+**Advanced** steps cover special cases: fixed waits, mouse coordinates, touch, frames, tabs,
+cookies, storage, screenshots, downloads, HTML attributes and classes. They follow the same
+rules. `lint` lists them as info, so a reviewer can spot them.
+
+Current core steps:
 
 <!-- generated:core-steps -->
 
@@ -86,10 +93,6 @@ after reading the [reviewer guide](reading-tests.md). Current core steps:
 - `I see a dialog with the message "Do you confirm?"`
 
 <!-- /generated:core-steps -->
-
-**Advanced** steps cover special cases: fixed waits, mouse coordinates, touch, frames, tabs,
-cookies, storage, screenshots, downloads, HTML attributes and classes. They follow the same
-rules. `lint` lists them as info, so a reviewer can spot them.
 
 ## Adding a step
 

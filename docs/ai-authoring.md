@@ -7,7 +7,10 @@ fast feedback. The person needs readable tests and a clear report.
 ## Set up the assistant
 
 `npx @nils.hoyer/plainwright init` asks which assistant you use and writes its instructions.
-They tell the assistant the workflow below and the rules for steps. To copy them by hand:
+They tell the assistant the workflow below and the rules for steps. To copy them by hand, use
+the templates below; they are in the installed package too, in
+`node_modules/@nils.hoyer/plainwright/templates/`. Adjust the `features/` and `steps/` paths if
+yours differ.
 
 | Assistant           | Template                                                                  | Copy to                               |
 | ------------------- | ------------------------------------------------------------------------- | ------------------------------------- |
@@ -15,19 +18,18 @@ They tell the assistant the workflow below and the rules for steps. To copy them
 | GitHub Copilot      | [templates/copilot-instructions.md](../templates/copilot-instructions.md) | `.github/copilot-instructions.md`     |
 | Claude Code (skill) | [templates/claude-skill/SKILL.md](../templates/claude-skill/SKILL.md)     | `.claude/skills/plainwright/SKILL.md` |
 
-The templates are in the installed package too: `node_modules/@nils.hoyer/plainwright/templates/`.
-Adjust the `features/` and `steps/` paths if yours differ.
-
 ## Asking for a test
 
 Describe what the test should show, as you would to a colleague. The page and the expected
-result are enough:
+result are enough. The assistant then looks up the steps, opens the page, writes the scenario,
+lints and runs it, and fixes what fails. It shows you the feature file to review. Larger
+requests work the same way: "Cover the checkout: an order with two products, a wrong voucher
+code, and an empty cart." For steps that repeat, ask for a [keyword](keywords.md).
+
+A request and the feature file it gives:
 
 > Write a test for the login page: a wrong password shows the error "Email or password is
 > incorrect.". The app runs on http://localhost:3000.
-
-The assistant then looks up the steps, opens the page, writes the scenario, lints and runs it,
-and fixes what fails. It shows you the feature file to review:
 
 ```gherkin
 Feature: Login
@@ -39,9 +41,6 @@ Feature: Login
     * I click the "Log in" button
     * I see the text "Email or password is incorrect."
 ```
-
-Larger requests work the same way: "Cover the checkout: an order with two products, a wrong
-voucher code, and an empty cart." For steps that repeat, ask for a [keyword](keywords.md).
 
 ## The workflow: catalog → inspect → write → lint → run → review
 
@@ -68,15 +67,15 @@ fixed waits and broken keywords, as `file:line: severity: message (rule)`. Exit 
 errors, so it can gate CI and agent loops.
 
 **Run.** `npx plainwright test`. When an element is missing, the error lists the elements of
-that type the page offers:
+that type the page offers, as in the example below.
+
+**Review.** The person reads the feature file and opens the report. The
+[reviewer guide](reading-tests.md) explains both in one page.
 
 ```
 No "Sign in" button found on the "Login" page.
 Buttons on this page: "Accept Cookies", "Log in".
 ```
-
-**Review.** The person reads the feature file and opens the report. The
-[reviewer guide](reading-tests.md) explains both in one page.
 
 ## "Fix with AI" in the report
 
@@ -87,7 +86,8 @@ element name. Plainwright's prompt keeps the assistant on the feature file and t
 names, instead of changing step code.
 
 `defineConfig()` turns it on. With your own Playwright configuration, add it to
-`defineBddConfig()`:
+`defineBddConfig()`. One limit: the page structure is taken from the test's first tab, so after
+`I switch to tab "2"` it may show the wrong tab.
 
 ```ts
 import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
@@ -97,6 +97,3 @@ defineBddConfig({
   aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
 });
 ```
-
-Limitation: the page structure is taken from the test's first tab. After `I switch to tab "2"`
-it may show the wrong tab.
