@@ -1,8 +1,8 @@
 # Editor support
 
 In VS Code, the [Cucumber extension](https://marketplace.visualstudio.com/items?itemName=CucumberOpen.cucumber-official)
-suggests steps while you type in a feature file and marks steps that do not exist. Other
-editors that use the Cucumber language server work the same way.
+suggests steps while you type in a feature file and marks steps that do not exist. This page is about VS Code; for IntelliJ IDEA, WebStorm, Neovim
+and other editors, see [other editors](other-editors.md).
 
 ## In a project set up with init
 
@@ -19,7 +19,13 @@ not committed.
 
 ## Setting it up by hand
 
-`plainwright stubs` writes the file the extension reads:
+`plainwright stubs` writes the file the extension reads, and two settings point the extension
+at it and at your feature files.
+
+- Keep the stub file **out of** playwright-bdd's `steps` glob, otherwise steps would be
+  registered twice.
+- Regenerate it after adding steps or keywords, for example in a `postinstall` or `pretest`
+  script.
 
 ```bash
 npx plainwright stubs --out .vscode/plainwright.steps.js
@@ -32,11 +38,6 @@ npx plainwright stubs --out .vscode/plainwright.steps.js
   "cucumber.glue": [".vscode/plainwright.steps.js"],
 }
 ```
-
-- Keep the stub file **out of** playwright-bdd's `steps` glob, otherwise steps would be
-  registered twice.
-- Regenerate it after adding steps or keywords, for example in a `postinstall` or `pretest`
-  script.
 
 ## Why a stub file
 
