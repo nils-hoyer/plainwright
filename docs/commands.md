@@ -5,6 +5,11 @@ Every command runs in a terminal in your project folder. A project set up with `
 
 ## Running tests
 
+`plainwright test` runs playwright-bdd's `bddgen` and then `playwright test`, and passes every
+option on to Playwright. Their own documentation lists all options:
+[Playwright command line](https://playwright.dev/docs/test-cli),
+[playwright-bdd](https://vitalets.github.io/playwright-bdd/).
+
 | Command                                 | Short                  | What it does                                                           |
 | --------------------------------------- | ---------------------- | ---------------------------------------------------------------------- |
 | `npx plainwright test`                  | `npm test`             | Turns the feature files into Playwright tests and runs all of them.    |
@@ -14,39 +19,35 @@ Every command runs in a terminal in your project folder. A project set up with `
 | `npx playwright show-report`            | `npm run report`       | Opens the report of the last run in the browser.                       |
 | `npx playwright show-trace <trace.zip>` |                        | Replays a failed test step by step (the report links the trace).       |
 
-`plainwright test` runs playwright-bdd's `bddgen` and then `playwright test`, and passes every
-option on to Playwright. Their own documentation lists all options:
-[Playwright command line](https://playwright.dev/docs/test-cli),
-[playwright-bdd](https://vitalets.github.io/playwright-bdd/).
-
 ## Plainwright's commands
+
+`pages/`, `data/`, `keywords/` and `.env` in the current folder load by themselves, and so
+do your step files in `steps/`. Pass `--steps "<glob>"` for step files elsewhere. Repeat `--steps`
+and `--features` for several patterns. Every command shows its options with `--help`.
 
 ```
 npx plainwright <command> [options]
 ```
 
-`pages/`, `data/`, `keywords/` and `.env` in the current folder load by themselves, and so
-do your step files in `steps/`. Pass `--steps "<glob>"` for step files elsewhere. Repeat `--steps`
-and `--features` for several patterns.
-
 ### init: set up a project
-
-```bash
-npx @nils.hoyer/plainwright@latest init
-```
 
 Installs Plainwright, Playwright and Chromium, writes the configuration, a first test against
 your app, AI instructions and editor settings, and adds the npm scripts. It never overwrites a
 file. Options and details are in [setup](setup.md).
 
+```bash
+npx @nils.hoyer/plainwright@latest init
+```
+
 ### lint: check feature files before running them
+
+Short: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
+exits with code 1 if there is an error, so it can stop a CI run. The first table lists the
+rules, the second the options.
 
 ```bash
 npx plainwright lint --features "features/**/*.feature"
 ```
-
-Short: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
-exits with code 1 if there is an error, so it can stop a CI run.
 
 | Rule                     | Severity | Reports                                                                                                  |
 | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------- |
@@ -70,13 +71,13 @@ exits with code 1 if there is an error, so it can stop a CI run.
 
 ### inspect: list the names on a page
 
-```bash
-npx plainwright inspect "Login"
-```
-
 Short: `npm run inspect -- "Login"`, while your app is running. Opens the page in Chromium and
 lists its buttons, fields, links, headings, rows and so on, by the names steps use
 (`the "Log in" button`), and how many elements of each type have no name.
+
+```bash
+npx plainwright inspect "Login"
+```
 
 | Option                   | Meaning                                                        |
 | ------------------------ | -------------------------------------------------------------- |
@@ -87,30 +88,29 @@ lists its buttons, fields, links, headings, rows and so on, by the names steps u
 
 ### catalog: all steps as JSON
 
-```bash
-npx plainwright catalog --out steps.json
-```
-
 Short: `npm run catalog`. Writes every step with its description, example, level and
 parameters, plus the element types, the wording rules, and your pages and aliases. Made for AI
 assistants, see [AI authoring](ai-authoring.md).
 
+```bash
+npx plainwright catalog --out steps.json
+```
+
 ### docs: all steps as Markdown
+
+The same list as the [step reference](steps.md), including your own steps and keywords.
+`--out <file>` writes to a file instead of the terminal, also for `catalog` and `stubs`.
 
 ```bash
 npx plainwright docs --out STEPS.md
 ```
 
-The same list as the [step reference](steps.md), including your own steps and keywords.
-`--out <file>` writes to a file instead of the terminal, also for `catalog` and `stubs`.
-
 ### stubs: autocomplete in the editor
+
+Short: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
+suggests steps while you type. See [editor support](ide-support.md) and
+[other editors](other-editors.md).
 
 ```bash
 npx plainwright stubs --out .vscode/plainwright.steps.js
 ```
-
-Short: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
-suggests steps while you type. See [editor support](ide-support.md).
-
-Every command shows its options with `--help`.
