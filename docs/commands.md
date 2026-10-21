@@ -59,6 +59,7 @@ npx plainwright lint --features "features/**/*.feature"
 | `ambiguous-step`         | error    | A step that matches several steps.                                                                       |
 | `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                            |
 | `unknown-value`          | error    | A `{value}` in quotes that no data file, earlier step or built-in value provides.                        |
+| `remember-name`          | error    | A name to remember a value under that has spaces or other characters a `{value}` cannot have.            |
 | `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                                                 |
 | `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                                     |
 | `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                            |

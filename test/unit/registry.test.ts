@@ -1,8 +1,15 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/index';
-import { parseStackFrame, registerStep, tagsFromPath } from '../../src/registry';
-import { CATEGORIES } from '../../src/steps/builtin';
+import {
+  parseStackFrame,
+  registerStep,
+  suggestionFor,
+  suggestSteps,
+  tagsFromPath,
+} from '../../src/registry';
+import { CATEGORIES, rememberedName } from '../../src/steps/builtin';
+import { checkRememberName } from '../../src/values';
 
 const builtIn = getSteps().filter((step) => step.source === 'built-in');
 
@@ -13,6 +20,13 @@ describe('built-in steps', () => {
       expect(findSteps(step.example).map((match) => match.step.pattern)).toEqual([step.pattern]);
     },
   );
+
+  it('remember values in their examples under names that braces can refer to', () => {
+    for (const step of builtIn) {
+      const name = rememberedName(step, findSteps(step.example)[0].args);
+      if (name !== undefined) expect(checkRememberName(name), step.example).toBeNull();
+    }
+  });
 
   it('have a one-sentence description and a known category', () => {
     for (const step of builtIn) {
@@ -194,5 +208,17 @@ describe('steps', () => {
   // playwright-bdd loads this file to find the built-in steps and `test`.
   it('is the file of the package entry', () => {
     expect(path.basename(steps, path.extname(steps))).toBe('index');
+  });
+});
+
+describe('suggestions', () => {
+  it('keep the values of the misspelled step', () => {
+    const text = 'I clik the "Add" button';
+    expect(suggestionFor(suggestSteps(text)[0], text)).toBe('I click the "Add" button');
+  });
+
+  it('use the example when the values do not fit', () => {
+    const text = 'I wiat "a few" seconds';
+    expect(suggestionFor(suggestSteps(text)[0], text)).toBe(suggestSteps(text)[0].example);
   });
 });

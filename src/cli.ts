@@ -135,6 +135,7 @@ async function main(argv: string[]): Promise<number> {
       const result = await inspectPage(page ? (page.url as string) : target, {
         baseURL: values['base-url'] ?? (await configuredBaseURL()),
         storageState: values['storage-state'],
+        aliases: page?.elements,
       });
       console.log(values.json ? JSON.stringify(result, null, 2) : formatInspectResult(result));
       return 0;
