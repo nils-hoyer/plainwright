@@ -12,6 +12,7 @@ import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
 import { ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
+import { levenshtein } from './similar';
 import { NumberReference, ResolvedReference, resolveRaw, resolveText } from './values';
 
 export type StepLevel = 'core' | 'advanced';
@@ -159,11 +160,28 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
         .join(', ');
       await test.step(shown, () => {});
     }
-    return fn.call(this, fixtures, ...values);
+    try {
+      return await fn.call(this, fixtures, ...values);
+    } catch (error) {
+      hideOwnFrames(error);
+      throw error;
+    }
   };
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
   return wrapped;
+}
+
+/**
+ * Removes the stack frames inside this package from a step's error, so the stack Playwright
+ * prints leads to the test and to project step files, not into node_modules.
+ */
+function hideOwnFrames(error: unknown) {
+  if (!(error instanceof Error) || !error.stack) return;
+  const own = __dirname + path.sep;
+  const lines = error.stack.split('\n');
+  const kept = lines.filter((line) => !(/^\s+at /.test(line) && line.includes(own)));
+  if (kept.length < lines.length) error.stack = kept.join('\n');
 }
 
 function resolveArg(arg: unknown, mode: 'text' | 'raw', used: ResolvedReference[]): unknown {
@@ -332,22 +350,4 @@ function sameTags(a: readonly string[], b: readonly string[]) {
 
 function normalizeForSuggestion(text: string) {
   return text.toLowerCase().replace(/"[^"]*"/g, '""');
-}
-
-export function levenshtein(a: string, b: string): number {
-  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
-  for (let i = 1; i <= a.length; i++) {
-    let diagonal = previous[0];
-    previous[0] = i;
-    for (let j = 1; j <= b.length; j++) {
-      const above = previous[j];
-      previous[j] = Math.min(
-        previous[j] + 1,
-        previous[j - 1] + 1,
-        diagonal + (a[i - 1] === b[j - 1] ? 0 : 1),
-      );
-      diagonal = above;
-    }
-  }
-  return previous[b.length];
 }

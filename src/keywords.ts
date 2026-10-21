@@ -3,19 +3,19 @@ import path from 'node:path';
 import { dialects } from '@cucumber/gherkin';
 import { test as playwrightTest } from '@playwright/test';
 import { globSync } from 'tinyglobby';
-import { BeforeAll } from './fixtures';
+import { workerChecks } from './fixtures';
 import { parseGherkin } from './gherkin';
 import {
   findSteps,
   formatLocation,
   getSteps,
   getUnusableSteps,
-  levenshtein,
   registerStep,
   StepDefinition,
   StepFixtures,
   suggestSteps,
 } from './registry';
+import { levenshtein } from './similar';
 
 export type KeywordStep = { keyword: string; text: string; line: number; column: number };
 
@@ -40,7 +40,6 @@ const keywords: KeywordDefinition[] = [];
 const loadedFiles = new Set<string>();
 const keywordOfStep = new WeakMap<StepDefinition, KeywordDefinition>();
 const warned = new Set<string>();
-let checkRegistered = false;
 
 /**
  * Loads keywords from .feature files. Each `Scenario Outline:` becomes a step whose text is
@@ -69,10 +68,7 @@ export function defineKeywords(
   const parsed = files.filter((file) => !loadedFiles.has(file)).flatMap(parseKeywordFile);
   for (const file of files) loadedFiles.add(file);
   parsed.forEach(registerKeyword);
-  if (!checkRegistered) {
-    checkRegistered = true;
-    BeforeAll({ name: 'check keywords' }, () => assertKeywordsValid());
-  }
+  workerChecks.add(assertKeywordsValid);
   return keywords.filter((keyword) => files.includes(keyword.file));
 }
 

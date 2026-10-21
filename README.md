@@ -96,8 +96,9 @@ means one change in the tests, and the suite stays easy to maintain and extend.
 Steps you repeat become a keyword: your own step, made of existing steps, written in a feature
 file in `keywords/`. The title is the new step, and each `"<name>"` in it is a value you fill in
 when you use it. Files in `keywords/` load by themselves, and any test can then use the keyword
-like a built-in step. The report shows the four login steps nested under `I log in as …`, and
-the editor knows the new step like any other. More in [keywords](docs/keywords.md).
+like a built-in step. The report shows the four login steps nested under `I log in as …`. The
+editor suggests the new step after the next `npm test`, or right away after `npm run stubs`.
+More in [keywords](docs/keywords.md).
 
 ```gherkin
 # keywords/account.feature

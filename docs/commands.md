@@ -6,7 +6,9 @@ Every command runs in a terminal in your project folder. A project set up with `
 ## Running tests
 
 `plainwright test` runs playwright-bdd's `bddgen` and then `playwright test`, and passes every
-option on to Playwright. Their own documentation lists all options:
+option on to Playwright. A step that does not exist stops the run before any test starts, with
+the step that comes closest. It also updates the editor's step list,
+`.vscode/plainwright.steps.js`, when the project has one. Their own documentation lists all options:
 [Playwright command line](https://playwright.dev/docs/test-cli),
 [playwright-bdd](https://vitalets.github.io/playwright-bdd/).
 
@@ -108,7 +110,8 @@ npx plainwright docs --out STEPS.md
 ### stubs: autocomplete in the editor
 
 Short: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
-suggests steps while you type. See [editor support](ide-support.md) and
+suggests steps while you type. `plainwright test` updates the file too. See
+[editor support](ide-support.md) and
 [other editors](other-editors.md).
 
 ```bash

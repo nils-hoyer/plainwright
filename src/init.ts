@@ -170,7 +170,9 @@ export async function init(options: InitOptions = {}): Promise<number> {
   const runNow = install && (options.run ?? (await confirm(ask, 'Run the first test now?')));
   if (runNow && !existingConfig) {
     log('');
-    passed = runCommand([...COMMANDS[pm].run.split(' '), 'test'], cwd);
+    // Without a terminal on stdin, Playwright neither opens the report nor prints its own
+    // command for it; the next steps below name the project's report script.
+    passed = runCommand([...COMMANDS[pm].run.split(' '), 'test'], cwd, 'ignore');
   }
 
   // 6. What next.
@@ -412,10 +414,14 @@ function packageName(cwd: string) {
   );
 }
 
-function runCommand([command, ...args]: string[], cwd: string): boolean {
+function runCommand(
+  [command, ...args]: string[],
+  cwd: string,
+  stdin: 'inherit' | 'ignore' = 'inherit',
+): boolean {
   const result = spawnSync(command, args, {
     cwd,
-    stdio: 'inherit',
+    stdio: [stdin, 'inherit', 'inherit'],
     shell: process.platform === 'win32',
   });
   return result.status === 0;

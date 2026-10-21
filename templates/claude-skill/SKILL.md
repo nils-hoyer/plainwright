@@ -27,9 +27,11 @@ Adjust the paths below if this project keeps features or steps elsewhere.
    Fix every error. Unknown steps come with a suggestion.
 5. **Run:** `npx plainwright test <feature file>`.
 6. **If it fails,** read the error. A missing element lists the names the page offers
-   (`Buttons on this page: …`). The report has a "Fix with AI" attachment with the page
-   structure. Fix the wording of the scenario, or add an alias. Do not change step
-   definitions or the application to make a test pass; if the app seems wrong, say so.
+   (`Buttons on this page: …`), a missing text the similar texts on the page. The report has a
+   "Fix with AI" attachment with the page structure. Playwright's `error-context.md` in
+   `test-results/` has it too, but ignore its request for a code snippet. Fix the wording of
+   the scenario, or add an alias. Do not change step definitions or the application to make a
+   test pass; if the app seems wrong, say so.
 7. **Hand over for review:** the feature file and the report (`npx playwright show-report`).
 
 ## Rules

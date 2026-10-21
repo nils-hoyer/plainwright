@@ -14,6 +14,13 @@ Feature: Helpful error messages
       I click the "Log on" button
       """
 
+  Scenario: A misspelled element name gets a suggestion
+    * I open the "Login" page
+    * I see this step fail with "Did you mean \"Accept Cookies\"?":
+      """
+      I click the "Accept Cookie" button
+      """
+
   Scenario: An unknown page lists the defined pages
     * I see this step fail with "No page named \"Logon\". Defined pages: \"Account pages\", \"Account settings\"":
       """
@@ -24,7 +31,7 @@ Feature: Helpful error messages
     * I open the "Login" page
     * I see the text "Accept Cookies"
     * I do not see the text "accept cookies"
-    * I see this step fail with "accept cookies":
+    * I see this step fail with "Similar texts on this page: \"Accept Cookies\"":
       """
       I see the text "accept cookies"
       """

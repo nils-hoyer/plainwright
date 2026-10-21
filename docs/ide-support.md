@@ -13,9 +13,10 @@ suggests it. You get:
 - a warning on a step that does not exist;
 - suggestions and checks in the files in `pages/` (see [pages](pages.md#suggestions-in-vs-code)).
 
-After adding keywords or steps in TypeScript, run `npm run stubs` so the editor knows them. Run
-it once after cloning the project too: the file it writes, `.vscode/plainwright.steps.js`, is
-not committed.
+After adding keywords or steps in TypeScript, the editor knows them after the next `npm test`,
+which updates its step list. `npm run stubs` updates it without running the tests. Run it once
+after cloning the project too: the file it writes, `.vscode/plainwright.steps.js`, is not
+committed.
 
 ## Setting it up by hand
 
@@ -24,8 +25,9 @@ at it and at your feature files.
 
 - Keep the stub file **out of** playwright-bdd's `steps` glob, otherwise steps would be
   registered twice.
-- Regenerate it after adding steps or keywords, for example in a `postinstall` or `pretest`
-  script.
+- `plainwright test` updates `.vscode/plainwright.steps.js` when it exists. A stub file
+  elsewhere needs `plainwright stubs` again after adding steps or keywords, for example in a
+  `postinstall` or `pretest` script.
 
 ```bash
 npx plainwright stubs --out .vscode/plainwright.steps.js

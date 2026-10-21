@@ -59,7 +59,7 @@ const DEFAULT_STEPS = ['steps/**/*.{ts,js,mjs,cjs}'];
 
 async function main(argv: string[]): Promise<number> {
   // Everything after "test" belongs to Playwright.
-  if (argv[0] === 'test') return runTests(argv.slice(1));
+  if (argv[0] === 'test') return runTests(argv.slice(1), { loadSteps: () => loadOwnSteps() });
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
@@ -102,8 +102,7 @@ async function main(argv: string[]): Promise<number> {
     });
   }
 
-  const stepFiles = values.steps ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
-  if (stepFiles.length) await loadStepFiles(stepFiles);
+  await loadOwnSteps(values.steps);
 
   switch (command) {
     case 'lint': {
@@ -145,6 +144,12 @@ async function main(argv: string[]): Promise<number> {
       console.error(`Unknown command "${command}".\n\n${HELP}`);
       return 1;
   }
+}
+
+/** The step files given with --steps, otherwise those in steps/. */
+async function loadOwnSteps(patterns?: string[]) {
+  const stepFiles = patterns ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
+  if (stepFiles.length) await loadStepFiles(stepFiles);
 }
 
 /** `use.baseURL` from playwright.config.*, so inspect needs no --base-url. */
