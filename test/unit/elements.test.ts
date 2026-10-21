@@ -335,6 +335,30 @@ describe('aria snapshot', () => {
     );
   });
 
+  it('does not take a different short name for a typo', () => {
+    const toolbar = `
+- button "Exit"
+- button "Same"
+`;
+    for (const name of ['Edit', 'Save']) {
+      expect(describeMissing(new ElementRef(name, 'button'), toolbar)).not.toContain(
+        'Did you mean',
+      );
+    }
+  });
+
+  it('lists only texts that share enough words, and capitals only when they differ', () => {
+    const orders = `
+- paragraph: Order 1001
+- paragraph: Order 1002 shipped
+- button "Close"
+`;
+    expect(describeMissingText('Order saved', orders)).toBe(
+      'The text "Order saved" is not visible on the page.',
+    );
+    expect(describeMissingText('Close', orders)).not.toContain('capitals');
+  });
+
   it('explains a missing text with similar texts on the page', () => {
     const login = `
 - main:
@@ -345,19 +369,19 @@ describe('aria snapshot', () => {
 `;
     expect(describeMissingText('Email or password is incorrect.', login)).toBe(
       [
-        'The text "Email or password is incorrect." is not on the page.',
+        'The text "Email or password is incorrect." is not visible on the page.',
         'Similar texts on this page: "Username and password are incorrect.".',
       ].join('\n'),
     );
     expect(describeMissingText('username and password', login)).toBe(
       [
-        'The text "username and password" is not on the page.',
+        'The text "username and password" is not visible on the page.',
         'Similar texts on this page: "Username and password are incorrect.".',
         'Text checks compare capitals too.',
       ].join('\n'),
     );
     expect(describeMissingText('Welcome back!', login)).toBe(
-      'The text "Welcome back!" is not on the page.',
+      'The text "Welcome back!" is not visible on the page.',
     );
   });
 

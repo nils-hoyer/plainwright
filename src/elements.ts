@@ -370,11 +370,11 @@ export function describeMissing(
 /**
  * Explains a text check that failed with the texts on the page that look like the one expected,
  * from `ariaSnapshot()` of the page.
- * Example: `The text "Email or password is wrong." is not on the page.
+ * Example: `The text "Email or password is wrong." is not visible on the page.
  * Similar texts on this page: "Username and password are incorrect."`.
  */
 export function describeMissingText(text: string, snapshot: string): string {
-  const lines = [`The text "${text}" is not on the page.`];
+  const lines = [`The text "${text}" is not visible on the page.`];
   const texts = new Set<string>();
   for (const node of parseAriaSnapshot(snapshot)) {
     for (const { name, text } of [node, ...node.descendants]) {
@@ -382,14 +382,18 @@ export function describeMissingText(text: string, snapshot: string): string {
     }
   }
   const lower = text.toLowerCase();
-  const otherCapitals = [...texts].filter((t) => t.toLowerCase().includes(lower));
+  const otherCapitals = [...texts].filter(
+    (t) => t.toLowerCase().includes(lower) && !t.includes(text),
+  );
   const words = wordsOf(text);
   const similar = [...texts]
     .map((candidate) => {
-      const shared = wordsOf(candidate).filter((word) => words.includes(word));
-      return { candidate, score: words.length ? new Set(shared).size / words.length : 0 };
+      const shared = new Set(wordsOf(candidate).filter((word) => words.includes(word))).size;
+      return { candidate, shared, score: words.length ? shared / words.length : 0 };
     })
-    .filter(({ score }) => score >= 0.5)
+    // Half the words, and two of them unless the text is one word: "Order saved" is not
+    // similar to "Order 1001".
+    .filter(({ shared, score }) => score >= 0.5 && (shared >= 2 || words.length === 1))
     .sort((a, b) => b.score - a.score)
     .map(({ candidate }) => candidate);
   const meant = closest(text, [...texts]);
