@@ -120,10 +120,10 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
     const used = new Set<string>();
     calls.set(keyword, new Set());
 
-    const collisions = findSteps(keyword.step.example).filter(({ step }) => step !== keyword.step);
-    for (const { step } of collisions) {
+    for (const step of sameWording(keyword)) {
       errors.push(
-        `${where}: The keyword "${keyword.title}" has the same wording as the step "${step.pattern}"${formatLocation(step.location)}.`,
+        `${where}: The keyword "${keyword.title}" has the same wording as the step "${step.pattern}"${formatLocation(step.location)}. ` +
+          'Steps worded like it match both: reword the keyword.',
       );
     }
 
@@ -190,6 +190,13 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
 
   errors.push(...findCycles(calls));
   return { errors, warnings };
+}
+
+/** The other steps the keyword's example also matches: they share its wording. */
+export function sameWording(keyword: KeywordDefinition): StepDefinition[] {
+  return findSteps(keyword.step.example)
+    .map(({ step }) => step)
+    .filter((step) => step !== keyword.step);
 }
 
 type ParsedKeyword = Omit<KeywordDefinition, 'step'> & {

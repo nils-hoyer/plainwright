@@ -2,7 +2,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { detectPackageManager, init, normalizeUrl, splitAddress } from '../../src/init';
+import {
+  chooseAssistant,
+  detectPackageManager,
+  init,
+  normalizeUrl,
+  splitAddress,
+} from '../../src/init';
 // Registers the built-in steps for the editor stubs that init writes.
 import '../../src/index';
 
@@ -106,7 +112,29 @@ describe('init in an existing project', () => {
     );
     expect(output).toContain('Adding Plainwright to shop (pnpm).');
     expect(output).toContain('To run feature files with it, add:');
+    // The same lines as docs/setup.md.
+    expect(output).toContain(
+      'aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },',
+    );
+    expect(output).toContain(
+      "use: { baseURL: 'http://localhost:9', actionTimeout: 10_000, trace: 'retain-on-failure' },",
+    );
     expect(output).toContain('pnpm exec plainwright test runs the tests');
+  });
+
+  it('opens the address in the first test when pages/ belongs to the app', async () => {
+    const dir = folder({
+      'package.json': JSON.stringify({ name: 'next-app' }),
+      'pages/index.tsx': 'export default function Home() {}\n',
+    });
+    const { output } = await run(dir);
+    expect(fs.existsSync(path.join(dir, 'pages/start.json'))).toBe(false);
+    expect(output).toContain(
+      "skipped pages/start.json: pages/ holds your app's files (pages/index.tsx)",
+    );
+    expect(read(dir, 'features/example.feature')).toContain(
+      '    * I open the url "/start"\n    * I see the url "/start"\n',
+    );
   });
 
   it('replaces the test script npm writes into a new package.json', async () => {
@@ -118,6 +146,34 @@ describe('init in an existing project', () => {
     });
     await run(dir);
     expect(JSON.parse(read(dir, 'package.json')).scripts.test).toBe('plainwright test');
+  });
+});
+
+describe('the question for the AI assistant', () => {
+  /** Answers the questions in turn and records them. */
+  const asker = (answers: string[]) => {
+    const questions: string[] = [];
+    const ask = async (question: string, fallback: string) => {
+      questions.push(question);
+      return answers.shift() || fallback;
+    };
+    return { ask, questions };
+  };
+
+  it('takes a number, a name as for --ai, or the default', async () => {
+    expect(await chooseAssistant(asker(['3']).ask)).toBe('claude');
+    expect(await chooseAssistant(asker(['Copilot']).ask)).toBe('copilot');
+    expect(await chooseAssistant(asker(['']).ask)).toBe('agents');
+  });
+
+  it('asks again until the answer is one of the choices', async () => {
+    const { ask, questions } = asker(['claude code', '9', 'none']);
+    expect(await chooseAssistant(ask)).toBe('none');
+    expect(questions).toHaveLength(3);
+    expect(questions[1]).toBe(
+      '"claude code" is not one of them. Write a number from 1 to 4, or agents, copilot, claude, none',
+    );
+    expect(questions[2]).toMatch(/^"9" is not one of them/);
   });
 });
 

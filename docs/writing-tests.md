@@ -170,6 +170,18 @@ a page that shows "Error". Write the text exactly as the page shows it.
 | `I see the "Log in" button is disabled`       | the button is shown but cannot be used           |
 | `I see the url "/dashboard"`                  | the browser shows exactly this address           |
 
+### Checks against a screenshot
+
+`I see the page matches the screenshot "start.png"` compares the page with a stored screenshot.
+The first run has none yet: it stores one and fails, and the runs after it compare. The file is
+next to the feature file, in a folder named after the test Playwright makes from it, and
+Playwright adds the browser and the operating system to the name:
+`features/start.feature.spec.js-snapshots/start-chromium-darwin.png` on a Mac,
+`start-chromium-linux.png` on Linux. Fonts look different on each system, so a screenshot made
+on a Mac does not count on Linux, where CI usually runs: there the check fails once more and
+stores its own. [Running in CI](setup.md#running-in-ci) says how to make the Linux screenshots.
+After a change to the page that is meant, `npm test -- --update-snapshots` stores new ones.
+
 ## Before you run
 
 `npm run lint` checks every feature file without opening a browser: steps that do not exist

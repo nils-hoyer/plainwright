@@ -199,6 +199,7 @@ describe('lint with project files', () => {
       expect.stringMatching(
         /^7: No value named "nothing" for \{nothing\}\. Known values: \{shop\.products\}, \{users\}/,
       ),
+      '8: The environment variable ANYTHING is not set. Set it, or add it to the .env file, before the tests run.',
       '16: No page named "Checkout". Defined pages: "Login", "Order", "Orders".',
     ]);
   });

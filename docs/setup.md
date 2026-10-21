@@ -6,21 +6,18 @@ engineer. After that, people write tests in feature files without touching any o
 ## What init does
 
 [Getting started](../README.md#getting-started) is one command, in an empty folder or in your
-project. It asks two questions, the address of your app and which AI assistant you use, and
-then:
+project. It asks for the address of your app and which AI assistant you use, and then:
 
 - installs `@nils.hoyer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
   the package manager of the project (npm, pnpm, Yarn or Bun);
 - writes the files listed [below](#files-init-writes);
 - adds the scripts `test`, `report`, `lint`, `inspect`, `catalog` and `stubs` to `package.json`
   (see [commands](commands.md));
-- runs the first test.
+- asks whether to run the first test now, and runs it.
 
 It never overwrites a file. Running it again adds only what is missing and says what it
 skipped. In a project with its own Playwright configuration, it prints the lines to add. With
-[options](#init-options), it sets up a project without questions, for CI or an AI assistant. To
-try Plainwright with an example app first, the [starter](../examples/starter) is a complete
-project with a small todo app.
+[options](#init-options), it sets up a project without questions, for CI or an AI assistant.
 
 ```bash
 # Set up the project, asking for the address and the assistant
@@ -30,17 +27,33 @@ npx @nils.hoyer/plainwright@latest init
 npx @nils.hoyer/plainwright init --yes --url http://localhost:3000 --ai agents
 ```
 
+To try Plainwright with an example app first, the [starter](../examples/starter) is a complete
+project with a small todo app. This copies only its folder, without the rest of the
+repository:
+
+```bash
+npx degit nils-hoyer/plainwright/examples/starter plainwright-starter
+cd plainwright-starter
+npm install
+npm test
+```
+
 ### Files init writes
 
 | File                        | Contains                                                                |
 | --------------------------- | ----------------------------------------------------------------------- |
 | `playwright.config.ts`      | the address of your app, see [the configuration](#the-configuration)    |
 | `features/example.feature`  | a first test that checks what your start page shows                     |
-| `pages/start.json`          | the start page, see [pages](pages.md)                                   |
+| `pages/start.json`          | the start page, see [pages](pages.md); see below for Next.js and Nuxt   |
 | `keywords/example.feature`  | a commented example, see [keywords](keywords.md)                        |
 | `AGENTS.md` or another file | instructions for your AI assistant, see [AI authoring](ai-authoring.md) |
 | `.vscode/`                  | editor settings, see [editor support](ide-support.md)                   |
 | `.gitignore`                | report folders, the login session and `.env`                            |
+
+In Next.js, Nuxt and other frameworks, `pages/` holds the app's own files, so Plainwright loads
+no pages from it. `init` then writes no `pages/start.json`, and the first test opens your app
+by its address, with `I open the url`. To name pages in such a project, keep their files in another folder
+and load it with `definePages('<folder>')` in a file in `steps/`.
 
 ### init options
 
@@ -130,6 +143,19 @@ the repository's secrets, as environment variables; there is no `.env` file in C
 does not open by itself in CI: download the `playwright-report` artifact of the run and open its
 `index.html`. If your app must run for the tests, start it with `webServer` in the
 configuration (see [above](#the-configuration)).
+
+Screenshots to compare against, from `I see the page matches the screenshot "…"`, are stored
+per operating system (see [writing tests](writing-tests.md#checks-against-a-screenshot)). CI on
+Linux needs its own: make them in Playwright's Linux image and commit them. Use the image of
+the Playwright version in your project (`npx playwright --version`). The tests run inside the
+image, so an app on your computer is at `host.docker.internal` there instead of `localhost`;
+an app that `webServer` starts runs inside the image too.
+
+```bash
+docker run --rm -v "$PWD":/work -v /work/node_modules -w /work \
+  mcr.microsoft.com/playwright:v1.64.0-noble \
+  sh -c "npm ci && npx plainwright test --update-snapshots"
+```
 
 ```yaml
 # .github/workflows/tests.yml

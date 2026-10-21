@@ -41,7 +41,8 @@ pages/
 ### Addresses with wildcards
 
 In an address, `*` stands for any text without `/` and `**` for any text. Such a page, like
-`"url": "/orders/*"`, can only be checked with `I am on the "Order" page`, not opened.
+`"url": "/orders/*"`, can only be checked with `I am on the "Order" page`, not opened. `lint`
+reports an `I open the "Order" page` for it.
 
 ### Where page files live
 

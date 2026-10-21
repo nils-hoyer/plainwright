@@ -5,6 +5,10 @@ tests start themselves (`webServer` in `playwright.config.ts`). Nothing is fetch
 internet while the tests run.
 
 ```bash
+# Copy this folder, without the rest of the repository
+npx degit nils-hoyer/plainwright/examples/starter plainwright-starter
+cd plainwright-starter
+
 npm install       # also installs the browser
 npm test          # generate and run the tests; the report opens if one fails
 npm run report    # open the report anytime

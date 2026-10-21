@@ -42,7 +42,7 @@ step({
           .locator('body')
           .ariaSnapshot({ timeout: 2000 })
           .catch(() => '');
-        addHint(error, describeMissingText(text, snapshot));
+        addHint(error, describeMissingText(text, snapshot, world.address()));
       }
       throw error;
     }

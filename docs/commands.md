@@ -53,21 +53,22 @@ rules, the second the options.
 npx plainwright lint --features "features/**/*.feature"
 ```
 
-| Rule                     | Severity | Reports                                                                                                  |
-| ------------------------ | -------- | -------------------------------------------------------------------------------------------------------- |
-| `undefined-step`         | error    | A step that matches no step, with the closest existing one.                                              |
-| `ambiguous-step`         | error    | A step that matches several steps.                                                                       |
-| `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                            |
-| `unknown-value`          | error    | A `{value}` in quotes that no data file, earlier step or built-in value provides.                        |
-| `remember-name`          | error    | A name to remember a value under that has spaces or other characters a `{value}` cannot have.            |
-| `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                                                 |
-| `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                                     |
-| `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                            |
-| `syntax`                 | error    | A feature file Gherkin cannot read.                                                                      |
-| `step-example`           | error    | A step definition whose `example` does not match it.                                                     |
-| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                                                   |
-| `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [steps in TypeScript](writing-steps.md#parameter-types). |
-| `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                                                 |
+| Rule                     | Severity | Reports                                                                                                   |
+| ------------------------ | -------- | --------------------------------------------------------------------------------------------------------- |
+| `undefined-step`         | error    | A step that matches no step, with the closest existing one.                                               |
+| `ambiguous-step`         | error    | A step that matches several steps.                                                                        |
+| `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                             |
+| `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which can only be checked.         |
+| `unknown-value`          | error    | A `{value}` that no data file, earlier step or built-in value provides; a warning for `{env.NAME}` unset. |
+| `remember-name`          | error    | A name to remember a value under that has spaces or other characters a `{value}` cannot have.             |
+| `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                                                  |
+| `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                                      |
+| `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                             |
+| `syntax`                 | error    | A feature file Gherkin cannot read.                                                                       |
+| `step-example`           | error    | A step definition whose `example` does not match it, or also matches another step.                        |
+| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                                                    |
+| `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [steps in TypeScript](writing-steps.md#parameter-types).  |
+| `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                                                  |
 
 | Option              | Meaning                                                     |
 | ------------------- | ----------------------------------------------------------- |
@@ -78,7 +79,9 @@ npx plainwright lint --features "features/**/*.feature"
 
 Short: `npm run inspect -- "Login"`, while your app is running. Opens the page in Chromium and
 lists its buttons, fields, links, headings, rows and so on, by the names steps use
-(`the "Log in" button`), and how many elements of each type have no name.
+(`the "Log in" button`), and how many elements of each type have no name. A name that several
+elements share, such as a "Delete" button in every row, shows how many there are. A page name
+must be one from `pages/`; an address starts with `/` or `http`.
 
 ```bash
 npx plainwright inspect "Login"

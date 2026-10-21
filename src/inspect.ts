@@ -6,6 +6,7 @@ import {
   elementTypeOfRole,
   ElementType,
   labelOf,
+  ownEntry,
   PLURAL,
 } from './elements';
 
@@ -16,6 +17,8 @@ export type InspectResult = {
   elements: Partial<Record<ElementType, string[]>>;
   /** How many elements of a type have no name and no alias; they need an alias. */
   unnamed: Partial<Record<ElementType, number>>;
+  /** Names that more than one element of a type has, with how many: `{ button: { Delete: 3 } }`. */
+  repeated?: Partial<Record<ElementType, Record<string, number>>>;
   /** The aliases of the page (from its file in pages/) and how many elements each finds. */
   aliases?: { name: string; type?: ElementType; count: number }[];
   /** The address asked for, when the page sent the browser elsewhere, e.g. to a login page. */
@@ -45,17 +48,33 @@ export async function inspectPage(
       storageState: options.storageState,
     });
     const page = await context.newPage();
-    await page.goto(url);
+    let requested: string;
+    try {
+      requested = new URL(url, options.baseURL).toString();
+    } catch {
+      throw new Error(
+        `"${url}" is not a full address, and there is no base URL. Pass --base-url ` +
+          `http://localhost:3000, or set baseURL in playwright.config.ts.`,
+      );
+    }
+    try {
+      await page.goto(url);
+    } catch (error) {
+      if (NO_ANSWER.test(String((error as Error).message))) {
+        throw new Error(`${requested} does not answer. Start your app, then run inspect again.`);
+      }
+      throw error;
+    }
     const snapshot = await page.locator('body').ariaSnapshot();
-    const { elements, unnamed } = groupSnapshot(snapshot);
+    const { elements, unnamed, repeated } = groupSnapshot(snapshot);
     const aliases = options.aliases && (await countAliases(page, options.aliases, unnamed));
     // Also a redirect in the page's own script, as single-page apps do to a login page.
-    const requested = new URL(url, options.baseURL).toString();
     return {
       url: page.url(),
       title: await page.title(),
       elements,
       unnamed,
+      ...(repeated ? { repeated } : {}),
       ...(aliases ? { aliases } : {}),
       ...(samePath(requested, page.url()) ? {} : { redirectedFrom: requested }),
     };
@@ -63,6 +82,10 @@ export async function inspectPage(
     await browser.close();
   }
 }
+
+/** Browser errors for an address where nothing answers, such as an app that is not running. */
+const NO_ANSWER =
+  /net::ERR_(CONNECTION_\w+|NAME_NOT_RESOLVED|ADDRESS_UNREACHABLE|EMPTY_RESPONSE|INTERNET_DISCONNECTED)/;
 
 /**
  * How many elements each alias finds. Elements without a name that an alias finds no longer
@@ -101,9 +124,12 @@ function samePath(a: string, b: string) {
   return path(a) === path(b);
 }
 
-export function groupSnapshot(snapshot: string): Pick<InspectResult, 'elements' | 'unnamed'> {
+export function groupSnapshot(
+  snapshot: string,
+): Pick<InspectResult, 'elements' | 'unnamed' | 'repeated'> {
   const elements: InspectResult['elements'] = {};
   const unnamed: InspectResult['unnamed'] = {};
+  const counts: Partial<Record<ElementType, Record<string, number>>> = {};
   for (const node of parseAriaSnapshot(snapshot)) {
     const type = elementTypeOfRole(node.role);
     if (!type) continue;
@@ -112,11 +138,18 @@ export function groupSnapshot(snapshot: string): Pick<InspectResult, 'elements' 
     if (!name && type === 'message' && !node.descendants.length) continue;
     if (!name) {
       unnamed[type] = (unnamed[type] ?? 0) + 1;
-    } else if (!elements[type]?.includes(name)) {
-      (elements[type] ??= []).push(name);
+      continue;
     }
+    const count = (counts[type] ??= {});
+    if (!count[name]) (elements[type] ??= []).push(name);
+    count[name] = (count[name] ?? 0) + 1;
   }
-  return { elements, unnamed };
+  const repeated: NonNullable<InspectResult['repeated']> = {};
+  for (const [type, count] of Object.entries(counts) as [ElementType, Record<string, number>][]) {
+    const more = Object.entries(count).filter(([, n]) => n > 1);
+    if (more.length) repeated[type] = Object.fromEntries(more);
+  }
+  return { elements, unnamed, ...(Object.keys(repeated).length ? { repeated } : {}) };
 }
 
 export function formatInspectResult(result: InspectResult): string {
@@ -132,8 +165,18 @@ export function formatInspectResult(result: InspectResult): string {
     const names = result.elements[type];
     if (!names?.length) continue;
     lines.push(PLURAL[type]);
-    for (const name of names) lines.push(`  the "${name}" ${type}`);
+    for (const name of names) {
+      const count = ownEntry(result.repeated?.[type], name);
+      lines.push(`  the "${name}" ${type}${count ? `  (${count} on this page)` : ''}`);
+    }
     lines.push('');
+  }
+  if (result.repeated && Object.keys(result.repeated).length) {
+    lines.push(
+      'A step cannot tell elements with the same name apart. Name the element it is in:',
+      '  the "Delete" button in the "Order 1001" row',
+      '',
+    );
   }
   if (result.aliases?.length) {
     lines.push('Aliases of this page');
