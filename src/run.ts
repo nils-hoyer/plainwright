@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
+import { readableSyntaxError } from './gherkin';
 import { validateKeywords } from './keywords';
 import { formatLintMessage, lintFeatures } from './lint';
 import { BddFiles, loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
@@ -34,6 +35,17 @@ export async function runTests(args: string[], cwd = process.cwd()): Promise<num
     );
     return 1;
   }
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(
+      'Usage: plainwright test [options]\n\n' +
+        "Turns the feature files into Playwright tests (playwright-bdd's bddgen) and runs them\n" +
+        '(playwright test). Every option goes to Playwright; these are its options:\n',
+    );
+    return (
+      spawnSync(process.execPath, [playwright, 'test', '--help'], { cwd, stdio: 'inherit' })
+        .status ?? 1
+    );
+  }
   const config = configArgs(args);
   const configFile = config.length === 2 ? config[1] : config[0]?.slice('--config='.length);
   const projects = (await loadPlaywrightConfig(cwd, configFile))?.bdd ?? [
@@ -55,7 +67,7 @@ export async function runTests(args: string[], cwd = process.cwd()): Promise<num
     stdio: ['inherit', 'inherit', 'pipe'],
     encoding: 'utf8',
   });
-  const output = generated.stderr ?? '';
+  const output = readableParseErrors(generated.stderr ?? '');
   if (generated.status !== 0 && MISSING_STEPS.test(output)) {
     const unknown = loaded ? unknownSteps(projects) : [];
     if (unknown.length) {
@@ -90,6 +102,18 @@ export function withoutSnippets(output: string): string {
   return output.replace(
     /^Missing step definitions: \d+[\s\S]*?Use snippets above to create missing steps\.\r?\n?/gm,
     '',
+  );
+}
+
+/**
+ * bddgen's syntax errors in words, like lint's:
+ * `Error: Parse error in "features/a.feature" (5:3): expected: …` → `features/a.feature:5:3: …`.
+ */
+export function readableParseErrors(output: string): string {
+  return output.replace(
+    /^Error: Parse error in "(.+?)" \((\d+):(\d+)\): (.*)$/gm,
+    (_, file: string, line: string, column: string, message: string) =>
+      `${file}:${line}:${column}: ${readableSyntaxError(message).text}`,
   );
 }
 

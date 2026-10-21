@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { globSync } from 'tinyglobby';
 import { inspectPage } from './inspect';
+import { appPagesFile } from './pages';
 import { renderStubs } from './stubs';
 
 export type AiAssistant = 'agents' | 'copilot' | 'claude' | 'none';
@@ -101,7 +102,7 @@ export async function init(options: InitOptions = {}): Promise<number> {
       ? `  ${address} answers.`
       : `  ${address} does not answer right now. Start your app before you run the tests.`,
   );
-  const ai = options.ai ?? (await choose(ask, 'Which AI assistant should get instructions?'));
+  const ai = options.ai ?? (await chooseAssistant(ask));
 
   // 2. Files, never overwriting one that exists.
   const changes = new Changes(cwd, log, options.dryRun ?? false);
@@ -113,10 +114,17 @@ export async function init(options: InitOptions = {}): Promise<number> {
   } else {
     changes.create('playwright.config.ts', configFile(baseURL));
   }
-  changes.create(
-    'pages/start.json',
-    `${JSON.stringify({ name: 'Start', url: startPath }, null, 2)}\n`,
-  );
+  // In Next.js, Nuxt and the like, pages/ belongs to the app, and Plainwright loads no pages
+  // from it. The first test then opens the address.
+  const appPages = appPagesFile(cwd);
+  if (appPages) {
+    changes.skip('pages/start.json', `pages/ holds your app's files (${appPages})`);
+  } else {
+    changes.create(
+      'pages/start.json',
+      `${JSON.stringify({ name: 'Start', url: startPath }, null, 2)}\n`,
+    );
+  }
   changes.create('keywords/example.feature', KEYWORD_EXAMPLE);
   if (ai !== 'none') changes.create(AI_FILES[ai].file, aiInstructions(ai));
   changes.create(
@@ -149,7 +157,7 @@ export async function init(options: InitOptions = {}): Promise<number> {
     changes.skip('features/', 'has tests already');
   } else {
     const check = reachable ? await firstCheck(baseURL, startPath) : undefined;
-    changes.create('features/example.feature', exampleFeature(check));
+    changes.create('features/example.feature', exampleFeature(!appPages, startPath, check));
   }
   if (!options.dryRun) changes.create('.vscode/plainwright.steps.js', renderStubs());
 
@@ -282,19 +290,28 @@ export default defineConfig({
 `;
 }
 
+/** The lines docs/setup.md shows for a configuration of one's own. */
 function existingConfigHelp(file: string, baseURL: string) {
   return `${file} exists, so it was left as it is. To run feature files with it, add:
 
   import { defineBddConfig } from 'playwright-bdd';
-  import { steps } from '@nils.hoyer/plainwright';
+  import { aiFixPromptTemplate, steps } from '@nils.hoyer/plainwright';
 
   const testDir = defineBddConfig({
     features: 'features/**/*.feature',
+    // Your own steps, if any, and Plainwright's ready-made steps.
     steps: ['steps/**/*.ts', steps],
+    // Failed tests get a "Fix with AI" prompt in the report.
+    aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
   });
 
-and use testDir (and baseURL: '${baseURL}') in its defineConfig(). See
-https://github.com/nils-hoyer/plainwright/blob/main/docs/setup.md`;
+and in its defineConfig():
+
+  testDir,
+  use: { baseURL: '${baseURL}', actionTimeout: 10_000, trace: 'retain-on-failure' },
+
+Then run the tests with npx plainwright test. See
+https://github.com/nils-hoyer/plainwright/blob/main/docs/setup.md#with-your-own-playwright-configuration`;
 }
 
 const KEYWORD_EXAMPLE = `# Your own sentences, made of existing steps. Every file in keywords/ loads by itself.
@@ -340,13 +357,17 @@ async function firstCheck(baseURL: string, startPath: string): Promise<string | 
   return undefined;
 }
 
-function exampleFeature(check = 'I am on the "Start" page') {
+/** The first test: opens the start page by name, or by its address without pages/start.json. */
+function exampleFeature(named: boolean, startPath: string, check?: string) {
+  const address = startPath.replace(/(["\\])/g, '\\$1');
+  const open = named ? 'I open the "Start" page' : `I open the url "${address}"`;
+  check ??= named ? 'I am on the "Start" page' : `I see the url "${address}"`;
   return `Feature: Start page
 
   The first test, written by plainwright init. Change it, or add more .feature files here.
 
   Scenario: The start page opens
-    * I open the "Start" page
+    * ${open}
     * ${check}
 `;
 }
@@ -427,7 +448,7 @@ function runCommand(
   return result.status === 0;
 }
 
-type Ask = (question: string, fallback: string) => Promise<string>;
+export type Ask = (question: string, fallback: string) => Promise<string>;
 
 function createAsker(options: InitOptions, log: (line: string) => void): Ask {
   const interactive = !options.yes && process.stdin.isTTY;
@@ -445,10 +466,18 @@ function createAsker(options: InitOptions, log: (line: string) => void): Ask {
   };
 }
 
-async function choose(ask: Ask, question: string): Promise<AiAssistant> {
+/** Asks which assistant gets instructions until the answer is a number or a name from --ai. */
+export async function chooseAssistant(ask: Ask): Promise<AiAssistant> {
   const list = AI_CHOICES.map((choice, i) => `  ${i + 1}. ${choice.label}`).join('\n');
-  const answer = await ask(`${question}\n${list}\nNumber`, '1');
-  return AI_CHOICES[Number(answer) - 1]?.value ?? 'agents';
+  let question = `Which AI assistant should get instructions?\n${list}\nNumber`;
+  for (;;) {
+    const answer = (await ask(question, '1')).trim().toLowerCase();
+    const choice = /^\d+$/.test(answer)
+      ? AI_CHOICES[Number(answer) - 1]
+      : AI_CHOICES.find(({ value }) => value === answer);
+    if (choice) return choice.value;
+    question = `"${answer}" is not one of them. Write a number from 1 to ${AI_CHOICES.length}, or ${AI_CHOICES.map(({ value }) => value).join(', ')}`;
+  }
 }
 
 async function confirm(ask: Ask, question: string): Promise<boolean> {

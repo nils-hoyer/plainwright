@@ -317,6 +317,14 @@ export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Loc
     .reduce((found, other) => found.or(other));
 }
 
+export type MissingContext = {
+  /** The page whose aliases are in use, and its file in pages/. */
+  page?: string;
+  pageFile?: string;
+  /** The address the browser shows, e.g. `/dashboard`. */
+  address?: string;
+};
+
 /**
  * Explains a missing element by listing what the page offers, built from `ariaSnapshot()` of
  * the page, or of the container the element is named in.
@@ -325,8 +333,7 @@ export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Loc
 export function describeMissing(
   ref: ElementRef,
   snapshot: string,
-  pageName?: string,
-  pageFile?: string,
+  { page: pageName, pageFile, address }: MissingContext = {},
 ): string {
   const where = ref.container
     ? ` in the ${ref.container}`
@@ -335,27 +342,24 @@ export function describeMissing(
       : '';
   const lines = [`No ${ref.label} found${where}.`];
   const roles: readonly string[] = ELEMENT_TYPE_SPECS[ref.type].roles;
-  let names: string[] = [];
+  const nodes = parseAriaSnapshot(snapshot).filter((node) => roles.includes(node.role));
+  const names = [...new Set(nodes.map((node) => labelOf(ref.type, node)).filter(Boolean))];
   if (roles.length) {
-    names = [
-      ...new Set(
-        parseAriaSnapshot(snapshot)
-          .filter((node) => roles.includes(node.role))
-          .map((node) => labelOf(ref.type, node))
-          .filter(Boolean),
-      ),
-    ];
     const quoted = names.map((name) => `"${name}"`);
     const shown = quoted.length > 15 ? [...quoted.slice(0, 15), '…'] : quoted;
     const offered = ref.container ? `in the ${ref.container}` : 'on this page';
     lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? sentence(shown) : '(none).'}`);
   }
+  // A wrong page, or one that sent the browser elsewhere, shows in the address.
+  if (address) lines.push(`The address in the browser is ${address}.`);
   // A typo is more likely than an element without a name.
   const meant = closest(ref.name, names);
   if (meant) {
     lines.push(`Did you mean "${meant}"?`);
     return lines.join('\n');
   }
+  // With no element of the type at all, an alias would not help.
+  if (roles.length && !nodes.length) return lines.join('\n');
   const alias = `"elements": { ${JSON.stringify(ref.name)}: "<selector>" }`;
   lines.push(
     pageFile
@@ -373,7 +377,7 @@ export function describeMissing(
  * Example: `The text "Email or password is wrong." is not visible on the page.
  * Similar texts on this page: "Username and password are incorrect."`.
  */
-export function describeMissingText(text: string, snapshot: string): string {
+export function describeMissingText(text: string, snapshot: string, address?: string): string {
   const lines = [`The text "${text}" is not visible on the page.`];
   const texts = new Set<string>();
   for (const node of parseAriaSnapshot(snapshot)) {
@@ -402,6 +406,7 @@ export function describeMissingText(text: string, snapshot: string): string {
     lines.push(`Similar texts on this page: ${sentence(shown.map((t) => `"${t}"`))}`);
   }
   if (otherCapitals.length) lines.push('Text checks compare capitals too.');
+  if (address) lines.push(`The address in the browser is ${address}.`);
   return lines.join('\n');
 }
 

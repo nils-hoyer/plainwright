@@ -67,6 +67,7 @@ Feature: Account
     * I fill "<username>" in the "Username" field
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
+    * I am on the "Dashboard" page
 ```
 
 ## Getting started

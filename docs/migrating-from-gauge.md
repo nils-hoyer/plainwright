@@ -44,15 +44,16 @@ match, which makes a first pass quick.
 A Gauge concept becomes a keyword: a `Scenario Outline:` in `keywords/`, with the concept's
 parameters in quotes. Files in `keywords/` load by themselves.
 
+<!-- prettier-ignore -->
 ```markdown
 # Login concepts (Gauge, login.cpt)
 
 ## I am logged in as <user>
 
-- I visit the page login
-- I type <user> in the "input user"
-- I type "secret" in the "input password"
-- I click the "button login"
+* I visit the page login
+* I type <user> in the "input user"
+* I type "secret" in the "input password"
+* I click the "button login"
 ```
 
 ```gherkin
@@ -64,6 +65,7 @@ Feature: Login
     * I fill "<user>" in the "Username" field
     * I fill "secret" in the "Password" field
     * I click the "Log in" button
+    * I am on the "Dashboard" page
 ```
 
 ## Test data and secrets

@@ -12,7 +12,9 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 2. **Elements are named by what the user sees**, followed by an element type:
    `the "Log in" button`, `the "Email" field`. CSS, XPath and test IDs stay out of feature files.
    An element without a visible name gets an alias in its page's file in `pages/`.
-3. **One phrase per action. No synonyms.** It is `fill`, never also `type` or `enter`.
+3. **One phrase per action. No synonyms.** Text goes into a field with `fill`, never also
+   `type` or `enter`. `I type "…" on the keyboard` is a different action: an advanced step that
+   presses the keys one by one in whatever has the focus.
 4. **Every step does exactly what it says**, documented in one sentence.
 5. **Checks start with `I see` / `I do not see`** and wait automatically. No fixed waits in the
    core vocabulary.

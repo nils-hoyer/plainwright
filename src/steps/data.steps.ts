@@ -27,7 +27,7 @@ step({
   level: 'advanced',
   description:
     'Keeps the text of the element, or the value of a field, under the name for the rest of the test.',
-  example: 'I remember the text of the "Order number" cell as "order-number"',
+  example: 'I remember the text of the "Order number" field as "order-number"',
   remembers: (args) => String(args[1]),
   fn: async ({ world }, element: ElementRef, name: string) => {
     const value = await world.withElement(element, async (el) => {

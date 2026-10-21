@@ -121,6 +121,20 @@ export class World {
     return base ? new URL(path, base).toString() : path;
   }
 
+  /** The address the active tab shows, without the base URL: `/dashboard`. */
+  address(): string {
+    const url = this.#page.url();
+    try {
+      if (this.baseURL && new URL(url).origin === new URL(this.baseURL).origin) {
+        const { pathname, search, hash } = new URL(url);
+        return `${pathname}${search}${hash}`;
+      }
+    } catch {
+      // Not an address with an origin, such as about:blank.
+    }
+    return url;
+  }
+
   setNextDialogAction(action: DialogAction) {
     this.#nextDialog = action;
   }
@@ -213,7 +227,14 @@ export class World {
       : this.scope.locator('body');
     const snapshot = await where.ariaSnapshot({ timeout: 2000 }).catch(() => '');
     const page = this.#currentPage?.name;
-    addHint(error, describeMissing(missing, snapshot, page, page && getPageSource(page)));
+    addHint(
+      error,
+      describeMissing(missing, snapshot, {
+        page,
+        pageFile: page && getPageSource(page),
+        address: this.address(),
+      }),
+    );
   }
 }
 

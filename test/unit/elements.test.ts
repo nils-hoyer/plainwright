@@ -225,7 +225,7 @@ describe('aria snapshot', () => {
   });
 
   it('explains a missing element with the names the page offers', () => {
-    expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot, 'Login')).toBe(
+    expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot, { page: 'Login' })).toBe(
       [
         'No "Sign up" button found on the "Login" page.',
         'Buttons on this page: "Accept Cookies", "Log in".',
@@ -236,7 +236,10 @@ describe('aria snapshot', () => {
 
   it('points to the file of the page for an alias', () => {
     expect(
-      describeMissing(new ElementRef('Sign up', 'button'), snapshot, 'Login', 'pages/login.json'),
+      describeMissing(new ElementRef('Sign up', 'button'), snapshot, {
+        page: 'Login',
+        pageFile: 'pages/login.json',
+      }),
     ).toContain(
       'If the element has no visible name, add an alias to pages/login.json: "elements": { "Sign up": "<selector>" }.',
     );
@@ -248,9 +251,22 @@ describe('aria snapshot', () => {
     );
   });
 
-  it('says when the page has no element of that type', () => {
-    expect(describeMissing(new ElementRef('Agree', 'checkbox'), snapshot)).toContain(
-      'Checkboxes on this page: (none).',
+  it('says when the page has no element of that type, and where the browser is', () => {
+    expect(
+      describeMissing(new ElementRef('Order 1001', 'row'), snapshot, { address: '/dashboard' }),
+    ).toBe(
+      [
+        'No "Order 1001" row found.',
+        'Rows on this page: (none).',
+        'The address in the browser is /dashboard.',
+      ].join('\n'),
+    );
+  });
+
+  it('suggests an alias only when the page has elements of the type without a name', () => {
+    const unnamed = '- checkbox\n- button "Save"';
+    expect(describeMissing(new ElementRef('Agree', 'checkbox'), unnamed)).toContain(
+      'Checkboxes on this page: (none).\nIf the element has no visible name, add an alias',
     );
   });
 
@@ -310,7 +326,7 @@ describe('aria snapshot', () => {
     - button "Edit"
 `;
     const ref = new ElementRef('Delete', 'button', new ElementRef('Order 1001', 'row'));
-    expect(describeMissing(ref, row, 'Orders')).toMatch(
+    expect(describeMissing(ref, row, { page: 'Orders' })).toMatch(
       /^No "Delete" button found in the "Order 1001" row\.\nButtons in the "Order 1001" row: "Edit"\./,
     );
   });
@@ -323,7 +339,7 @@ describe('aria snapshot', () => {
     - button "Delete"
 `;
     const ref = new ElementRef('Delet', 'button', new ElementRef('Order 1001', 'row'));
-    expect(describeMissing(ref, row, 'Orders', 'pages/orders.json')).toBe(
+    expect(describeMissing(ref, row, { page: 'Orders', pageFile: 'pages/orders.json' })).toBe(
       [
         'No "Delet" button found in the "Order 1001" row.',
         'Buttons in the "Order 1001" row: "Delete".',
@@ -357,6 +373,12 @@ describe('aria snapshot', () => {
       'The text "Order saved" is not visible on the page.',
     );
     expect(describeMissingText('Close', orders)).not.toContain('capitals');
+    expect(describeMissingText('Order saved', orders, '/login?next=%2Forders')).toBe(
+      [
+        'The text "Order saved" is not visible on the page.',
+        'The address in the browser is /login?next=%2Forders.',
+      ].join('\n'),
+    );
   });
 
   it('explains a missing text with similar texts on the page', () => {
@@ -406,6 +428,27 @@ describe('aria snapshot', () => {
     );
     expect(text).toContain('--storage-state <file>');
     expect(text).toContain('  the "Search" field\n  the "Settings" button  (finds nothing)');
+  });
+
+  it('counts names that several elements have', () => {
+    const orders = `
+- row "Order 1001 Delete":
+  - cell "Order 1001"
+  - cell "Delete":
+    - button "Delete"
+- row "Order 1002 Delete":
+  - cell "Order 1002"
+  - cell "Delete":
+    - button "Delete"
+`;
+    const grouped = groupSnapshot(orders);
+    expect(grouped.repeated).toEqual({ button: { Delete: 2 }, cell: { Delete: 2 } });
+    const text = formatInspectResult({ url: 'http://localhost/orders', title: '', ...grouped });
+    expect(text).toContain('Buttons\n  the "Delete" button  (2 on this page)\n');
+    expect(text).toContain('  the "Order 1001" row\n  the "Order 1002" row\n');
+    expect(text).toContain(
+      'Name the element it is in:\n  the "Delete" button in the "Order 1001" row',
+    );
   });
 
   it('groups elements by type for inspect', () => {

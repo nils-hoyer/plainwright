@@ -73,10 +73,22 @@ export function getPageDefinition(name: string): PageDefinition {
   const page = pages.get(name);
   if (page) return page;
   const known = [...pages.keys()].map((n) => `"${n}"`).join(', ') || '(none)';
+  const app = appPagesFile();
   throw new Error(
     `[plainwright] No page named "${name}". Defined pages: ${known}. ` +
-      `Add it as a file in pages/: { "name": "${name}", "url": "/..." }.`,
+      (app
+        ? `pages/ holds your app's files (${app}), so Plainwright loads no pages from it: ` +
+          `open the address with I open the url "/...", or load page files from another folder with definePages().`
+        : `Add it as a file in pages/: { "name": "${name}", "url": "/..." }.`),
   );
+}
+
+/** App source files: a `pages/` folder with them belongs to Next.js, Nuxt, Astro and the like. */
+const APP_PAGES = 'pages/**/*.{js,jsx,ts,tsx,mjs,cjs,vue,svelte,astro,md,mdx}';
+
+/** An app source file in `pages/`, such as `pages/index.tsx`, if the folder belongs to the app. */
+export function appPagesFile(cwd = process.cwd()): string | undefined {
+  return globSync(APP_PAGES, { cwd, ignore: ['**/node_modules/**'] })[0];
 }
 
 export function getPageDefinitions(): PageDefinition[] {
