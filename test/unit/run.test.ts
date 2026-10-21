@@ -27,7 +27,12 @@ describe('plainwright test', () => {
     const loaded = await loadPlaywrightConfig(root);
     expect(loaded?.config.use?.baseURL).toMatch(/^http:\/\/localhost:\d+$/);
     expect(loaded?.bdd).toEqual([
-      { cwd: root, features: ['test/features/**/*.feature'], steps: ['test/steps/**/*.ts'] },
+      {
+        cwd: root,
+        outputDir: path.join(root, '.features-gen'),
+        features: ['test/features/**/*.feature'],
+        steps: ['test/steps/**/*.ts'],
+      },
     ]);
     // bddgen and Playwright, started after this, read their own configuration.
     expect(process.env.PLAYWRIGHT_BDD_CONFIGS).toBeUndefined();

@@ -217,10 +217,13 @@ export class World {
   }
 }
 
-/** Puts an explanation in front of the error message, also in the stack Playwright prints. */
+/**
+ * Puts an explanation in front of the error message, also in the stack Playwright prints.
+ * Playwright's own message follows as details for developers.
+ */
 export function addHint(error: Error, hint: string) {
   const original = error.message;
-  error.message = `${hint}\n\n${original}`;
+  error.message = `${hint}\n\nDetails for developers:\n${original}`;
   if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
 }
 

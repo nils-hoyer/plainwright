@@ -348,7 +348,7 @@ export function describeMissing(
     const quoted = names.map((name) => `"${name}"`);
     const shown = quoted.length > 15 ? [...quoted.slice(0, 15), '…'] : quoted;
     const offered = ref.container ? `in the ${ref.container}` : 'on this page';
-    lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? shown.join(', ') : '(none)'}.`);
+    lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? sentence(shown) : '(none).'}`);
   }
   // A typo is more likely than an element without a name.
   const meant = closest(ref.name, names);
@@ -399,10 +399,16 @@ export function describeMissingText(text: string, snapshot: string): string {
   const meant = closest(text, [...texts]);
   const shown = [...new Set([...otherCapitals, ...(meant ? [meant] : []), ...similar])].slice(0, 5);
   if (shown.length) {
-    lines.push(`Similar texts on this page: ${shown.map((t) => `"${t}"`).join(', ')}.`);
+    lines.push(`Similar texts on this page: ${sentence(shown.map((t) => `"${t}"`))}`);
   }
   if (otherCapitals.length) lines.push('Text checks compare capitals too.');
   return lines.join('\n');
+}
+
+/** The quoted items as the end of a sentence: no second full stop after `"Saved."`. */
+function sentence(quoted: string[]): string {
+  const text = quoted.join(', ');
+  return /[.!?…]"?$/.test(text) ? text : `${text}.`;
 }
 
 /** Words of three letters or more, in lower case: `Buy milk!` → `['buy', 'milk']`. */
