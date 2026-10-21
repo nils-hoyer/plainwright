@@ -1,6 +1,9 @@
 import { customParameterTypes } from './params';
 import { getSteps } from './registry';
 
+/** Where `init` and the `stubs` script write the step list for the editor. */
+export const STUBS_FILE = '.vscode/plainwright.steps.js';
+
 /**
  * A JavaScript file the Cucumber editor extensions can read to offer autocomplete and
  * go-to-definition for all steps, including keywords from .feature files.

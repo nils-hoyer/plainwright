@@ -11,21 +11,37 @@ export type KeywordsFixtures = {
   world: World;
 };
 
-/** The Playwright `test` with the `world` fixture. Extend it with `useTest()` to add your own fixtures. */
-export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures>({
-  exactNames: [true, { option: true }],
-  world: async ({ page, baseURL, exactNames }, use) => {
-    const world = new World(page, { baseURL, exactNames });
-    await use(world);
-    try {
-      await world.runAfterTest();
-    } finally {
-      world.dispose();
-    }
-  },
-});
+/**
+ * Checks that run once per worker before the first test, after all steps are loaded, e.g. that
+ * the keywords are valid. A failed check fails every test with its error.
+ */
+export const workerChecks = new Set<() => void>();
 
-export const { Step, BeforeAll } = createBdd(test);
+/** The Playwright `test` with the `world` fixture. Extend it with `useTest()` to add your own fixtures. */
+export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwrightChecks: void }>(
+  {
+    // Boxed, so it does not show up as a step in the report.
+    plainwrightChecks: [
+      async ({}, use) => {
+        for (const check of workerChecks) check();
+        await use();
+      },
+      { scope: 'worker', auto: true, box: true },
+    ],
+    exactNames: [true, { option: true }],
+    world: async ({ page, baseURL, exactNames }, use) => {
+      const world = new World(page, { baseURL, exactNames });
+      await use(world);
+      try {
+        await world.runAfterTest();
+      } finally {
+        world.dispose();
+      }
+    },
+  },
+);
+
+export const { Step } = createBdd(test);
 
 /**
  * Makes playwright-bdd run every feature with your extended `test`, so your steps can use your

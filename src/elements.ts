@@ -1,5 +1,6 @@
 import type { FrameLocator, Locator, Page } from '@playwright/test';
 import { AriaNode, parseAriaSnapshot } from './aria';
+import { closest } from './similar';
 
 /**
  * Element types a step can name, e.g. `the "Log in" button`.
@@ -334,19 +335,26 @@ export function describeMissing(
       : '';
   const lines = [`No ${ref.label} found${where}.`];
   const roles: readonly string[] = ELEMENT_TYPE_SPECS[ref.type].roles;
+  let names: string[] = [];
   if (roles.length) {
-    const names = [
+    names = [
       ...new Set(
         parseAriaSnapshot(snapshot)
           .filter((node) => roles.includes(node.role))
           .map((node) => labelOf(ref.type, node))
-          .filter(Boolean)
-          .map((name) => `"${name}"`),
+          .filter(Boolean),
       ),
     ];
-    const shown = names.length > 15 ? [...names.slice(0, 15), '…'] : names;
+    const quoted = names.map((name) => `"${name}"`);
+    const shown = quoted.length > 15 ? [...quoted.slice(0, 15), '…'] : quoted;
     const offered = ref.container ? `in the ${ref.container}` : 'on this page';
     lines.push(`${PLURAL[ref.type]} ${offered}: ${shown.length ? shown.join(', ') : '(none)'}.`);
+  }
+  // A typo is more likely than an element without a name.
+  const meant = closest(ref.name, names);
+  if (meant) {
+    lines.push(`Did you mean "${meant}"?`);
+    return lines.join('\n');
   }
   const alias = `"elements": { ${JSON.stringify(ref.name)}: "<selector>" }`;
   lines.push(
@@ -357,4 +365,43 @@ export function describeMissing(
         : `If the element has no visible name, add an alias in the page's file in pages/, ${alias}, and open the page by name: I open the "…" page.`,
   );
   return lines.join('\n');
+}
+
+/**
+ * Explains a text check that failed with the texts on the page that look like the one expected,
+ * from `ariaSnapshot()` of the page.
+ * Example: `The text "Email or password is wrong." is not on the page.
+ * Similar texts on this page: "Username and password are incorrect."`.
+ */
+export function describeMissingText(text: string, snapshot: string): string {
+  const lines = [`The text "${text}" is not on the page.`];
+  const texts = new Set<string>();
+  for (const node of parseAriaSnapshot(snapshot)) {
+    for (const { name, text } of [node, ...node.descendants]) {
+      for (const value of [name, text]) if (value && value.length <= 200) texts.add(value);
+    }
+  }
+  const lower = text.toLowerCase();
+  const otherCapitals = [...texts].filter((t) => t.toLowerCase().includes(lower));
+  const words = wordsOf(text);
+  const similar = [...texts]
+    .map((candidate) => {
+      const shared = wordsOf(candidate).filter((word) => words.includes(word));
+      return { candidate, score: words.length ? new Set(shared).size / words.length : 0 };
+    })
+    .filter(({ score }) => score >= 0.5)
+    .sort((a, b) => b.score - a.score)
+    .map(({ candidate }) => candidate);
+  const meant = closest(text, [...texts]);
+  const shown = [...new Set([...otherCapitals, ...(meant ? [meant] : []), ...similar])].slice(0, 5);
+  if (shown.length) {
+    lines.push(`Similar texts on this page: ${shown.map((t) => `"${t}"`).join(', ')}.`);
+  }
+  if (otherCapitals.length) lines.push('Text checks compare capitals too.');
+  return lines.join('\n');
+}
+
+/** Words of three letters or more, in lower case: `Buy milk!` → `['buy', 'milk']`. */
+function wordsOf(text: string): string[] {
+  return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []).filter((word) => word.length >= 3);
 }

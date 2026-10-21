@@ -40,8 +40,9 @@ export function defineConfig(
   });
   return definePlaywrightConfig<KeywordsOptions>({
     testDir,
-    // The report opens by itself when a test fails (not in CI).
-    reporter: [['list'], ['html']],
+    // The report opens by itself when a test fails (not in CI). Its "Fix with AI" attachment
+    // asks to fix the scenario; Playwright's own "Copy prompt" would ask for code.
+    reporter: [['list'], ['html', { noCopyPrompt: true }]],
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     ...playwright,
     use: {

@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
-import type { ElementRef } from '../elements';
-import type { World } from '../world';
+import { describeMissingText, type ElementRef } from '../elements';
+import { addHint, type World } from '../world';
 import { category, escapeRegExp } from './builtin';
 
 const step = category('Checking what you see');
@@ -34,7 +34,18 @@ step({
     'Checks that some visible element on the page contains this text, with the same capitals.',
   example: 'I see the text "Welcome back!"',
   fn: async ({ world }, text: string) => {
-    await expect(containingText(world, text).first()).toBeVisible();
+    try {
+      await expect(containingText(world, text).first()).toBeVisible();
+    } catch (error) {
+      if (error instanceof Error) {
+        const snapshot = await world.scope
+          .locator('body')
+          .ariaSnapshot({ timeout: 2000 })
+          .catch(() => '');
+        addHint(error, describeMissingText(text, snapshot));
+      }
+      throw error;
+    }
   },
 });
 

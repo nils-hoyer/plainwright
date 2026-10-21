@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { parseAriaSnapshot } from '../../src/aria';
-import { describeMissing, ElementRef, locate, Scope } from '../../src/elements';
+import {
+  describeMissing,
+  describeMissingText,
+  ElementRef,
+  locate,
+  Scope,
+} from '../../src/elements';
 import { findStep } from '../../src/index';
 import { groupSnapshot } from '../../src/inspect';
 
@@ -219,26 +225,26 @@ describe('aria snapshot', () => {
   });
 
   it('explains a missing element with the names the page offers', () => {
-    expect(describeMissing(new ElementRef('Log on', 'button'), snapshot, 'Login')).toBe(
+    expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot, 'Login')).toBe(
       [
-        'No "Log on" button found on the "Login" page.',
+        'No "Sign up" button found on the "Login" page.',
         'Buttons on this page: "Accept Cookies", "Log in".',
-        `If the element has no visible name, add an alias: definePage('Login', { elements: { 'Log on': '<selector>' } }).`,
+        `If the element has no visible name, add an alias: definePage('Login', { elements: { 'Sign up': '<selector>' } }).`,
       ].join('\n'),
     );
   });
 
   it('points to the file of the page for an alias', () => {
     expect(
-      describeMissing(new ElementRef('Log on', 'button'), snapshot, 'Login', 'pages/login.json'),
+      describeMissing(new ElementRef('Sign up', 'button'), snapshot, 'Login', 'pages/login.json'),
     ).toContain(
-      'If the element has no visible name, add an alias to pages/login.json: "elements": { "Log on": "<selector>" }.',
+      'If the element has no visible name, add an alias to pages/login.json: "elements": { "Sign up": "<selector>" }.',
     );
   });
 
   it('points to the pages folder when no page is open', () => {
-    expect(describeMissing(new ElementRef('Log on', 'button'), snapshot)).toContain(
-      `add an alias in the page's file in pages/, "elements": { "Log on": "<selector>" }, and open the page by name`,
+    expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot)).toContain(
+      `add an alias in the page's file in pages/, "elements": { "Sign up": "<selector>" }, and open the page by name`,
     );
   });
 
@@ -306,6 +312,52 @@ describe('aria snapshot', () => {
     const ref = new ElementRef('Delete', 'button', new ElementRef('Order 1001', 'row'));
     expect(describeMissing(ref, row, 'Orders')).toMatch(
       /^No "Delete" button found in the "Order 1001" row\.\nButtons in the "Order 1001" row: "Edit"\./,
+    );
+  });
+
+  it('suggests a close name instead of an alias for a typo', () => {
+    const row = `
+- row "Order 1001 Delete":
+  - cell "Order 1001"
+  - cell "Delete":
+    - button "Delete"
+`;
+    const ref = new ElementRef('Delet', 'button', new ElementRef('Order 1001', 'row'));
+    expect(describeMissing(ref, row, 'Orders', 'pages/orders.json')).toBe(
+      [
+        'No "Delet" button found in the "Order 1001" row.',
+        'Buttons in the "Order 1001" row: "Delete".',
+        'Did you mean "Delete"?',
+      ].join('\n'),
+    );
+    expect(describeMissing(new ElementRef('log in', 'button'), snapshot)).toContain(
+      'Did you mean "Log in"?',
+    );
+  });
+
+  it('explains a missing text with similar texts on the page', () => {
+    const login = `
+- main:
+  - heading "Log in" [level=1]
+  - paragraph: Username and password are incorrect.
+  - textbox "Username"
+  - button "Log in"
+`;
+    expect(describeMissingText('Email or password is incorrect.', login)).toBe(
+      [
+        'The text "Email or password is incorrect." is not on the page.',
+        'Similar texts on this page: "Username and password are incorrect.".',
+      ].join('\n'),
+    );
+    expect(describeMissingText('username and password', login)).toBe(
+      [
+        'The text "username and password" is not on the page.',
+        'Similar texts on this page: "Username and password are incorrect.".',
+        'Text checks compare capitals too.',
+      ].join('\n'),
+    );
+    expect(describeMissingText('Welcome back!', login)).toBe(
+      'The text "Welcome back!" is not on the page.',
     );
   });
 

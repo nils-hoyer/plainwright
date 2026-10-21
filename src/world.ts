@@ -213,11 +213,15 @@ export class World {
       : this.scope.locator('body');
     const snapshot = await where.ariaSnapshot({ timeout: 2000 }).catch(() => '');
     const page = this.#currentPage?.name;
-    const hint = describeMissing(missing, snapshot, page, page && getPageSource(page));
-    const original = error.message;
-    error.message = `${hint}\n\n${original}`;
-    if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
+    addHint(error, describeMissing(missing, snapshot, page, page && getPageSource(page)));
   }
+}
+
+/** Puts an explanation in front of the error message, also in the stack Playwright prints. */
+export function addHint(error: Error, hint: string) {
+  const original = error.message;
+  error.message = `${hint}\n\n${original}`;
+  if (error.stack?.includes(original)) error.stack = error.stack.replace(original, error.message);
 }
 
 /** Whether the page has its own `dialog` listener. Pages are Node event emitters at runtime. */
