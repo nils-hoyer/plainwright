@@ -72,12 +72,9 @@ jobs:
       - name: Use npm 11.5.1 or later, which trusted publishing needs
         run: npm install -g npm@latest
       - run: npm ci
-      # prepack builds dist/. Trusted publishing adds the provenance attestation.
-      - run: npm publish --provenance
-        env:
-          # Only for the first release: npm offers trusted publishing once the package exists.
-          # npm tries OIDC first; delete the NPM_TOKEN secret once trusted publishing is set up.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # prepack builds dist/. Trusted publishing adds the provenance attestation. There is no
+      # token to fall back on, so this fails unless the trusted publisher on npmjs.com matches.
+      - run: npm publish
 
   github-release:
     needs: [version, publish]
