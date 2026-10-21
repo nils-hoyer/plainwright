@@ -67,7 +67,7 @@ describe('defineKeywords', () => {
     define();
     const file = 'test/unit/fixtures/keywords/broken-steps/broken.feature';
     expect(library.validateKeywords()).toEqual([
-      `${file}:5: No step matches "I clik the "Search" button". Did you mean "I click the "Log in" button"?`,
+      `${file}:5: No step matches "I clik the "Search" button". Did you mean "I click the "Search" button"?`,
       `${file}:3: The parameter <term> of "I search for "<term>"" is not used in any step.`,
       `${file}:8: The parameter <email> of "I sign up as "<name>" with "<email>"" is not used in any step.`,
     ]);

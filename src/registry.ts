@@ -158,7 +158,8 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
       const shown = [...new Map(used.map((u) => [u.reference, u.shown])).entries()]
         .map(([reference, value]) => `{${reference}} = ${shorten(value)}`)
         .join(', ');
-      await test.step(shown, () => {});
+      // The report links the line to where the step is written, not to this file.
+      await test.step(shown, () => {}, { location: runningKeywordStep ?? stepCallSite() });
     }
     try {
       return await fn.call(this, fixtures, ...values);
@@ -170,6 +171,36 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
   return wrapped;
+}
+
+/** Where the step a keyword is running is written, while it runs. */
+let runningKeywordStep: StepLocation | undefined;
+
+/** Runs a step of a keyword, so its value line in the report links to the keyword file. */
+export async function runAt<T>(location: StepLocation, fn: () => T | Promise<T>): Promise<T> {
+  const before = runningKeywordStep;
+  runningKeywordStep = location;
+  try {
+    return await fn();
+  } finally {
+    runningKeywordStep = before;
+  }
+}
+
+/** Where the running step is called in the test: its line in the test file, as in the report. */
+function stepCallSite(): StepLocation | undefined {
+  let info;
+  try {
+    info = test.info();
+  } catch {
+    return undefined;
+  }
+  const { file, line, column } = info;
+  for (const frame of new Error().stack?.split('\n').slice(1) ?? []) {
+    const location = parseStackFrame(frame.replace(/^\s*at async /, 'at '));
+    if (location?.file === file) return location;
+  }
+  return { file, line, column };
 }
 
 /**
@@ -232,7 +263,7 @@ export function findStep(text: string): StepMatch {
     throw new Error(
       `No step matches "${text}".` +
         (suggestions.length
-          ? `\nDid you mean:\n${suggestions.map((s) => `  - ${s.example}`).join('\n')}`
+          ? `\nDid you mean:\n${suggestions.map((s) => `  - ${suggestionFor(s, text)}`).join('\n')}`
           : ''),
     );
   }
@@ -240,6 +271,22 @@ export function findStep(text: string): StepMatch {
     `"${text}" matches ${matches.length} steps:\n` +
       matches.map(({ step }) => `  - ${step.pattern}${formatLocation(step.location)}`).join('\n'),
   );
+}
+
+/**
+ * How to write `text` with the step: its example with the quoted values of `text` in place of
+ * its own, when there are as many and the result matches the step.
+ * `I clik the "Add" button` → `I click the "Add" button`.
+ */
+export function suggestionFor(step: StepDefinition, text: string): string {
+  const quoted = /"(?:[^"\\]|\\.)*"/g;
+  const values = text.match(quoted) ?? [];
+  if (!values.length || values.length !== (step.example.match(quoted) ?? []).length) {
+    return step.example;
+  }
+  let i = 0;
+  const filled = step.example.replace(quoted, () => values[i++]);
+  return findSteps(filled).some((match) => match.step === step) ? filled : step.example;
 }
 
 /** Steps whose example is closest to the given text. */

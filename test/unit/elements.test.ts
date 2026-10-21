@@ -8,7 +8,7 @@ import {
   Scope,
 } from '../../src/elements';
 import { findStep } from '../../src/index';
-import { groupSnapshot } from '../../src/inspect';
+import { formatInspectResult, groupSnapshot } from '../../src/inspect';
 
 /** A stand-in for Page/FrameLocator/Locator that records how a locator was built. */
 function fakeScope(): Scope {
@@ -383,6 +383,29 @@ describe('aria snapshot', () => {
     expect(describeMissingText('Welcome back!', login)).toBe(
       'The text "Welcome back!" is not visible on the page.',
     );
+  });
+
+  it('does not count an empty status area as an element without a name', () => {
+    expect(groupSnapshot('- status\n- alert\n- textbox').unnamed).toEqual({ field: 1 });
+  });
+
+  it('shows aliases and a redirect in inspect', () => {
+    const text = formatInspectResult({
+      url: 'http://localhost/login',
+      title: 'Log in',
+      elements: {},
+      unnamed: {},
+      aliases: [
+        { name: 'Search', type: 'field', count: 1 },
+        { name: '"Settings" button', type: 'button', count: 0 },
+      ],
+      redirectedFrom: 'http://localhost/dashboard',
+    });
+    expect(text).toContain(
+      'The page sent the browser from http://localhost/dashboard to http://localhost/login.',
+    );
+    expect(text).toContain('--storage-state <file>');
+    expect(text).toContain('  the "Search" field\n  the "Settings" button  (finds nothing)');
   });
 
   it('groups elements by type for inspect', () => {

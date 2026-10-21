@@ -24,6 +24,15 @@ describe('lint', () => {
     ]);
   });
 
+  it('reports a name to remember that braces cannot refer to', () => {
+    const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/remember.feature')], root)
+      .filter((message) => message.severity === 'error')
+      .map(formatLintMessage);
+    expect(errors).toEqual([
+      `test/unit/fixtures/lint/remember.feature:4: error: "order number" cannot be remembered: a name may only contain letters, digits, - and _, such as "order-number". (remember-name)`,
+    ]);
+  });
+
   it('summarizes the counts', () => {
     expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
   });

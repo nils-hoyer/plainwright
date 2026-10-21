@@ -11,8 +11,10 @@ import {
   getSteps,
   getUnusableSteps,
   registerStep,
+  runAt,
   StepDefinition,
   StepFixtures,
+  suggestionFor,
   suggestSteps,
 } from './registry';
 import { levenshtein } from './similar';
@@ -151,7 +153,9 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
         const suggestions = suggestSteps(sub.text);
         errors.push(
           `${subWhere}: No step matches "${sub.text}".` +
-            (suggestions.length ? ` Did you mean "${suggestions[0].example}"?` : ''),
+            (suggestions.length
+              ? ` Did you mean "${suggestionFor(suggestions[0], sub.text)}"?`
+              : ''),
         );
         continue;
       }
@@ -340,7 +344,7 @@ async function runKeyword(
                 : `No step matches "${text}".`),
           );
         }
-        await matches[0].step.fn.call({}, fixtures, ...matches[0].args);
+        await runAt(location, () => matches[0].step.fn.call({}, fixtures, ...matches[0].args));
       },
       { location },
     );

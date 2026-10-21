@@ -16,7 +16,7 @@ const gherkinSteps = [...readme.matchAll(/```gherkin\n([\s\S]*?)```/g)]
 
 const inlineSentences = [...readme.matchAll(/`(I [^`…]+)`/g)].map((match) => match[1]);
 
-// Keywords the README defines, e.g. I log in as "<username>" with password "<password>".
+// Keywords the README defines, e.g. I log in as "<email>" with password "<password>".
 const keywords = [...readme.matchAll(/Scenario Outline: (.+)/g)].map((match) => {
   const parsed = titleToPattern(match[1].trim());
   if ('error' in parsed) throw new Error(parsed.error);
