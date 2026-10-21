@@ -44,6 +44,10 @@ export function defineConfig(
     // asks to fix the scenario; Playwright's own "Copy prompt" would ask for code.
     reporter: [['list'], ['html', { noCopyPrompt: true }]],
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+    // Screenshots to compare against are stored next to the feature files, so they can be
+    // committed: features/login.feature.spec.js-snapshots/. Playwright's default is next to
+    // the generated tests, a folder that is not committed.
+    snapshotDir: bdd?.featuresRoot ?? '.',
     ...playwright,
     use: {
       // A click or fill that finds nothing fails after 10 s and lists what the page offers.

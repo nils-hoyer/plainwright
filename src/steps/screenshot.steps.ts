@@ -41,7 +41,7 @@ step({
   pattern: 'I see the {element} matches the screenshot {string}',
   level: 'advanced',
   description:
-    'Compares the element with the stored screenshot of this name. Without one, it stores one and fails once.',
+    'Compares the element with the stored screenshot of this name. Without one, it stores one next to the feature file and fails once.',
   example: 'I see the "Blue square" section matches the screenshot "blue-square.png"',
   fn: async ({ world }, element: ElementRef, name: string) => {
     await world.withElement(element, (el) => expect(el).toHaveScreenshot(name));
@@ -52,7 +52,7 @@ step({
   pattern: 'I see the page matches the screenshot {string}',
   level: 'advanced',
   description:
-    'Compares the visible page with the stored screenshot of this name. Without one, it stores one and fails once.',
+    'Compares the visible page with the stored screenshot of this name. Without one, it stores one next to the feature file and fails once.',
   example: 'I see the page matches the screenshot "swatch-page.png"',
   fn: async ({ world }, name: string) => {
     await expect(world.page).toHaveScreenshot(name);
