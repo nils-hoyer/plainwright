@@ -180,13 +180,13 @@ For special cases. `lint` lists where they are used.
 
 ### Screenshots
 
-| Step                                                  | What it does                                                                                                  | Example                                                                    |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| `I take a screenshot`                                 | Adds a screenshot of the visible page to the test report.                                                     | `I take a screenshot`                                                      |
-| `I take a screenshot named {string}`                  | Adds a screenshot of the visible page to the test report under this name.                                     | `I take a screenshot named "Login form"`                                   |
-| `I take a screenshot of the {element}`                | Adds a screenshot of just this element to the test report.                                                    | `I take a screenshot of the "Account Overview" section`                    |
-| `I see the {element} matches the screenshot {string}` | Compares the element with the stored screenshot of this name. Without one, it stores one and fails once.      | `I see the "Blue square" section matches the screenshot "blue-square.png"` |
-| `I see the page matches the screenshot {string}`      | Compares the visible page with the stored screenshot of this name. Without one, it stores one and fails once. | `I see the page matches the screenshot "swatch-page.png"`                  |
+| Step                                                  | What it does                                                                                                                           | Example                                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `I take a screenshot`                                 | Adds a screenshot of the visible page to the test report.                                                                              | `I take a screenshot`                                                      |
+| `I take a screenshot named {string}`                  | Adds a screenshot of the visible page to the test report under this name.                                                              | `I take a screenshot named "Login form"`                                   |
+| `I take a screenshot of the {element}`                | Adds a screenshot of just this element to the test report.                                                                             | `I take a screenshot of the "Account Overview" section`                    |
+| `I see the {element} matches the screenshot {string}` | Compares the element with the stored screenshot of this name. Without one, it stores one next to the feature file and fails once.      | `I see the "Blue square" section matches the screenshot "blue-square.png"` |
+| `I see the page matches the screenshot {string}`      | Compares the visible page with the stored screenshot of this name. Without one, it stores one next to the feature file and fails once. | `I see the page matches the screenshot "swatch-page.png"`                  |
 
 ### Downloads
 
