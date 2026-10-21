@@ -267,7 +267,7 @@ describe('aria snapshot', () => {
       image: ['Company logo'],
     });
     expect(describeMissing(new ElementRef('Confirm', 'dialog'), widgets)).toContain(
-      'Dialogs on this page: "Delete order?".',
+      'Dialogs on this page: "Delete order?"\n',
     );
   });
 
@@ -370,13 +370,13 @@ describe('aria snapshot', () => {
     expect(describeMissingText('Email or password is incorrect.', login)).toBe(
       [
         'The text "Email or password is incorrect." is not visible on the page.',
-        'Similar texts on this page: "Username and password are incorrect.".',
+        'Similar texts on this page: "Username and password are incorrect."',
       ].join('\n'),
     );
     expect(describeMissingText('username and password', login)).toBe(
       [
         'The text "username and password" is not visible on the page.',
-        'Similar texts on this page: "Username and password are incorrect.".',
+        'Similar texts on this page: "Username and password are incorrect."',
         'Text checks compare capitals too.',
       ].join('\n'),
     );

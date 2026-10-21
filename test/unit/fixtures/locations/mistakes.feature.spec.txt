@@ -1,0 +1,21 @@
+// Generated from: mistakes.feature
+import { test } from "../../../../src/index";
+
+test.describe('Mistakes', () => {
+
+  test.beforeEach('Background', async ({ And, world }, testInfo) => { if (testInfo.error) return;
+    await And('I open the "Todos" page', null, { world }); 
+  });
+  
+  test('Wrong text', async ({ And, page, world }) => { 
+    await And('I add the todo "Buy milk"', null, { page, world }); 
+    await And('I see the text "Buy bread"', null, { world }); 
+  });
+
+});
+
+// == technical section ==
+
+const bddFileData = [ // bdd-data-start
+  {"pwTestLine":10,"pickleLine":6,"tags":[],"steps":[{"pwStepLine":7,"gherkinStepLine":4,"keywordType":"Unknown","textWithKeyword":"* I open the \"Todos\" page","isBg":true},{"pwStepLine":11,"gherkinStepLine":7,"keywordType":"Unknown","textWithKeyword":"* I add the todo \"Buy milk\""},{"pwStepLine":12,"gherkinStepLine":8,"keywordType":"Unknown","textWithKeyword":"* I see the text \"Buy bread\""}]},
+]; // bdd-data-end

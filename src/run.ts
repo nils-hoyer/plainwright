@@ -5,6 +5,7 @@ import path from 'node:path';
 import { validateKeywords } from './keywords';
 import { formatLintMessage, lintFeatures } from './lint';
 import { BddFiles, loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
+import { mapToFeatures } from './locations';
 import { renderStubs, STUBS_FILE } from './stubs';
 
 /** Without a configuration that loads: the defaults of defineConfig(). */
@@ -68,6 +69,13 @@ export async function runTests(args: string[], cwd = process.cwd()): Promise<num
   }
   process.stderr.write(output);
   if (generated.status !== 0) return generated.status ?? 1;
+  for (const { outputDir, cwd: configDir } of projects) {
+    try {
+      if (outputDir) mapToFeatures(outputDir, configDir);
+    } catch {
+      // Locations then stay in the generated files.
+    }
+  }
   const run = spawnSync(process.execPath, [playwright, 'test', ...args], { cwd, stdio: 'inherit' });
   return run.status ?? 1;
 }

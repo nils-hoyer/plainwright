@@ -43,7 +43,7 @@
     "lint:features": "jiti src/cli.ts lint --features 'test/features/**/*.feature' --steps 'test/steps/**/*.ts' --quiet",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "vitest run",
-    "test:e2e": "bddgen && playwright test",
+    "test:e2e": "jiti src/cli.ts test",
     "verify": "npm run format:check && npm run typecheck && npm run docs:check && npm run lint:features && npm test",
     "prepack": "npm run build"
   },

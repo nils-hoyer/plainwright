@@ -21,8 +21,11 @@ export async function loadStepFiles(patterns: string[], cwd = process.cwd()): Pr
   return files;
 }
 
-/** Feature and step file patterns of one playwright-bdd project, relative to `cwd`. */
-export type BddFiles = { cwd: string; features: string[]; steps: string[] };
+/**
+ * Feature and step file patterns of one playwright-bdd project, relative to `cwd`, and the
+ * folder bddgen writes the tests to.
+ */
+export type BddFiles = { cwd: string; features: string[]; steps: string[]; outputDir?: string };
 
 /**
  * Loads playwright.config.* (or `file`) and returns it with the feature and step patterns of
@@ -48,8 +51,9 @@ export async function loadPlaywrightConfig(
       string,
       { configDir: string; features?: string | string[]; steps?: string | string[] }
     >;
-    const bdd = Object.values(projects).map(({ configDir, features, steps }) => ({
+    const bdd = Object.entries(projects).map(([outputDir, { configDir, features, steps }]) => ({
       cwd: configDir,
+      outputDir,
       features: [features ?? []].flat(),
       steps: [steps ?? []]
         .flat()
