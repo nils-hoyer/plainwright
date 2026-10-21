@@ -71,9 +71,9 @@ A test can keep a value from the page and use it later. A remembered value lasts
 of the test.
 
 ```gherkin
-* I remember the text of the "Order number" cell as "order number"
+* I remember the text of the "Order number" cell as "order-number"
 * I open the url "/orders"
-* I see the text "{order number}"
+* I see the text "{order-number}"
 ```
 
 | Step                                                    | What it does                                    |

@@ -4,9 +4,16 @@ import { featureSteps, parseGherkin } from './gherkin';
 import { ElementRef } from './elements';
 import { checkKeywords, fillPlaceholders, keywordOf } from './keywords';
 import { getPageDefinitions } from './pages';
-import { findSteps, getSteps, getUnusableSteps, StepDefinition, suggestSteps } from './registry';
+import {
+  findSteps,
+  getSteps,
+  getUnusableSteps,
+  StepDefinition,
+  suggestionFor,
+  suggestSteps,
+} from './registry';
 import { rememberedName } from './steps/builtin';
-import { checkReference, NumberReference, referencesIn } from './values';
+import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
 
@@ -26,7 +33,8 @@ export type LintMessage = {
     | 'step-example'
     | 'unknown-parameter-type'
     | 'unknown-page'
-    | 'unknown-value';
+    | 'unknown-value'
+    | 'remember-name';
   message: string;
 };
 
@@ -89,7 +97,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           'error',
           'undefined-step',
           `Unknown step "${text}".` +
-            (suggestion ? ` Did you mean "${suggestion.example}"?` : '') +
+            (suggestion ? ` Did you mean "${suggestionFor(suggestion, text)}"?` : '') +
             skippedHint,
         );
         continue;
@@ -137,6 +145,11 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       for (const reference of new Set(valueTexts(args).flatMap(referencesIn))) {
         const problem = checkReference(reference, remembered);
         if (problem) add('error', 'unknown-value', problem);
+      }
+      const name = rememberedName(step, args);
+      if (name !== undefined && !referencesIn(name).length) {
+        const problem = checkRememberName(name);
+        if (problem) add('error', 'remember-name', problem);
       }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {

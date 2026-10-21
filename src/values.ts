@@ -88,15 +88,30 @@ export function getDataFiles(): { name: string; file: string; value: unknown }[]
 
 /** Keeps a value for the rest of the test under a name, so later steps can write `{name}`. */
 export function remember(name: string, value: unknown) {
+  const problem = checkRememberName(name);
+  if (problem) throw new Error(`[plainwright] ${problem}`);
+  current().values.set(name, value);
+}
+
+/** Why a value cannot be remembered under this name, or null when it can. */
+export function checkRememberName(name: string): string | null {
   if (!VALID_NAME.test(name)) {
-    throw new Error(
-      `[plainwright] "${name}" cannot be remembered: a name may only contain letters, digits, - and _.`,
-    );
+    return `"${name}" cannot be remembered: a name may only contain letters, digits, - and _, such as "${suggestName(name)}".`;
   }
   if (RESERVED.includes(name)) {
-    throw new Error(`[plainwright] "${name}" is reserved. Remember the value under another name.`);
+    return `"${name}" is reserved. Remember the value under another name.`;
   }
-  current().values.set(name, value);
+  return null;
+}
+
+/** `order number` → `order-number`. */
+function suggestName(name: string) {
+  return (
+    name
+      .trim()
+      .replace(/[^\p{L}\p{N}_-]+/gu, '-')
+      .replace(/^-+|-+$/g, '') || 'name'
+  );
 }
 
 /** A quoted number written as a reference, `"{cart.count}"`; filled in when the step runs. */

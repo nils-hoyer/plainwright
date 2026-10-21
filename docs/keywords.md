@@ -23,17 +23,17 @@ point to the line in the keyword file.
 # keywords/account.feature
 Feature: Account
 
-  Scenario Outline: I log in as "<username>" with password "<password>"
+  Scenario Outline: I log in as "<email>" with password "<password>"
     Opens the login page and logs in.
 
     * I open the url "/login"
-    * I fill "<username>" in the "Username" field
+    * I fill "<email>" in the "Email" field
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
 
     Examples:
-      | username | password |
-      | jane     | secret   |
+      | email            | password |
+      | jane@example.com | secret   |
 ```
 
 ```gherkin
@@ -41,7 +41,7 @@ Feature: Account
 Feature: Orders
 
   Scenario: Delete an order
-    * I log in as "jane" with password "secret"
+    * I log in as "jane@example.com" with password "secret"
     * I open the url "/orders"
     * I click the "Delete" button in the "Order 1001" row
     * I see the "Order 1001 deleted" message
