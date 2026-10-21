@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'tinyglobby';
 import { defineKeywords } from './keywords';
-import { definePages } from './pages';
+import { appPagesFile, definePages } from './pages';
 import { defineData } from './values';
 
 /**
@@ -25,14 +25,11 @@ export function loadProjectFiles(cwd = process.cwd()) {
   }
 }
 
-/** App source files: a `pages/` folder with them belongs to Next.js, Nuxt, Astro and the like. */
-const APP_PAGES = 'pages/**/*.{js,jsx,ts,tsx,mjs,cjs,vue,svelte,astro,md,mdx}';
-
 function loadPages(cwd: string) {
-  const app = globSync(APP_PAGES, { cwd, ignore: ['**/node_modules/**'] });
-  if (app.length) {
+  const app = appPagesFile(cwd);
+  if (app) {
     console.warn(
-      `[plainwright] pages/ holds app files such as ${app[0]}, so Plainwright does not load ` +
+      `[plainwright] pages/ holds app files such as ${app}, so Plainwright does not load ` +
         `pages from it. Keep your page files in another folder and load it with ` +
         `definePages('<folder>') in a file in steps/.`,
     );

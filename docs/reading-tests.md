@@ -47,7 +47,7 @@ as `(hidden)`.
   `admin`.
 - `{env.TEST_PASSWORD}` is a secret from the environment, such as a password.
 - `{order.id}` is a value an earlier step remembered, for example with
-  `I remember the text of the "Order number" cell as "order"`, or the number the app gave a new
+  `I remember the text of the "Order number" field as "order"`, or the number the app gave a new
   order.
 - `{unique}` is a text that differs in every test; `{today}` is today's date.
 

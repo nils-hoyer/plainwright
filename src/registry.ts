@@ -120,7 +120,8 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   if (steps.some((step) => step.pattern === options.pattern && sameTags(step.tags, tags))) {
     throw new Error(`[plainwright] The step "${options.pattern}" is defined twice.`);
   }
-  const fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
+  let fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
+  if (tags.length) fn = onlyForTags(fn, options.pattern, tags);
   const step: StepDefinition = Object.freeze({
     pattern: options.pattern,
     description: options.description,
@@ -167,6 +168,31 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
       hideOwnFrames(error);
       throw error;
     }
+  };
+  wrapped.toString = () => fn.toString();
+  Object.defineProperty(wrapped, 'length', { value: fn.length });
+  return wrapped;
+}
+
+/**
+ * playwright-bdd only applies the tags of a step folder when the scenario has tags, so a step
+ * from `steps/@admin/` would also run in a scenario without any. It fails there instead, with
+ * the message lint gives.
+ */
+function onlyForTags<F>(fn: StepFn<F>, pattern: string, tags: string[]): StepFn<F> {
+  const wrapped = async function (this: unknown, fixtures: F, ...args: unknown[]) {
+    let scenarioTags: readonly string[] | undefined;
+    try {
+      scenarioTags = test.info().tags;
+    } catch {
+      // Outside a test, e.g. in unit tests.
+    }
+    if (scenarioTags && !tags.every((tag) => scenarioTags.includes(tag))) {
+      const error = new Error(`[plainwright] ${onlyForTagsMessage(pattern, tags.join(' and '))}`);
+      hideOwnFrames(error);
+      throw error;
+    }
+    return fn.call(this, fixtures, ...args);
   };
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
@@ -242,16 +268,25 @@ export function getSteps(): readonly StepDefinition[] {
 
 /**
  * All steps whose pattern matches the step text (without the Given/When/Then keyword).
- * With `tags` (of a scenario), steps from tagged folders only count when the tags fit.
+ * With `tags` (of a scenario), steps from tagged folders only count when the tags fit, and
+ * then win over steps without tags, as in playwright-bdd.
  */
 export function findSteps(text: string, tags?: readonly string[]): StepMatch[] {
   const matches: StepMatch[] = [];
   for (const step of steps) {
-    if (tags && !step.tags.every((tag) => tags.includes(tag))) continue;
     const result = expressionOf(step)?.match(text);
     if (result) matches.push({ step, args: result.map((arg) => arg.getValue(null)) });
   }
-  return matches;
+  if (!tags) return matches;
+  const tagged = matches.filter(
+    ({ step }) => step.tags.length && step.tags.every((tag) => tags.includes(tag)),
+  );
+  return tagged.length ? tagged : matches.filter(({ step }) => !step.tags.length);
+}
+
+/** `"I open the start page" only applies to scenarios tagged @admin, …`, for lint and runs. */
+export function onlyForTagsMessage(text: string, tags: string) {
+  return `"${text}" only applies to scenarios tagged ${tags}, the folder of its step file.`;
 }
 
 /** The single step matching the text. Throws a readable error when none or several match. */

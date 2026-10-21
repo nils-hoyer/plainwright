@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadPlaywrightConfig } from '../../src/load';
-import { withoutSnippets } from '../../src/run';
+import { readableParseErrors, withoutSnippets } from '../../src/run';
 
 // What bddgen prints when steps are missing (playwright-bdd 9), after another error.
 const bddgenOutput = `Error: features/broken.feature: Parser errors
@@ -20,6 +20,16 @@ describe('plainwright test', () => {
   it('leaves out the code snippets of bddgen but keeps its other errors', () => {
     expect(withoutSnippets(bddgenOutput)).toBe('Error: features/broken.feature: Parser errors\n\n');
     expect(withoutSnippets(bddgenOutput.replace(/\n/g, '\r\n'))).not.toContain('Missing step');
+  });
+
+  it('writes the syntax errors of bddgen in words', () => {
+    expect(
+      readableParseErrors(
+        `Error: Parse error in "features/a.feature" (5:3): expected: #EOF, #TableRow, #DocStringSeparator, #StepLine, #TagLine, #ExamplesLine, #ScenarioLine, #RuleLine, #Comment, #Empty, got 'Click the Save button'\n`,
+      ),
+    ).toBe(
+      'features/a.feature:5:3: "Click the Save button" is not a step: steps start with * (or Given, When, Then). Other text goes right below the "Feature:" or "Scenario:" line, or after # as a comment.\n',
+    );
   });
 
   it('reads the feature and step files from the configuration, without the built-in steps', async () => {

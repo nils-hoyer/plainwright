@@ -33,9 +33,10 @@ Feature: Orders
 
 You need [Node.js](https://nodejs.org/) LTS and a terminal. Run `init` in an empty folder or in
 your project: it asks for the address of your app and which AI assistant you use, installs
-Plainwright, Playwright and the browser, and writes a first test that checks what your app's
-start page shows. In an existing project it overwrites no file and says what it left out. To set
-everything up by hand instead, see [setup](docs/setup.md).
+Plainwright, Playwright and the browser, writes a first test that checks what your app's start
+page shows, and offers to run it. In an existing project it overwrites no file and says what it
+left out. To set everything up by hand, or to try an example project first, see
+[setup](docs/setup.md).
 
 ```bash
 # Set up the project
@@ -96,8 +97,9 @@ means one change in the tests, and the suite stays easy to maintain and extend.
 Steps you repeat become a keyword: your own step, made of existing steps, written in a feature
 file in `keywords/`. The title is the new step, and each `"<name>"` in it is a value you fill in
 when you use it. Files in `keywords/` load by themselves, and any test can then use the keyword
-like a built-in step. The report shows the four login steps nested under `I log in as …`. The
-editor suggests the new step after the next `npm test`, or right away after `npm run stubs`.
+like a built-in step. The report shows the login steps nested under `I log in as …`. The last
+step waits until the app has logged in, so the next step does not start too early. The editor
+suggests the new step after the next `npm test`, or right away after `npm run stubs`.
 More in [keywords](docs/keywords.md).
 
 ```gherkin
@@ -105,12 +107,13 @@ More in [keywords](docs/keywords.md).
 Feature: Account
 
   Scenario Outline: I log in as "<email>" with password "<password>"
-    Opens the login page and logs in.
+    Opens the login page, logs in and waits for the dashboard.
 
     * I open the url "/login"
     * I fill "<email>" in the "Email" field
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
+    * I see the url "/dashboard"
 
     Examples:
       | email            | password |

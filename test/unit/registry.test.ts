@@ -1,5 +1,6 @@
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { test } from '@playwright/test';
+import { describe, expect, it, vi } from 'vitest';
 import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/index';
 import {
   parseStackFrame,
@@ -201,6 +202,40 @@ describe('steps in tagged folders', () => {
 
   it('may share their wording with steps for other tags only', () => {
     expect(() => define('@admin')).toThrow(/defined twice/);
+  });
+
+  const project = (pattern: string, folder: string, fn: () => unknown = () => {}) =>
+    registerStep(
+      { pattern, description: 'Test step.', example: pattern, fn },
+      {
+        source: 'project',
+        location: { file: path.join(process.cwd(), `steps/${folder}start.ts`), line: 1, column: 1 },
+      },
+    );
+
+  it('win over steps without tags, as in playwright-bdd', () => {
+    const plain = project('I open the overridden start page', '');
+    const admin = project('I open the overridden start page', '@admin/');
+    const found = (tags: string[]) =>
+      findSteps('I open the overridden start page', tags).map((match) => match.step);
+    expect(found(['@admin'])).toEqual([admin]);
+    expect(found(['@guest'])).toEqual([plain]);
+    expect(found([])).toEqual([plain]);
+  });
+
+  it('fail in a scenario without the tags of their folder', async () => {
+    const step = project('I open the guarded start page', '@admin/', () => 'opened');
+    const info = vi.spyOn(test, 'info');
+    try {
+      info.mockReturnValue({ tags: ['@admin', '@smoke'] } as never);
+      await expect(step.fn({})).resolves.toBe('opened');
+      info.mockReturnValue({ tags: [] } as never);
+      await expect(step.fn({})).rejects.toThrow(
+        '"I open the guarded start page" only applies to scenarios tagged @admin, the folder of its step file.',
+      );
+    } finally {
+      info.mockRestore();
+    }
   });
 });
 

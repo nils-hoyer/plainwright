@@ -2,13 +2,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { featureSteps, parseGherkin } from './gherkin';
 import { ElementRef } from './elements';
-import { checkKeywords, fillPlaceholders, keywordOf } from './keywords';
-import { getPageDefinitions } from './pages';
+import { checkKeywords, fillPlaceholders, getKeywords, keywordOf, sameWording } from './keywords';
+import { appPagesFile, getPageDefinitions, isUrlPattern } from './pages';
 import {
   findSteps,
   getSteps,
   getUnusableSteps,
+  onlyForTagsMessage,
   StepDefinition,
+  StepMatch,
   suggestionFor,
   suggestSteps,
 } from './registry';
@@ -33,6 +35,7 @@ export type LintMessage = {
     | 'step-example'
     | 'unknown-parameter-type'
     | 'unknown-page'
+    | 'page-address'
     | 'unknown-value'
     | 'remember-name';
   message: string;
@@ -43,11 +46,9 @@ const SELECTOR =
   /^(?:[#.][a-z_-]|\[[a-z_-]|\/\/|\.\/\/|(?:css|xpath|text|role|id|data-testid|internal:\w+)=)|>>|\[data-[\w-]+/i;
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 const OPEN_URL = 'I open the url {string}';
-const PAGE_STEPS = [
-  'I open the {string} page',
-  'I am on the {string} page',
-  'I use the page object {string}',
-];
+const OPEN_PAGE = 'I open the {string} page';
+const CHECK_PAGE = 'I am on the {string} page';
+const PAGE_STEPS = [OPEN_PAGE, CHECK_PAGE, 'I use the page object {string}'];
 
 /**
  * Checks feature files against the registered steps. Also checks loaded keywords and that
@@ -60,6 +61,15 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
   const skippedHint = unusable.length
     ? ` Lint skips ${unusable.length} step(s) with an unknown parameter type; see the warnings.`
     : '';
+  // A keyword worded like another step is reported once, at the keyword. A step that matches
+  // both counts as the other step, so one keyword does not cause an error in every test.
+  const colliding = new Set(
+    getKeywords()
+      .filter((keyword) => sameWording(keyword).length)
+      .map((keyword) => keyword.step),
+  );
+  const find = (text: string, tags?: readonly string[]) =>
+    withoutColliding(findSteps(text, tags), colliding);
   for (const absolute of files) {
     const file = path.relative(cwd, absolute) || absolute;
     let steps;
@@ -70,7 +80,9 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       continue;
     }
     // Names that steps in this file remember, also inside keywords, for {name} references.
-    const remembered = new Set(steps.flatMap(({ text, tags }) => rememberedNames(text, tags)));
+    const remembered = new Set(
+      steps.flatMap(({ text, tags }) => rememberedNames(find, text, tags)),
+    );
     for (const { text, line, tags } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
       const add = (severity: LintSeverity, rule: LintMessage['rule'], message: string) => {
@@ -80,16 +92,12 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         messages.push({ file, line, severity, rule, message });
       };
 
-      const matches = findSteps(text, tags);
+      const matches = find(text, tags);
       if (matches.length === 0) {
         const elsewhere = findSteps(text);
         if (elsewhere.length) {
           const needed = [...new Set(elsewhere.map(({ step }) => step.tags.join(' and ')))];
-          add(
-            'error',
-            'undefined-step',
-            `"${text}" only applies to scenarios tagged ${needed.join(' or ')}, the folder of its step file.`,
-          );
+          add('error', 'undefined-step', onlyForTagsMessage(text, needed.join(' or ')));
           continue;
         }
         const suggestion = suggestSteps(text)[0];
@@ -102,11 +110,17 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         );
         continue;
       }
-      if (matches.length > 1) {
+      // playwright-bdd applies the tags of step folders only to scenarios that have tags, so in
+      // a scenario without any, it also counts the steps of tag folders.
+      const counted = tags.length ? matches : find(text);
+      if (counted.length > 1) {
         add(
           'error',
           'ambiguous-step',
-          `"${text}" matches ${matches.length} steps: ${matches.map((m) => `"${m.step.pattern}"`).join(', ')}.`,
+          `"${text}" matches ${counted.length} steps: ${counted.map((m) => named(m.step, cwd)).join(', ')}.` +
+            (counted.length > matches.length
+              ? ' In a scenario without tags, the steps in tag folders count too.'
+              : ''),
         );
         continue;
       }
@@ -128,23 +142,50 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           `"${args[0]}" is an absolute URL. Use a page name (I open the "..." page) or a URL relative to baseURL.`,
         );
       }
-      if (PAGE_STEPS.includes(step.pattern)) {
+      if (PAGE_STEPS.includes(step.pattern) && !referencesIn(String(args[0])).length) {
         const name = String(args[0]);
-        const pages = getPageDefinitions().map((page) => page.name);
-        if (!referencesIn(name).length && !pages.includes(name)) {
+        const pages = getPageDefinitions();
+        const page = pages.find((p) => p.name === name);
+        if (!page) {
+          const app = appPagesFile(cwd);
           add(
             'error',
             'unknown-page',
             `No page named "${name}". ` +
               (pages.length
-                ? `Defined pages: ${pages.map((page) => `"${page}"`).join(', ')}.`
-                : 'Add it as a file in pages/, or open the address with I open the url "/...".'),
+                ? `Defined pages: ${pages.map((p) => `"${p.name}"`).join(', ')}.`
+                : app
+                  ? `pages/ holds your app's files (${app}), so Plainwright loads no pages from it. Open the address with I open the url "/...".`
+                  : 'Add it as a file in pages/, or open the address with I open the url "/...".'),
+          );
+        } else if (step.pattern === OPEN_PAGE && (!page.url || isUrlPattern(page.url))) {
+          add(
+            'error',
+            'page-address',
+            page.url
+              ? `The page "${name}" has the address pattern ${page.url}, which can only be checked (I am on the "${name}" page). Open it with I open the url "/...".`
+              : `The page "${name}" has no address to open. Add its "url".`,
+          );
+        } else if (step.pattern === CHECK_PAGE && !page.url) {
+          add(
+            'error',
+            'page-address',
+            `The page "${name}" has no address to check. Add its "url".`,
           );
         }
       }
       for (const reference of new Set(valueTexts(args).flatMap(referencesIn))) {
         const problem = checkReference(reference, remembered);
         if (problem) add('error', 'unknown-value', problem);
+        // CI often sets secrets only for the test run, so this is a warning.
+        const variable = /^env\.(.+)$/.exec(reference)?.[1];
+        if (variable && process.env[variable] === undefined) {
+          add(
+            'warning',
+            'unknown-value',
+            `The environment variable ${variable} is not set. Set it, or add it to the .env file, before the tests run.`,
+          );
+        }
       }
       const name = rememberedName(step, args);
       if (name !== undefined && !referencesIn(name).length) {
@@ -176,19 +217,35 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
   }
 
   for (const step of getSteps()) {
-    if (unusable.some((entry) => entry.step === step)) continue;
-    const matches = findSteps(step.example, step.tags);
+    if (unusable.some((entry) => entry.step === step) || colliding.has(step)) continue;
+    const matches = find(step.example, step.tags);
     if (matches.length === 1 && matches[0].step === step) continue;
+    const others = matches.map((m) => m.step).filter((other) => other !== step);
+    // A built-in step has no file to point to: the cause is a step in the project.
+    const causes = others.filter((other) => other.location);
+    if (!step.location && causes.length && others.length < matches.length) {
+      for (const other of causes) {
+        // Reported with the example of the other step already.
+        if (find(other.example, other.tags).some((m) => m.step === step)) continue;
+        messages.push({
+          ...stepLocation(other, cwd),
+          severity: 'error',
+          rule: 'step-example',
+          message: `"${other.pattern}" also matches "${step.example}", the example of the ${step.source} step "${step.pattern}". Word it differently.`,
+        });
+      }
+      continue;
+    }
     messages.push({
       ...stepLocation(step, cwd),
       severity: 'error',
       rule: 'step-example',
-      message: matches.some((m) => m.step === step)
-        ? `The example "${step.example}" of "${step.pattern}" also matches ${matches
-            .filter((m) => m.step !== step)
-            .map((m) => `"${m.step.pattern}"`)
-            .join(', ')}.`
-        : `The example "${step.example}" does not match its own step "${step.pattern}".`,
+      message:
+        others.length < matches.length
+          ? `The example "${step.example}" of "${step.pattern}" also matches ${others
+              .map((other) => `"${other.pattern}"`)
+              .join(', ')}.`
+          : `The example "${step.example}" does not match its own step "${step.pattern}".`,
     });
   }
 
@@ -207,6 +264,12 @@ export function summarize(messages: LintMessage[]): string {
   return `${plural(count('error'), 'error')}, ${plural(count('warning'), 'warning')}, ${count('info')} info`;
 }
 
+/** `"I open the start page" (steps/@admin/start.ts:3)` */
+function named(step: StepDefinition, cwd: string) {
+  const { file, line } = stepLocation(step, cwd);
+  return `"${step.pattern}"${file ? ` (${file}:${line})` : ''}`;
+}
+
 function stepLocation(step: StepDefinition, cwd: string) {
   return {
     file: step.location ? path.relative(cwd, step.location.file) : '',
@@ -214,9 +277,20 @@ function stepLocation(step: StepDefinition, cwd: string) {
   };
 }
 
+/** Of several matches, those that are not a keyword worded like another step, if any. */
+function withoutColliding(matches: StepMatch[], colliding: ReadonlySet<StepDefinition>) {
+  const others = matches.filter(({ step }) => !colliding.has(step));
+  return others.length ? others : matches;
+}
+
 /** The names a step remembers values under, including the steps of a keyword it calls. */
-function rememberedNames(text: string, tags?: readonly string[], depth = 0): string[] {
-  const matches = findSteps(text, tags);
+function rememberedNames(
+  find: (text: string, tags?: readonly string[]) => StepMatch[],
+  text: string,
+  tags?: readonly string[],
+  depth = 0,
+): string[] {
+  const matches = find(text, tags);
   if (matches.length !== 1 || depth > 20) return [];
   const { step, args } = matches[0];
   const name = rememberedName(step, args);
@@ -225,7 +299,7 @@ function rememberedNames(text: string, tags?: readonly string[], depth = 0): str
   if (!keyword) return [];
   const values = Object.fromEntries(keyword.params.map((param, i) => [param, String(args[i])]));
   return keyword.steps.flatMap((sub) =>
-    rememberedNames(fillPlaceholders(sub.text, values), undefined, depth + 1),
+    rememberedNames(find, fillPlaceholders(sub.text, values), undefined, depth + 1),
   );
 }
 

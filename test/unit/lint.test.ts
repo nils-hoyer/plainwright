@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderElementTypes, renderStepReference, replaceGenerated } from '../../src/docs';
 import { getSteps } from '../../src/index';
 import { formatLintMessage, lintFeatures, summarize } from '../../src/lint';
@@ -71,7 +71,81 @@ describe('lint', () => {
       severity: 'error',
       rule: 'syntax',
     });
-    expect(message.message).toMatch(/^expected: /);
+    expect(message.message).toBe(
+      '"This line is not valid Gherkin" is not a step: steps start with * (or Given, When, Then). Other text goes right below the "Feature:" or "Scenario:" line, or after # as a comment.',
+    );
+  });
+});
+
+/** Fresh registries, for checks that would change the results of the other tests. */
+async function fresh() {
+  vi.resetModules();
+  const library = await import('../../src/index');
+  const lint = await import('../../src/lint');
+  const registry = await import('../../src/registry');
+  const check = (feature: string, cwd = root) =>
+    lint
+      .lintFeatures([path.join(__dirname, 'fixtures/lint', feature)], cwd)
+      .filter((message) => message.severity !== 'info')
+      .map(lint.formatLintMessage);
+  const project = (pattern: string, example: string, file: string) =>
+    registry.registerStep(
+      { pattern, description: 'Test step.', example, fn: () => {} },
+      { source: 'project', location: { file: path.join(root, file), line: 3, column: 1 } },
+    );
+  return { library, check, project };
+}
+
+describe('lint, with steps and keywords of its own', () => {
+  it('reports a keyword worded like another step once, at the keyword', async () => {
+    const { library, check } = await fresh();
+    library.defineKeywords('keywords/*.feature', {
+      cwd: path.join(__dirname, 'fixtures/lint/collision'),
+    });
+    expect(check('collision/orders.feature')).toEqual([
+      'test/unit/fixtures/lint/collision/keywords/buttons.feature:3: error: The keyword "I click the "<name>" button" has the same wording as the step "I click the {element}". Steps worded like it match both: reword the keyword. (keyword)',
+    ]);
+  });
+
+  it('reports a step whose wording matches the example of a built-in step at that step', async () => {
+    const { check, project } = await fresh();
+    project('I reload/refresh the page', 'I refresh the page', 'steps/pages.ts');
+    expect(check('pages.feature').filter((line) => line.includes('step-example'))).toEqual([
+      'steps/pages.ts:3: error: "I reload/refresh the page" also matches "I reload the page", the example of the built-in step "I reload the page". Word it differently. (step-example)',
+    ]);
+  });
+
+  it('counts steps in tag folders like playwright-bdd', async () => {
+    const { check, project } = await fresh();
+    project('I open the start page for both', 'I open the start page for both', 'steps/start.ts');
+    project(
+      'I open the start page for both',
+      'I open the start page for both',
+      'steps/@admin/start.ts',
+    );
+    expect(check('tag-folders.feature')).toEqual([
+      'test/unit/fixtures/lint/tag-folders.feature:8: error: "I open the start page for both" matches 2 steps: "I open the start page for both" (steps/start.ts:3), "I open the start page for both" (steps/@admin/start.ts:3). In a scenario without tags, the steps in tag folders count too. (ambiguous-step)',
+    ]);
+  });
+
+  it('reports pages that cannot be opened or checked, and environment variables not set', async () => {
+    const { library, check } = await fresh();
+    library.definePage('Order', { url: '/orders/*' });
+    library.definePage('Draft');
+    expect(check('pages.feature')).toEqual([
+      'test/unit/fixtures/lint/pages.feature:4: error: The page "Order" has the address pattern /orders/*, which can only be checked (I am on the "Order" page). Open it with I open the url "/...". (page-address)',
+      'test/unit/fixtures/lint/pages.feature:6: error: The page "Draft" has no address to check. Add its "url". (page-address)',
+      'test/unit/fixtures/lint/pages.feature:7: warning: The environment variable PLAINWRIGHT_LINT_UNSET is not set. Set it, or add it to the .env file, before the tests run. (unknown-value)',
+    ]);
+  });
+
+  it('does not send pages to a pages/ folder that belongs to the app', async () => {
+    const { check } = await fresh();
+    expect(
+      check('next/features/start.feature', path.join(__dirname, 'fixtures/lint/next')),
+    ).toEqual([
+      `features/start.feature:4: error: No page named "Start". pages/ holds your app's files (pages/index.js), so Plainwright loads no pages from it. Open the address with I open the url "/...". (unknown-page)`,
+    ]);
   });
 });
 

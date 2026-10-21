@@ -70,16 +70,22 @@ data, e.g. `"test-{unique}@example.com"`. Data files may use these values too.
 A test can keep a value from the page and use it later. A remembered value lasts until the end
 of the test.
 
+The step finds the element by its name, so name it by something that stays the same, not by
+the text you want to keep: a field by its label (the step keeps its value), or an element
+without a usable name by an [alias](pages.md#elements-without-a-name-aliases). A cell is named
+by its own text, so `the "Order number" cell` is the cell with the words "Order number", not
+the number next to it.
+
 ```gherkin
-* I remember the text of the "Order number" cell as "order-number"
+* I remember the text of the "Order number" field as "order-number"
 * I open the url "/orders"
 * I see the text "{order-number}"
 ```
 
-| Step                                                    | What it does                                    |
-| ------------------------------------------------------- | ----------------------------------------------- |
-| `I remember "Coffee" as "item"`                         | keeps a value under a name                      |
-| `I remember the text of the "Order number" cell as "x"` | keeps the text of an element or a field's value |
+| Step                                                     | What it does                                    |
+| -------------------------------------------------------- | ----------------------------------------------- |
+| `I remember "Coffee" as "item"`                          | keeps a value under a name                      |
+| `I remember the text of the "Order number" field as "x"` | keeps the text of an element or a field's value |
 
 ## What the reviewer sees
 

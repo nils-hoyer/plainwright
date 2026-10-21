@@ -7,13 +7,17 @@ feature file, so no programming is needed, and reviewers can read it like any te
 
 A keyword is a `Scenario Outline:` in a file in `keywords/`. The title is the new step, and each
 `"<name>"` in it is a value you fill in when you use it. Any test can then use it like a
-built-in step. The report shows the four login steps nested under `I log in as …`, and errors
+built-in step. The report shows the login steps nested under `I log in as …`, and errors
 point to the line in the keyword file.
 
 - The text under the title says what the keyword does. It appears in the
   [step reference](commands.md#docs-all-steps-as-markdown), the catalog for AI assistants and
   the editor.
 - The first `Examples` row is the keyword's example. The `Examples` table is optional.
+- End the keyword with a check of where it leads, such as `I see the url "/dashboard"`. A
+  keyword that ends on a click lets the next step start while the app is still answering the
+  click: `I open the url "/orders"` then races the app's own move to the dashboard, and the
+  test fails now and then.
 - Files in `keywords/` load by themselves.
 - Keywords can use other keywords, [pages](pages.md) and [test data](test-data.md), such as
   `"{users.admin.email}"`. A keyword that creates data through your app's API is shown in
@@ -24,12 +28,13 @@ point to the line in the keyword file.
 Feature: Account
 
   Scenario Outline: I log in as "<email>" with password "<password>"
-    Opens the login page and logs in.
+    Opens the login page, logs in and waits for the dashboard.
 
     * I open the url "/login"
     * I fill "<email>" in the "Email" field
     * I fill "<password>" in the "Password" field
     * I click the "Log in" button
+    * I see the url "/dashboard"
 
     Examples:
       | email            | password |

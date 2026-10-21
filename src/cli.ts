@@ -27,23 +27,7 @@ Commands:
   stubs     Write a step file for editor autocomplete (Cucumber extension "cucumber.glue").
 
 pages/, data/ and keywords/ in the project folder load by themselves.
-
-Options:
-  --steps <glob>       Your step files in TypeScript or JavaScript. Repeat for several
-                       patterns. Default: the files in steps/, if there are any.
-  --features <glob>    Feature files to lint (lint). Repeat for several patterns.
-  --out <file>         Write to a file instead of the console (catalog, docs, stubs).
-  --quiet              Hide info messages (lint).
-  --base-url <url>     Base URL for relative addresses and page names (inspect).
-  --storage-state <f>  Playwright storage state, e.g. a logged-in session (inspect).
-  --json               Print JSON (inspect).
-  --url <address>      The address of your app (init).
-  --ai <assistant>     Instructions for agents, copilot, claude or none (init).
-  --yes, -y            Take the defaults instead of asking (init).
-  --dry-run            Only list what would change (init).
-  --no-install         Do not install packages and Chromium (init).
-  --no-run             Do not run the first test (init).
-  --help               Show this help.
+plainwright <command> --help shows the options of one command.
 
 Examples:
   npx @nils.hoyer/plainwright init
@@ -52,6 +36,75 @@ Examples:
   npx plainwright catalog --out steps.json
   npx plainwright inspect "Login" --base-url http://localhost:3000
 `;
+
+const STEPS_OPTION = `  --steps <glob>       Your step files in TypeScript or JavaScript. Repeat for several
+                       patterns. Default: the files in steps/, if there are any.`;
+
+/** The help of each command, for plainwright <command> --help. */
+const COMMAND_HELP: Record<string, string> = {
+  init: `Usage: plainwright init [options]
+
+Sets up this folder for tests: installs Plainwright, Playwright and Chromium, writes the
+configuration, a first test against your app, AI instructions and editor settings, and adds
+the npm scripts. It never overwrites a file. Without options, it asks for the address of your
+app, the AI assistant, and whether to run the first test.
+
+Options:
+  --url <address>      The address of your app, instead of asking.
+  --ai <assistant>     agents (AGENTS.md), copilot, claude or none, instead of asking.
+  --yes, -y            Take the defaults for everything not given, and run the first test.
+  --dry-run            Only list what would change.
+  --no-install         Do not install packages and Chromium.
+  --no-run             Do not run the first test.
+`,
+  lint: `Usage: plainwright lint [options]
+
+Checks feature files without a browser: unknown or ambiguous steps, unknown pages and values,
+selectors, absolute URLs, fixed waits, advanced steps (info) and keyword definitions. Prints
+file:line: severity: message (rule), and exits with 1 when there is an error.
+
+Options:
+  --features <glob>    The feature files to check. Repeat for several patterns.
+                       Default: every .feature file.
+  --quiet              Hide info messages.
+${STEPS_OPTION}
+`,
+  inspect: `Usage: plainwright inspect <page name or address> [options]
+
+Opens the page in Chromium and lists its elements by type and visible name, as steps write
+them, while your app is running.
+
+Options:
+  --base-url <url>     Where addresses start. Default: baseURL from playwright.config.
+  --storage-state <f>  Open the page logged in, with a saved Playwright session.
+  --json               Print JSON instead of a list.
+${STEPS_OPTION}
+`,
+  catalog: `Usage: plainwright catalog [options]
+
+Writes every step, the element types, your pages and data values as JSON, for AI assistants.
+
+Options:
+  --out <file>         Write to a file instead of the terminal.
+${STEPS_OPTION}
+`,
+  docs: `Usage: plainwright docs [options]
+
+Writes every step, your own steps and keywords included, as a Markdown reference.
+
+Options:
+  --out <file>         Write to a file instead of the terminal.
+${STEPS_OPTION}
+`,
+  stubs: `Usage: plainwright stubs [options]
+
+Writes a step file for the editor's suggestions (VS Code: "cucumber.glue").
+
+Options:
+  --out <file>         Write to a file instead of the terminal.
+${STEPS_OPTION}
+`,
+};
 
 const DEFAULT_STEPS = ['steps/**/*.{ts,js,mjs,cjs}'];
 
@@ -80,7 +133,7 @@ async function main(argv: string[]): Promise<number> {
   });
   const [command, ...rest] = positionals;
   if (values.help || !command) {
-    console.log(HELP);
+    console.log(COMMAND_HELP[command] ?? HELP);
     return command || values.help ? 0 : 1;
   }
 
@@ -110,6 +163,8 @@ async function main(argv: string[]): Promise<number> {
         console.error('No feature files found. Pass --features "<glob>".');
         return 1;
       }
+      // The configuration may set environment variables, such as defaults for {env.NAME}.
+      await loadPlaywrightConfig();
       const messages = lintFeatures(files).filter((m) => !values.quiet || m.severity !== 'info');
       for (const message of messages) console.log(formatLintMessage(message));
       console.log(`${files.length} feature file(s): ${summarize(messages)}`);
@@ -127,9 +182,19 @@ async function main(argv: string[]): Promise<number> {
         console.error('Usage: plainwright inspect <url or page name>');
         return 1;
       }
-      const page = getPageDefinitions().find((p) => p.name === target);
+      const pages = getPageDefinitions();
+      const page = pages.find((p) => p.name === target);
       if (page && (typeof page.url !== 'string' || isUrlPattern(page.url))) {
         console.error(`The page "${target}" has no address to open.`);
+        return 1;
+      }
+      if (!page && !isAddress(target)) {
+        const known = pages.map((p) => `"${p.name}"`).join(', ');
+        console.error(
+          `No page named "${target}".` +
+            (known ? ` Pages: ${known}.` : ' There are no pages in pages/.') +
+            ` For an address, start it with /: plainwright inspect "/${target}"`,
+        );
         return 1;
       }
       const result = await inspectPage(page ? (page.url as string) : target, {
@@ -144,6 +209,11 @@ async function main(argv: string[]): Promise<number> {
       console.error(`Unknown command "${command}".\n\n${HELP}`);
       return 1;
   }
+}
+
+/** `/login`, `?tab=2`, `https://…`: an address, not a page name. */
+function isAddress(target: string) {
+  return /^[/.?#]/.test(target) || /^[a-z][a-z0-9+.-]*:\/\//i.test(target);
 }
 
 /** `use.baseURL` from playwright.config.*, so inspect needs no --base-url. */

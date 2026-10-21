@@ -94,7 +94,7 @@ describe('defineKeywords', () => {
     const { library, define } = await load('collision');
     define();
     expect(library.validateKeywords()).toEqual([
-      'test/unit/fixtures/keywords/collision/collision.feature:3: The keyword "I see the "<title>" heading" has the same wording as the step "I see the {element}".',
+      'test/unit/fixtures/keywords/collision/collision.feature:3: The keyword "I see the "<title>" heading" has the same wording as the step "I see the {element}". Steps worded like it match both: reword the keyword.',
     ]);
   });
 
