@@ -6,11 +6,13 @@ Every command runs in a terminal in your project folder. A project set up with `
 ## Running tests
 
 `plainwright test` runs playwright-bdd's `bddgen` and then `playwright test`, and passes every
-option on to Playwright. A step that does not exist stops the run before any test starts, with
-the step that comes closest. It also updates the editor's step list,
-`.vscode/plainwright.steps.js`, when the project has one. Their own documentation lists all options:
+option on to Playwright. Their own documentation lists all options:
 [Playwright command line](https://playwright.dev/docs/test-cli),
 [playwright-bdd](https://vitalets.github.io/playwright-bdd/).
+
+A step that does not exist, or a keyword with a problem, stops the run before any test starts,
+with the step that comes closest. The run also updates the editor's step list,
+`.vscode/plainwright.steps.js`, when the project has one.
 
 | Command                                 | Short                  | What it does                                                           |
 | --------------------------------------- | ---------------------- | ---------------------------------------------------------------------- |

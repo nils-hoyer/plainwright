@@ -2,13 +2,15 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { suggestSteps } from './registry';
+import { validateKeywords } from './keywords';
+import { formatLintMessage, lintFeatures } from './lint';
+import { BddFiles, loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
 import { renderStubs, STUBS_FILE } from './stubs';
 
-export type RunOptions = {
-  cwd?: string;
-  /** Loads the project's own step files, for the editor's step list and for suggestions. */
-  loadSteps?: () => Promise<void>;
+/** Without a configuration that loads: the defaults of defineConfig(). */
+const DEFAULT_FILES: Omit<BddFiles, 'cwd'> = {
+  features: ['features/**/*.feature'],
+  steps: ['steps/**/*.{ts,js}'],
 };
 
 /**
@@ -16,8 +18,7 @@ export type RunOptions = {
  * (playwright-bdd's `bddgen`), then runs them (`playwright test`). Options such as `--ui`,
  * `--headed` or a feature file go to Playwright; `--config` goes to both.
  */
-export async function runTests(args: string[], options: RunOptions = {}): Promise<number> {
-  const cwd = options.cwd ?? process.cwd();
+export async function runTests(args: string[], cwd = process.cwd()): Promise<number> {
   const require = createRequire(path.join(cwd, 'package.json'));
   let bddgen: string;
   let playwright: string;
@@ -32,26 +33,56 @@ export async function runTests(args: string[], options: RunOptions = {}): Promis
     );
     return 1;
   }
-  const loadSteps = once(options.loadSteps ?? (async () => {}));
-  await refreshStubs(cwd, loadSteps);
-  const generated = spawnSync(process.execPath, [bddgen, ...configArgs(args)], {
+  const config = configArgs(args);
+  const configFile = config.length === 2 ? config[1] : config[0]?.slice('--config='.length);
+  const projects = (await loadPlaywrightConfig(cwd, configFile))?.bdd ?? [
+    { cwd, ...DEFAULT_FILES },
+  ];
+  // The project's own steps, as bddgen loads them, for keywords, lint and the editor.
+  const loaded = await loadSteps(projects);
+  if (loaded) {
+    const errors = validateKeywords();
+    if (errors.length) {
+      console.error(`Invalid keywords:\n${errors.join('\n')}\n\nNo test ran.`);
+      return 1;
+    }
+    refreshStubs(cwd);
+  }
+
+  const generated = spawnSync(process.execPath, [bddgen, ...config], {
     cwd,
     stdio: ['inherit', 'inherit', 'pipe'],
     encoding: 'utf8',
   });
-  if (generated.status !== 0) {
-    const missing = missingSteps(generated.stderr ?? '');
-    if (missing.length) {
-      await loadSteps().catch(() => {});
-      console.error(formatMissingSteps(missing));
-    } else {
-      process.stderr.write(generated.stderr ?? '');
+  const output = generated.stderr ?? '';
+  if (generated.status !== 0 && MISSING_STEPS.test(output)) {
+    const unknown = loaded ? unknownSteps(projects) : [];
+    if (unknown.length) {
+      process.stderr.write(withoutSnippets(output));
+      console.error(
+        `${unknown.join('\n')}\n\nNo test ran: every step must exist first. ` +
+          '"npx plainwright lint" also lists them.',
+      );
+      return generated.status ?? 1;
     }
-    return generated.status ?? 1;
   }
-  process.stderr.write(generated.stderr ?? '');
+  process.stderr.write(output);
+  if (generated.status !== 0) return generated.status ?? 1;
   const run = spawnSync(process.execPath, [playwright, 'test', ...args], { cwd, stdio: 'inherit' });
   return run.status ?? 1;
+}
+
+const MISSING_STEPS = /^Missing step definitions: \d+/m;
+
+/**
+ * bddgen's output without its list of missing steps, a TypeScript snippet for each written for
+ * programmers. Other errors in the output stay.
+ */
+export function withoutSnippets(output: string): string {
+  return output.replace(
+    /^Missing step definitions: \d+[\s\S]*?Use snippets above to create missing steps\.\r?\n?/gm,
+    '',
+  );
 }
 
 /** `--config x`, `--config=x`, `-c x`: bddgen must read the same configuration. */
@@ -63,58 +94,37 @@ function configArgs(args: string[]): string[] {
   return [];
 }
 
+/** Loads the step files of every project. False when one does not load outside the runner. */
+async function loadSteps(projects: BddFiles[]): Promise<boolean> {
+  try {
+    for (const { cwd, steps } of projects) {
+      if (resolveFiles(steps, cwd).length) await loadStepFiles(steps, cwd);
+    }
+    return true;
+  } catch (error) {
+    console.warn(
+      `[plainwright] Your step files do not load outside the test run, so keywords are checked ` +
+        `and the editor's step list is updated only by the tests: ${(error as Error).message}`,
+    );
+    return false;
+  }
+}
+
 /**
  * Rewrites the editor's step list (written by `init` or `plainwright stubs`) when keywords or
  * steps changed, so new keywords show up in the editor after the next test run.
  */
-async function refreshStubs(cwd: string, loadSteps: () => Promise<void>) {
+function refreshStubs(cwd: string) {
   const file = path.join(cwd, STUBS_FILE);
   if (!fs.existsSync(file)) return;
-  try {
-    await loadSteps();
-    const stubs = renderStubs();
-    if (fs.readFileSync(file, 'utf8') !== stubs) fs.writeFileSync(file, stubs);
-  } catch {
-    // A step file that does not load fails the test run below, with its own error.
-  }
+  const stubs = renderStubs();
+  if (fs.readFileSync(file, 'utf8') !== stubs) fs.writeFileSync(file, stubs);
 }
 
-export type MissingStep = { text: string; location: string };
-
-/**
- * The steps bddgen found no definition for, from its error output. bddgen prints one code
- * snippet per missing step pattern, with the step and where it is:
- *
- *   Given('I press the {string} button', async ({}, arg) => {
- *     // Step: * I press the "Walk" button
- *     // From: features/todos.feature:13:5
- *   });
- */
-export function missingSteps(output: string): MissingStep[] {
-  if (!/^Missing step definitions: \d+/m.test(output)) return [];
-  return [...output.matchAll(/\/\/ Step: \S+ (.*)\r?\n\s*\/\/ From: (.+?)(?::\d+)?\r?$/gm)].map(
-    ([, text, location]) => ({ text, location }),
-  );
-}
-
-/** The missing steps as lint reports them, with the closest existing step. */
-export function formatMissingSteps(missing: MissingStep[]): string {
-  const lines = missing.map(({ text, location }) => {
-    const suggestion = suggestSteps(text)[0];
-    return (
-      `${location}: error: Unknown step "${text}".` +
-      (suggestion ? ` Did you mean "${suggestion.example}"?` : '')
-    );
-  });
-  return [
-    ...lines,
-    '',
-    'No test ran: every step must exist first. ' +
-      '"npx plainwright lint" lists every unknown step at once.',
-  ].join('\n');
-}
-
-function once(fn: () => Promise<void>): () => Promise<void> {
-  let result: Promise<void> | undefined;
-  return () => (result ??= fn());
+/** Lint's messages for steps that do not exist or match several steps, in every feature file. */
+function unknownSteps(projects: BddFiles[]): string[] {
+  const files = [...new Set(projects.flatMap(({ cwd, features }) => resolveFiles(features, cwd)))];
+  return lintFeatures(files)
+    .filter((m) => m.rule === 'undefined-step' || m.rule === 'ambiguous-step')
+    .map(formatLintMessage);
 }

@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
-import path from 'node:path';
 import { parseArgs } from 'node:util';
-import { createJiti } from 'jiti';
 import { buildCatalog } from './catalog';
 import { renderStepReference } from './docs';
 import { AiAssistant, init } from './init';
 import { formatInspectResult, inspectPage } from './inspect';
 import { formatLintMessage, lintFeatures, summarize } from './lint';
-import { loadStepFiles, resolveFiles } from './load';
+import { loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
 import { getPageDefinitions, isUrlPattern } from './pages';
 import { runTests } from './run';
 import { renderStubs } from './stubs';
@@ -59,7 +57,7 @@ const DEFAULT_STEPS = ['steps/**/*.{ts,js,mjs,cjs}'];
 
 async function main(argv: string[]): Promise<number> {
   // Everything after "test" belongs to Playwright.
-  if (argv[0] === 'test') return runTests(argv.slice(1), { loadSteps: () => loadOwnSteps() });
+  if (argv[0] === 'test') return runTests(argv.slice(1));
   const { values, positionals } = parseArgs({
     args: argv,
     allowPositionals: true,
@@ -102,7 +100,8 @@ async function main(argv: string[]): Promise<number> {
     });
   }
 
-  await loadOwnSteps(values.steps);
+  const stepFiles = values.steps ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
+  if (stepFiles.length) await loadStepFiles(stepFiles);
 
   switch (command) {
     case 'lint': {
@@ -146,26 +145,10 @@ async function main(argv: string[]): Promise<number> {
   }
 }
 
-/** The step files given with --steps, otherwise those in steps/. */
-async function loadOwnSteps(patterns?: string[]) {
-  const stepFiles = patterns ?? (resolveFiles(DEFAULT_STEPS).length ? DEFAULT_STEPS : []);
-  if (stepFiles.length) await loadStepFiles(stepFiles);
-}
-
 /** `use.baseURL` from playwright.config.*, so inspect needs no --base-url. */
-async function configuredBaseURL(cwd = process.cwd()): Promise<string | undefined> {
-  const file = resolveFiles(['playwright.config.{ts,js,mjs,cjs,mts,cts}'], cwd)[0];
-  if (!file) return undefined;
-  try {
-    const jiti = createJiti(path.join(cwd, 'noop.js'), { interopDefault: true });
-    const config = (await jiti.import(file, { default: true })) as {
-      use?: { baseURL?: string };
-      projects?: { use?: { baseURL?: string } }[];
-    };
-    return config?.use?.baseURL ?? config?.projects?.find((p) => p.use?.baseURL)?.use?.baseURL;
-  } catch {
-    return undefined;
-  }
+async function configuredBaseURL(): Promise<string | undefined> {
+  const config = (await loadPlaywrightConfig())?.config;
+  return config?.use?.baseURL ?? config?.projects?.find((p) => p.use?.baseURL)?.use?.baseURL;
 }
 
 function write(file: string | undefined, content: string): number {
