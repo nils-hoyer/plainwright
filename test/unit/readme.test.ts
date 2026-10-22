@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { CucumberExpression, ParameterTypeRegistry } from '@cucumber/cucumber-expressions';
 import { describe, expect, it } from 'vitest';
-import { findSteps } from '../../src/index';
+import { findSteps, getSteps } from '../../src/index';
 import { titleToPattern } from '../../src/keywords';
 
 // Every sentence the README shows must be a real step, so readers can copy it.
@@ -27,6 +27,11 @@ describe('README', () => {
   it('shows sentences', () => {
     expect(gherkinSteps.length).toBeGreaterThan(5);
     expect(inlineSentences.length).toBeGreaterThan(5);
+  });
+
+  it('names the number of everyday steps', () => {
+    const core = getSteps().filter((step) => step.source === 'built-in' && step.level === 'core');
+    expect(readme).toContain(`${core.length} everyday steps`);
   });
 
   it.each([...new Set([...gherkinSteps, ...inlineSentences])])('"%s" is a step', (text) => {
