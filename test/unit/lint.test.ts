@@ -33,6 +33,15 @@ describe('lint', () => {
     ]);
   });
 
+  it('reports a session kept outside a @setup scenario', () => {
+    const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/setup.feature')], root)
+      .filter((message) => message.severity === 'error')
+      .map(formatLintMessage);
+    expect(errors).toEqual([
+      `test/unit/fixtures/lint/setup.feature:9: error: "I keep the session" only works in a scenario tagged @setup, which runs before the others when the configuration has setup: true. (setup-step)`,
+    ]);
+  });
+
   it('summarizes the counts', () => {
     expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
   });

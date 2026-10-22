@@ -50,6 +50,9 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 - Repeated sequences of steps become a keyword: a `Scenario Outline:` in `keywords/*.feature`
   whose title is the new step, with parameters written `"<name>"`. End a keyword with a check of
   where it leads, such as `I see the url "/dashboard"`, so the next step does not start early.
+- When a feature tagged `@setup` ends with `I keep the session`, every scenario starts logged
+  in: do not log in again. A scenario that needs a fresh browser, such as a test of the login
+  itself, gets the tag `@logged-out`.
 - Data a test needs first is a `Given` keyword such as `there is an order for "<item>"`: it
   creates the data with `I create "…" at "/api/…" with "{…}"` and removes it with
   `I delete "…" after the test`. Do not create test data by clicking through other screens when

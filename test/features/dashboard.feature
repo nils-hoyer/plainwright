@@ -16,6 +16,7 @@ Feature: Dashboard
     * I see the "Transfer Money" button is enabled
     * I do not see the attribute "disabled" on the "Transfer Money" button
 
+  @logged-out
   Scenario: Nobody is signed in without the saved session
     * I see the text "Not signed in"
 
