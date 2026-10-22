@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { ELEMENT_TYPES } from '../../src/elements';
 
 const cwd = path.join(__dirname, 'fixtures/project');
 
@@ -103,6 +104,60 @@ describe('page files', () => {
     } finally {
       spy.mockRestore();
     }
+  });
+
+  it('take aliases for one element type without quotes in the key', async () => {
+    const page = JSON.stringify({
+      name: 'Orders',
+      elements: {
+        Search: '[data-testid=search]',
+        Settings: { type: 'button', selector: '[data-testid=settings]' },
+        Total: [
+          { type: 'cell', selector: '#total' },
+          { type: 'heading', selector: 'h2.total' },
+        ],
+        '"Help" link': 'a.help',
+      },
+    });
+    const { dir, library } = await folder({ 'pages/orders.json': page });
+    const [orders] = library.definePages('pages', { cwd: dir });
+    expect(orders.elements).toEqual({
+      Search: '[data-testid=search]',
+      '"Settings" button': '[data-testid=settings]',
+      '"Total" cell': '#total',
+      '"Total" heading': 'h2.total',
+      '"Help" link': 'a.help',
+    });
+  });
+
+  it('explain an alias that is written wrong', async () => {
+    const wrongType = await folder({
+      'pages/a.json':
+        '{ "name": "A", "elements": { "Go": { "type": "knob", "selector": "#go" } } }',
+    });
+    expect(() => wrongType.library.definePages('pages', { cwd: wrongType.dir })).toThrow(
+      '"knob" is not an element type, in the alias "Go". Use one of: button, link,',
+    );
+    const noSelector = await folder({
+      'pages/a.json': '{ "name": "A", "elements": { "Go": { "type": "button" } } }',
+    });
+    expect(() => noSelector.library.definePages('pages', { cwd: noSelector.dir })).toThrow(
+      'Write the alias "Go" as "selector", or { "type": "button", "selector": "selector" } for one element type.',
+    );
+    const twice = await folder({
+      'pages/a.json':
+        '{ "name": "A", "elements": { "Go": { "type": "button", "selector": "#go" }, "\\"Go\\" button": "#go2" } }',
+    });
+    expect(() => twice.library.definePages('pages', { cwd: twice.dir })).toThrow(
+      'The element "Go" button has two aliases.',
+    );
+  });
+
+  it('are described by a schema that knows every element type', () => {
+    const schema = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '../../schema/page.json'), 'utf8'),
+    );
+    expect(schema.definitions.typedAlias.properties.type.enum).toEqual([...ELEMENT_TYPES]);
   });
 
   it("are not loaded from an app's pages/ folder", async () => {
