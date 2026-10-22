@@ -1,6 +1,11 @@
+import path from 'node:path';
 import { defineConfig as definePlaywrightConfig, devices } from '@playwright/test';
-import type { PlaywrightTestConfig } from '@playwright/test';
-import { defineBddConfig, type BDDInputConfig } from 'playwright-bdd';
+import type { PlaywrightTestConfig, ReporterDescription } from '@playwright/test';
+import {
+  cucumberReporter as bddCucumberReporter,
+  defineBddConfig,
+  type BDDInputConfig,
+} from 'playwright-bdd';
 import { aiFixPromptTemplate } from './ai';
 import type { KeywordsOptions } from './fixtures';
 import { steps as builtInSteps } from './index';
@@ -31,7 +36,7 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
 export function defineConfig(
   config: PlainwrightConfig = {},
 ): PlaywrightTestConfig<KeywordsOptions> {
-  const { baseURL, features, steps, bdd, use, ...playwright } = config;
+  const { baseURL, features, steps, bdd, use, reporter, ...playwright } = config;
   const testDir = defineBddConfig({
     aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
     ...bdd,
@@ -42,7 +47,7 @@ export function defineConfig(
     testDir,
     // The report opens by itself when a test fails (not in CI). Its "Fix with AI" attachment
     // asks to fix the scenario; Playwright's own "Copy prompt" would ask for code.
-    reporter: [['list'], ['html', { noCopyPrompt: true }]],
+    reporter: reporter ? withCucumberFix(reporter) : [['list'], ['html', { noCopyPrompt: true }]],
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     // Screenshots to compare against are stored next to the feature files, so they can be
     // committed: features/login.feature.spec.js-snapshots/. Playwright's default is next to
@@ -57,4 +62,28 @@ export function defineConfig(
       ...use,
     },
   });
+}
+
+/** Plainwright's wrapper of playwright-bdd's Cucumber reporters, see src/reporter.ts. */
+const CUCUMBER_REPORTER = path.join(__dirname, `reporter${path.extname(__filename)}`);
+const BDD_CUCUMBER_REPORTER = bddCucumberReporter('json')[0];
+
+/**
+ * A Cucumber report: `json` or `junit` for CI servers and test management tools, `html` for
+ * people. Takes the options of playwright-bdd's cucumberReporter(), which marks every step
+ * "skipped" in tests that run with `plainwright test`:
+ *
+ *   reporter: [['list'], ['html'], cucumberReporter('json', { outputFile: 'reports/cucumber.json' })]
+ */
+export const cucumberReporter: typeof bddCucumberReporter = (type, options) => [
+  CUCUMBER_REPORTER,
+  bddCucumberReporter(type, options)[1],
+];
+
+/** The reporters, with playwright-bdd's Cucumber reporters replaced by Plainwright's. */
+function withCucumberFix(reporter: string | ReporterDescription[]): string | ReporterDescription[] {
+  if (typeof reporter === 'string') return reporter;
+  return reporter.map((entry) =>
+    entry[0] === BDD_CUCUMBER_REPORTER ? [CUCUMBER_REPORTER, entry[1]] : entry,
+  );
 }
