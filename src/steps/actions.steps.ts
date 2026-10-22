@@ -67,6 +67,17 @@ step({
 });
 
 step({
+  pattern: 'I type {string} in the {element}',
+  level: 'advanced',
+  description:
+    'Types the text into the field key by key, without clearing it first, for fields that react to every key, such as a date with a mask or a search with suggestions.',
+  example: 'I type "21102026" in the "Birthday" field',
+  fn: async ({ world }, text: string, element: ElementRef) => {
+    await world.withElement(element, (el) => el.pressSequentially(text));
+  },
+});
+
+step({
   pattern: 'I clear the {element}',
   level: 'core',
   description: 'Removes all text from the field.',
@@ -161,6 +172,16 @@ step({
       element,
       files.split(',').map((file) => file.trim()),
     );
+  },
+});
+
+step({
+  pattern: 'I tap the {element}',
+  level: 'advanced',
+  description: 'Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).',
+  example: 'I tap the "Menu" button',
+  fn: async ({ world }, element: ElementRef) => {
+    await world.withElement(element, (el) => el.tap());
   },
 });
 

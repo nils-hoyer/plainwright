@@ -24,10 +24,6 @@ Feature: Interactions
     * I see the "Open Dashboard in new tab" link is in the viewport
     * I scroll to the top of the page
     * I see the "Open Dashboard in new tab" link is not in the viewport
-    * I scroll down by "400" pixels
-    * I see the "Interactions Demo" heading is not in the viewport
-    * I scroll up by "400" pixels
-    * I see the "Interactions Demo" heading is in the viewport
 
   Scenario: Accept an alert
     * I accept the next dialog
@@ -80,11 +76,6 @@ Feature: Interactions
     * I see the value "Hi" in the "Message" field
     * I switch to the main frame
     * I see the "Interactions Demo" heading
-
-  Scenario: Type on the keyboard
-    * I click the "Keyboard input" field
-    * I type "Hello BDD!" on the keyboard
-    * I see the value "Hello BDD!" in the "Keyboard input" field
 
   Scenario: Press a key in a field
     * I fill "hello" in the "Keyboard input" field

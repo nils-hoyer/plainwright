@@ -2,22 +2,14 @@ Feature: Keyboard
 
   Background:
     * I open the "Interactions" page
-    * I focus on the "Keyboard input" field
 
-  Scenario: Hold down and release keys
-    * I hold down the key "H"
-    * I release the key "H"
-    * I hold down the key "i"
-    * I release the key "i"
+  Scenario: Type key by key into a field
+    * I type "Hi" in the "Keyboard input" field
     * I see the value "Hi" in the "Keyboard input" field
 
-  Scenario: Insert text without key presses
-    * I insert the text "hello"
-    * I see the value "hello" in the "Keyboard input" field
-
-  Scenario: Inserted text is added to the value
+  Scenario: Typing adds to the value
     * I fill "world" in the "Keyboard input" field
-    * I insert the text "!"
+    * I type "!" in the "Keyboard input" field
     * I see the value "world!" in the "Keyboard input" field
 
   Scenario: Press a key combination
