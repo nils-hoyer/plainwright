@@ -1,5 +1,4 @@
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { readableSyntaxError } from './gherkin';
@@ -7,7 +6,7 @@ import { validateKeywords } from './keywords';
 import { formatLintMessage, lintFeatures } from './lint';
 import { BddFiles, loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
 import { mapToFeatures } from './locations';
-import { renderStubs, STUBS_FILE } from './stubs';
+import { refreshStubs } from './stubs';
 
 /** Without a configuration that loads: the defaults of defineConfig(). */
 const DEFAULT_FILES: Omit<BddFiles, 'cwd'> = {
@@ -140,17 +139,6 @@ async function loadSteps(projects: BddFiles[]): Promise<boolean> {
     );
     return false;
   }
-}
-
-/**
- * Rewrites the editor's step list (written by `init` or `plainwright stubs`) when keywords or
- * steps changed, so new keywords show up in the editor after the next test run.
- */
-function refreshStubs(cwd: string) {
-  const file = path.join(cwd, STUBS_FILE);
-  if (!fs.existsSync(file)) return;
-  const stubs = renderStubs();
-  if (fs.readFileSync(file, 'utf8') !== stubs) fs.writeFileSync(file, stubs);
 }
 
 /** Lint's messages for steps that do not exist or match several steps, in every feature file. */

@@ -31,11 +31,9 @@ into `steps/`.
 ## Useful commands
 
 ```bash
-npm run lint                  # check feature files before running them
-npm run catalog               # steps.json: every step, for people and AI assistants
+npm run lint                  # check feature files, update the editor's step list
 npm run app                   # start the example app on http://localhost:3210
 npm run inspect -- "Todos"    # with the app running: list the buttons, fields, links … of a page
-npm run stubs                 # step file for editor autocomplete (see .vscode/settings.json)
 ```
 
 To test your own app, set `baseURL` in `playwright.config.ts` to it, remove `webServer` (or

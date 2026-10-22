@@ -273,8 +273,6 @@ function scriptsFor(baseURL: string): Record<string, string> {
     report: 'playwright show-report',
     lint: "plainwright lint --features 'features/**/*.feature' --quiet",
     inspect: 'plainwright inspect',
-    catalog: 'plainwright catalog --out steps.json',
-    stubs: 'plainwright stubs --out .vscode/plainwright.steps.js',
   };
 }
 

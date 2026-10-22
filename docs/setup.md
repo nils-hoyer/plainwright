@@ -11,8 +11,8 @@ project. It asks for the address of your app and which AI assistant you use, and
 - installs `@nils.hoyer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
   the package manager of the project (npm, pnpm, Yarn or Bun);
 - writes the files listed [below](#files-init-writes);
-- adds the scripts `test`, `report`, `lint`, `inspect`, `catalog` and `stubs` to `package.json`
-  (see [commands](commands.md));
+- adds the scripts `test`, `report`, `lint` and `inspect` to `package.json` (see
+  [commands](commands.md));
 - asks whether to run the first test now, and runs it.
 
 It never overwrites a file. Running it again adds only what is missing and says what it
