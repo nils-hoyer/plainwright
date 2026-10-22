@@ -1,6 +1,4 @@
-import { exec } from 'node:child_process';
-import { promisify } from 'node:util';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import type { ElementRef } from '../elements';
 import type { ApiResponse, World } from '../world';
 import { category } from './builtin';
@@ -144,41 +142,6 @@ step({
   },
 });
 
-// Anything else a team already has a script for, e.g. filling a database.
-
-step({
-  pattern: 'I run the command {string}',
-  level: 'advanced',
-  description:
-    'Runs the command in the project folder, e.g. a script that fills the database, and fails when the command fails.',
-  example: 'I run the command "npm run db:seed"',
-  // Built-in steps destructure `world`, even when they do not need it.
-  fn: async ({ world: _world }, command: string) => {
-    let output: string;
-    try {
-      const result = await promisify(exec)(command, { cwd: process.cwd(), maxBuffer: 10 << 20 });
-      output = `${result.stdout}${result.stderr}`;
-    } catch (error) {
-      const {
-        code,
-        stdout = '',
-        stderr = '',
-      } = error as {
-        code?: number;
-        stdout?: string;
-        stderr?: string;
-      };
-      throw new Error(
-        `[plainwright] The command "${command}" failed with exit code ${code ?? '?'}.\n` +
-          lastLines(`${stdout}${stderr}`),
-      );
-    }
-    if (output.trim()) {
-      await test.info().attach(command, { body: output, contentType: 'text/plain' });
-    }
-  },
-});
-
 function text(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);
 }
@@ -222,8 +185,4 @@ function fieldOf(body: unknown, field: string): unknown {
     value = (value as Record<string, unknown>)[key];
   }
   return value;
-}
-
-function lastLines(output: string, count = 20) {
-  return output.trimEnd().split('\n').slice(-count).join('\n');
 }
