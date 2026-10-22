@@ -31,12 +31,18 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
       // Touch scenarios need a browser with touch enabled, see chromium-touch.
-      grepInvert: /@touch/,
+      grepInvert: /@touch|@german/,
     },
     {
       name: 'chromium-touch',
       use: { ...devices['Desktop Chrome'], hasTouch: true },
       grep: /@touch/,
+    },
+    {
+      // Dates as a browser in German writes them, in the time zone of Berlin.
+      name: 'chromium-german',
+      use: { ...devices['Desktop Chrome'], locale: 'de-DE', timezoneId: 'Europe/Berlin' },
+      grep: /@german/,
     },
   ],
 });
