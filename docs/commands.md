@@ -46,8 +46,9 @@ npx @nils.hoyer/plainwright@latest init
 ### lint: check feature files before running them
 
 Short: `npm run lint`. Prints one line per problem, `file:line: severity: message (rule)`, and
-exits with code 1 if there is an error, so it can stop a CI run. The first table lists the
-rules, the second the options.
+exits with code 1 if there is an error, so it can stop a CI run. Like `npm test`, it updates the
+editor's step list, `.vscode/plainwright.steps.js`. The first table lists the rules, the second
+the options.
 
 ```bash
 npx plainwright lint --features "features/**/*.feature"
@@ -96,7 +97,7 @@ npx plainwright inspect "Login"
 
 ### catalog: all steps as JSON
 
-Short: `npm run catalog`. Writes every step with its description, example, level and
+Writes every step with its description, example, level and
 parameters, plus the element types, the wording rules, and your pages and aliases. Made for AI
 assistants, see [AI authoring](ai-authoring.md).
 
@@ -115,8 +116,9 @@ npx plainwright docs --out STEPS.md
 
 ### stubs: autocomplete in the editor
 
-Short: `npm run stubs`. Writes a file the Cucumber extension for VS Code reads, so the editor
-suggests steps while you type. `plainwright test` updates the file too. See
+Writes a file the Cucumber extension for VS Code reads, so the editor suggests steps while you
+type. `plainwright test` and `plainwright lint` update the file, and write it when
+`.vscode/settings.json` names it, so you rarely need this command. See
 [editor support](ide-support.md) and
 [other editors](other-editors.md).
 

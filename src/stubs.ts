@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { customParameterTypes } from './params';
 import { getSteps } from './registry';
 
@@ -31,4 +33,28 @@ export function renderStubs(): string {
     lines.push(`Given(${JSON.stringify(step.pattern)}, () => {});`);
   }
   return `${lines.join('\n')}\n`;
+}
+
+/**
+ * Rewrites the editor's step list when keywords or steps changed, so new keywords show up in the
+ * editor after the next `plainwright test` or `plainwright lint`. It writes the file when it
+ * exists or when the VS Code settings name it: the file is not committed, so it is missing after
+ * a clone.
+ */
+export function refreshStubs(cwd: string) {
+  const file = path.join(cwd, STUBS_FILE);
+  const exists = fs.existsSync(file);
+  if (!exists && !readText(path.join(cwd, '.vscode/settings.json')).includes(STUBS_FILE)) return;
+  const stubs = renderStubs();
+  if (exists && fs.readFileSync(file, 'utf8') === stubs) return;
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, stubs);
+}
+
+function readText(file: string) {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return '';
+  }
 }
