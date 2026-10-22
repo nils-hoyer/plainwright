@@ -90,6 +90,18 @@ describe('defineConfig', () => {
     expect('Seed @setup-data'.match(projects![0].grep as RegExp)).toBeNull();
   });
 
+  it('says that exactNames is gone, in use and in a project', () => {
+    expect(() =>
+      defineConfig({ bdd: { outputDir: '.gen-8' }, use: { exactNames: false } as never }),
+    ).toThrow('exactNames was removed in 0.3.0');
+    expect(() =>
+      defineConfig({
+        bdd: { outputDir: '.gen-9' },
+        projects: [{ name: 'chromium', use: { exactNames: true } as never }],
+      }),
+    ).toThrow('For a name with a part that changes, such as "Cart (3)", add an alias');
+  });
+
   it('refuses setup: true next to a project named setup', () => {
     expect(() =>
       defineConfig({ bdd: { outputDir: '.gen-7' }, setup: true, projects: [{ name: 'setup' }] }),

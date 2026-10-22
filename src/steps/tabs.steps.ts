@@ -75,7 +75,7 @@ step({
       alias === undefined
         ? scope
             .locator('iframe, frame')
-            .and(scope.getByTitle(name, { exact: world.exactNames }))
+            .and(scope.getByTitle(name, { exact: true }))
             .or(scope.locator(`iframe[name=${JSON.stringify(name)}]`))
         : typeof alias === 'string'
           ? scope.locator(alias)

@@ -11,7 +11,7 @@ import {
   type BDDInputConfig,
 } from 'playwright-bdd';
 import { aiFixPromptTemplate } from './ai';
-import type { KeywordsOptions } from './fixtures';
+import { checkOptions, type KeywordsOptions } from './fixtures';
 import { steps as builtInSteps } from './index';
 import { SETUP_TAG } from './session';
 
@@ -47,6 +47,9 @@ export function defineConfig(
   config: PlainwrightConfig = {},
 ): PlaywrightTestConfig<KeywordsOptions> {
   const { baseURL, features, steps, bdd, use, reporter, setup, projects, ...playwright } = config;
+  for (const options of [use, ...(projects ?? []).map((project) => project.use)]) {
+    checkOptions(options);
+  }
   const testDir = defineBddConfig({
     aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
     ...bdd,

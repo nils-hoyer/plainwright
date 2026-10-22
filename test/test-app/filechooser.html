@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -19,12 +19,7 @@
         accept="*/*"
       />
 
-      <button
-        data-testid="btn-upload"
-        id="btn-upload"
-      >
-        Choose File
-      </button>
+      <button data-testid="btn-upload" id="btn-upload">Choose File</button>
 
       <!-- Shows the name of the selected file -->
       <section aria-label="Chosen file"><p data-testid="file-result" id="file-result"></p></section>
@@ -39,11 +34,11 @@
         multiple
       />
 
-      <button data-testid="btn-upload-multi" id="btn-upload-multi">
-        Choose Multiple Files
-      </button>
+      <button data-testid="btn-upload-multi" id="btn-upload-multi">Choose Multiple Files</button>
 
-      <section aria-label="Chosen files"><p data-testid="file-result-multi" id="file-result-multi"></p></section>
+      <section aria-label="Chosen files">
+        <p data-testid="file-result-multi" id="file-result-multi"></p>
+      </section>
 
       <!-- Cannot be clicked: an upload with it fails at the click -->
       <button type="button" disabled>Choose from cloud</button>
@@ -55,8 +50,9 @@
       });
 
       document.getElementById('file-input').addEventListener('change', function () {
-        document.getElementById('file-result').textContent =
-          this.files[0] ? this.files[0].name : '';
+        document.getElementById('file-result').textContent = this.files[0]
+          ? this.files[0].name
+          : '';
       });
 
       document.getElementById('btn-upload-multi').addEventListener('click', () => {
@@ -64,7 +60,9 @@
       });
 
       document.getElementById('file-input-multi').addEventListener('change', function () {
-        const names = Array.from(this.files).map((f) => f.name).join(', ');
+        const names = Array.from(this.files)
+          .map((f) => f.name)
+          .join(', ');
         document.getElementById('file-result-multi').textContent = names;
       });
     </script>

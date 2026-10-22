@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -29,10 +29,16 @@
       <div id="mouse-target" data-testid="mouse-target">Mouse Target Area</div>
 
       <!-- Updated by every mouse event so tests can assert the event type -->
-      <section aria-label="Last event"><p id="last-event" data-testid="last-event">no-event</p></section>
+      <section aria-label="Last event">
+        <p id="last-event" data-testid="last-event">no-event</p>
+      </section>
       <!-- Dedicated trackers: not overwritten by subsequent events like click -->
-      <section aria-label="Last mouse down"><p id="last-mousedown" data-testid="last-mousedown">-</p></section>
-      <section aria-label="Last mouse up"><p id="last-mouseup" data-testid="last-mouseup">-</p></section>
+      <section aria-label="Last mouse down">
+        <p id="last-mousedown" data-testid="last-mousedown">-</p>
+      </section>
+      <section aria-label="Last mouse up">
+        <p id="last-mouseup" data-testid="last-mouseup">-</p>
+      </section>
     </main>
 
     <script>
@@ -58,21 +64,25 @@
       });
 
       const lastMousedown = document.getElementById('last-mousedown');
-      const lastMouseup    = document.getElementById('last-mouseup');
+      const lastMouseup = document.getElementById('last-mouseup');
 
       document.addEventListener('mousedown', (e) => {
-        log.textContent          = 'mousedown:' + e.button;
+        log.textContent = 'mousedown:' + e.button;
         lastMousedown.textContent = 'mousedown:' + e.button;
       });
 
       document.addEventListener('mouseup', (e) => {
-        log.textContent       = 'mouseup:' + e.button;
+        log.textContent = 'mouseup:' + e.button;
         lastMouseup.textContent = 'mouseup:' + e.button;
       });
 
-      document.addEventListener('wheel', (e) => {
-        log.textContent = 'wheel:' + Math.round(e.deltaX) + ',' + Math.round(e.deltaY);
-      }, { passive: true });
+      document.addEventListener(
+        'wheel',
+        (e) => {
+          log.textContent = 'wheel:' + Math.round(e.deltaX) + ',' + Math.round(e.deltaY);
+        },
+        { passive: true },
+      );
     </script>
   </body>
 </html>
