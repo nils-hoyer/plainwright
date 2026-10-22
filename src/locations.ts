@@ -12,7 +12,8 @@ import { globSync } from 'tinyglobby';
  * line of each step, and the line of the step in the feature file. Playwright reads the map when
  * it loads the file. Other lines map to themselves, so tests keep their location in the
  * generated file: playwright-bdd finds a step's location by searching the stack for the test's
- * file, and its Cucumber reporters find a test's data by that file and line.
+ * file, and its Cucumber reporters find a test's data by that file and line. They find steps
+ * the same way, so src/reporter.ts gives them the steps' lines in the generated file.
  */
 export function mapToFeatures(outputDir: string, configDir: string) {
   for (const file of globSync('**/*.spec.js', { cwd: outputDir, absolute: true })) {
@@ -25,7 +26,29 @@ export function mapToFeatures(outputDir: string, configDir: string) {
 
 const SOURCE_MAP_COMMENT = '//# sourceMappingURL=data:application/json;base64,';
 
-type BddTestData = { steps: { pwStepLine?: number; gherkinStepLine: number }[] };
+type BddTestData = {
+  pwTestLine: number;
+  steps: { pwStepLine?: number; gherkinStepLine: number }[];
+};
+
+/**
+ * The reverse of the source map, for one test of a generated file: its feature file, and the
+ * line of each of its steps in the feature file → the line in the generated file.
+ */
+export function generatedStepLines(
+  code: string,
+  testLine: number,
+  configDir: string,
+): { feature: string; lines: Map<number, number> } | undefined {
+  const source = /^\/\/ Generated from: (.+)$/m.exec(code)?.[1];
+  const test = bddData(code)?.find((data) => data.pwTestLine === testLine);
+  if (!source || !test) return undefined;
+  const lines = new Map<number, number>();
+  for (const step of test.steps) {
+    if (step.pwStepLine) lines.set(step.gherkinStepLine, step.pwStepLine);
+  }
+  return { feature: path.resolve(configDir, source), lines };
+}
 
 /** The generated test file with a source map to its feature file, or undefined if unsure. */
 export function withSourceMap(code: string, file: string, configDir: string): string | undefined {
