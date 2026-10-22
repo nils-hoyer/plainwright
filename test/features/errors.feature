@@ -124,3 +124,10 @@ Feature: Helpful error messages
       """
       I create "order" at "/api/nothing" with "x"
       """
+
+  Scenario: An element that opens nothing cannot be expanded
+    * I open the "Assertions" page
+    * I see this step fail with "The \"Greeting\" section does not open or close anything: it has no aria-expanded and is no details element.":
+      """
+      I see the "Greeting" section is expanded
+      """

@@ -21,6 +21,12 @@ const HOLD_KEY =
   'Press a key or a combination with I press "Shift+A", or I press "…" in the "…" field. To hold a key while doing something else, write a step in TypeScript (docs/writing-steps.md).';
 const SCROLL_BY =
   'Scroll to what you need instead: I scroll to the "…" section, or to the bottom of the page. Clicks and checks scroll by themselves.';
+const ATTRIBUTE =
+  'Check what the user sees instead: I see the "…" button is disabled, is enabled, is checked or is expanded. For a check no step has, write a step in TypeScript (docs/writing-steps.md).';
+const ATTRIBUTE_VALUE =
+  'For a link: I see the "…" link leads to "/…". For a menu or an accordion: I see the "…" button is expanded. For a check no step has, write a step in TypeScript (docs/writing-steps.md).';
+const CLASS =
+  'A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".';
 const PAGE_LOAD =
   'Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.';
 
@@ -69,6 +75,32 @@ export const REMOVED_STEPS: readonly RemovedStep[] = [
   },
   { pattern: 'I scroll down by {number} pixels', removedIn: '0.3.0', instead: SCROLL_BY },
   { pattern: 'I scroll up by {number} pixels', removedIn: '0.3.0', instead: SCROLL_BY },
+  {
+    pattern: 'I see the attribute {string} on the {element}',
+    removedIn: '0.3.0',
+    instead: ATTRIBUTE,
+  },
+  {
+    pattern: 'I do not see the attribute {string} on the {element}',
+    removedIn: '0.3.0',
+    instead: ATTRIBUTE,
+  },
+  {
+    pattern: 'I see the attribute {string} with the value {string} on the {element}',
+    removedIn: '0.3.0',
+    instead: ATTRIBUTE_VALUE,
+  },
+  {
+    pattern: 'I see the attribute {string} containing {string} on the {element}',
+    removedIn: '0.3.0',
+    instead: ATTRIBUTE_VALUE,
+  },
+  { pattern: 'I see the class {string} on the {element}', removedIn: '0.3.0', instead: CLASS },
+  {
+    pattern: 'I do not see the class {string} on the {element}',
+    removedIn: '0.3.0',
+    instead: CLASS,
+  },
 ];
 
 const expressions = new Map<RemovedStep, CucumberExpression>();
