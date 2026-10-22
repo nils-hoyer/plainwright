@@ -1,6 +1,6 @@
 import { exec } from 'node:child_process';
 import { promisify } from 'node:util';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 import type { ElementRef } from '../elements';
 import type { ApiResponse, World } from '../world';
 import { category } from './builtin';
@@ -30,16 +30,63 @@ step({
   example: 'I remember the text of the "Order number" field as "order-number"',
   remembers: (args) => String(args[1]),
   fn: async ({ world }, element: ElementRef, name: string) => {
-    const value = await world.withElement(element, async (el) => {
-      const isField = await el.evaluate(
-        (node) =>
-          node instanceof HTMLInputElement ||
-          node instanceof HTMLTextAreaElement ||
-          node instanceof HTMLSelectElement,
-      );
-      return isField ? el.inputValue() : el.innerText();
-    });
+    const value = await world.withElement(element, (el) => textOf(el));
     world.remember(name, value.trim());
+  },
+});
+
+step({
+  pattern: 'I remember the first number in the {element} as {string}',
+  level: 'advanced',
+  description:
+    'Waits until the text of the element, or the value of a field, has a number, and keeps the first one as written.',
+  example: 'I remember the first number in the "Confirmation" message as "order"',
+  remembers: (args) => String(args[1]),
+  fn: async ({ world }, element: ElementRef, name: string) => {
+    const number = await world.withElement(element, async (el) => {
+      let text = '';
+      try {
+        await expect
+          .poll(async () => numbersIn((text = await textOf(el, 1000)))[0])
+          .not.toBeUndefined();
+      } catch (error) {
+        // A missing element, or several, is explained by withElement().
+        if ((await el.count()) !== 1) throw error;
+        throw new Error(`[plainwright] The ${element} has no number: "${text.trim()}".`);
+      }
+      return numbersIn(text)[0];
+    });
+    world.remember(name, number);
+  },
+});
+
+step({
+  pattern: 'I remember the url as {string}',
+  level: 'advanced',
+  description:
+    'Keeps the address the browser shows, without the base URL when it is on the same website.',
+  example: 'I remember the url as "order-page"',
+  remembers: (args) => String(args[0]),
+  fn: ({ world }, name: string) => {
+    world.remember(name, world.address());
+  },
+});
+
+step({
+  pattern: 'I remember the last number in the url as {string}',
+  level: 'advanced',
+  description:
+    'Waits until the path of the address has a number, and keeps the last one; the query and the part after # count only when the path has none.',
+  example: 'I remember the last number in the url as "order"',
+  remembers: (args) => String(args[0]),
+  fn: async ({ world }, name: string) => {
+    let number: string | undefined;
+    try {
+      await expect.poll(() => (number = lastNumberInUrl(world.page.url()))).not.toBeUndefined();
+    } catch {
+      throw new Error(`[plainwright] The address has no number: ${world.address()}`);
+    }
+    world.remember(name, number);
   },
 });
 
@@ -166,6 +213,41 @@ step({
     }
   },
 });
+
+/** The value of a field, or else the text of the element. */
+async function textOf(element: Locator, timeout?: number): Promise<string> {
+  const isField = await element.evaluate(
+    (node) =>
+      node instanceof HTMLInputElement ||
+      node instanceof HTMLTextAreaElement ||
+      node instanceof HTMLSelectElement,
+    undefined,
+    { timeout },
+  );
+  return isField ? element.inputValue({ timeout }) : element.innerText({ timeout });
+}
+
+/**
+ * The numbers in a text as written: digits, with `.` or `,` between digits.
+ * `Order #10234, 1.234,56 €` → `['10234', '1.234,56']`. No minus sign: `Order-123` → `123`.
+ */
+export function numbersIn(text: string): string[] {
+  return text.match(/\d+(?:[.,]\d+)*/g) ?? [];
+}
+
+/** The last number in the path of an address, else in its query or the part after #. */
+export function lastNumberInUrl(url: string): string | undefined {
+  let pathname = url;
+  let rest = '';
+  try {
+    const parsed = new URL(url);
+    pathname = parsed.pathname;
+    rest = `${parsed.search}${parsed.hash}`;
+  } catch {
+    // Not an address with an origin, such as about:blank.
+  }
+  return numbersIn(pathname).at(-1) ?? numbersIn(rest).at(-1);
+}
 
 function text(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);

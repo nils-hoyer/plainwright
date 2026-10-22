@@ -103,6 +103,22 @@ export type FeatureStep = {
  * in the file and the scenario's tags. A step in an outline appears once per distinct text.
  */
 export function featureSteps(document: GherkinDocument, file: string): FeatureStep[] {
+  const seen = new Set<string>();
+  const result: FeatureStep[] = [];
+  for (const step of scenarioSteps(document, file).flat()) {
+    const key = `${step.line}\u0000${step.text}\u0000${step.tags.join(' ')}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(step);
+  }
+  return result.sort((a, b) => a.line - b.line);
+}
+
+/**
+ * The steps of each scenario in the order they run, Background steps first. A Scenario Outline
+ * gives one scenario per example.
+ */
+export function scenarioSteps(document: GherkinDocument, file: string): FeatureStep[][] {
   const pickles: readonly Pickle[] = compile(document, file, IdGenerator.incrementing());
   const locations = new Map<string, { line: number; column: number }>();
   const visit = (steps: readonly { id: string; location: { line: number; column?: number } }[]) =>
@@ -117,18 +133,11 @@ export function featureSteps(document: GherkinDocument, file: string): FeatureSt
       if (ruleChild.scenario) visit(ruleChild.scenario.steps);
     }
   }
-  const seen = new Set<string>();
-  const result: FeatureStep[] = [];
-  for (const pickle of pickles) {
+  return pickles.map((pickle) => {
     const tags = pickle.tags.map((tag) => tag.name);
-    for (const step of pickle.steps) {
+    return pickle.steps.flatMap((step) => {
       const location = locations.get(step.astNodeIds[0]);
-      if (!location) continue;
-      const key = `${location.line}\u0000${step.text}\u0000${tags.join(' ')}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      result.push({ text: step.text, ...location, tags });
-    }
-  }
-  return result.sort((a, b) => a.line - b.line);
+      return location ? [{ text: step.text, ...location, tags }] : [];
+    });
+  });
 }

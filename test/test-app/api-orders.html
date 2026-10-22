@@ -20,8 +20,28 @@
         <tbody id="orders"></tbody>
       </table>
       <p>Last updated <span id="updated" data-testid="updated"></span></p>
+
+      <!-- Creates an order and opens its page, /orders/<number>, as many apps do after saving. -->
+      <form id="new-order">
+        <h2>New order</h2>
+        <label for="item">Item</label>
+        <input id="item" required />
+        <button type="submit">Create order</button>
+      </form>
     </main>
     <script>
+      document.getElementById('new-order').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const response = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ item: document.getElementById('item').value }),
+        });
+        const order = await response.json();
+        sessionStorage.setItem('created', order.id);
+        location.href = `/orders/${order.id}`;
+      });
+
       fetch('/api/orders')
         .then((response) => response.json())
         .then((orders) => {

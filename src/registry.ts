@@ -13,7 +13,14 @@ import { ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
 import { levenshtein } from './similar';
-import { NumberReference, ResolvedReference, resolveRaw, resolveText } from './values';
+import {
+  HIDDEN,
+  NumberReference,
+  ResolvedReference,
+  resolveRaw,
+  resolveText,
+  takeRemembered,
+} from './values';
 
 export type StepLevel = 'core' | 'advanced';
 export type StepSource = 'built-in' | 'project' | 'keyword';
@@ -148,26 +155,32 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
 
 /**
  * Fills in `{references}` in the step's values before it runs, and lists them as a nested step
- * in the report. The wrapper keeps the signature of `fn`, from which playwright-bdd reads the
- * fixtures to pass.
+ * in the report; after it, the values it remembered. The wrapper keeps the signature of `fn`,
+ * from which playwright-bdd reads the fixtures to pass.
  */
 function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
   const wrapped = async function (this: unknown, fixtures: F, ...args: unknown[]) {
     const used: ResolvedReference[] = [];
     const values = args.map((arg) => resolveArg(arg, mode, used));
-    if (used.length) {
-      const shown = [...new Map(used.map((u) => [u.reference, u.shown])).entries()]
-        .map(([reference, value]) => `{${reference}} = ${shorten(value)}`)
-        .join(', ');
-      // The report links the line to where the step is written, not to this file.
-      await test.step(shown, () => {}, { location: runningKeywordStep ?? stepCallSite() });
-    }
+    if (used.length) await showValues('', used);
+    takeRemembered();
+    let result: unknown;
     try {
-      return await fn.call(this, fixtures, ...values);
+      result = await fn.call(this, fixtures, ...values);
     } catch (error) {
       hideOwnFrames(error);
       throw error;
     }
+    const remembered = takeRemembered();
+    // A value made from a secret stays hidden.
+    const secret = used.some((u) => u.shown === HIDDEN);
+    if (remembered.length) {
+      await showValues(
+        'remembered ',
+        remembered.map((r) => (secret ? { ...r, shown: HIDDEN } : r)),
+      );
+    }
+    return result;
   };
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
@@ -197,6 +210,17 @@ function onlyForTags<F>(fn: StepFn<F>, pattern: string, tags: string[]): StepFn<
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
   return wrapped;
+}
+
+/** `{order.id} = "1001", {users.admin.email} = "admin@example.com"` as a nested step. */
+async function showValues(prefix: string, values: ResolvedReference[]) {
+  const shown = [...new Map(values.map((u) => [u.reference, u.shown])).entries()]
+    .map(([reference, value]) => `{${reference}} = ${shorten(value)}`)
+    .join(', ');
+  // The report links the line to where the step is written, not to this file.
+  await test.step(`${prefix}${shown}`, () => {}, {
+    location: runningKeywordStep ?? stepCallSite(),
+  });
 }
 
 /** Where the step a keyword is running is written, while it runs. */

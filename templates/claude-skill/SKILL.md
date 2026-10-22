@@ -48,8 +48,9 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 - Every scenario checks something: it ends with at least one `I see` step.
 - Values from elsewhere are written in braces inside the quotes: `"{users.admin.email}"` from
   `data/users.json`, `"{env.TEST_PASSWORD}"` for secrets, `"{order.id}"` for a value an earlier
-  step remembered, `"{unique}"` for a value that differs in every test. Never write passwords or
-  other secrets into feature or data files.
+  step remembered, `"{unique}"` for a value that differs in every test, `"{today}"` or
+  `"{in-7-days}"` for dates. A remembered value lasts for one scenario; data several scenarios
+  need goes into `data/`. Never write passwords or other secrets into feature or data files.
 - Shared test data goes into JSON files in `data/`. A named page is one file in `pages/`:
   `{ "name": "Orders", "url": "/orders" }`.
 - Repeated sequences of steps become a keyword: a `Scenario Outline:` in `keywords/*.feature`

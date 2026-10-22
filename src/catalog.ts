@@ -50,7 +50,32 @@ const BUILT_IN_VALUES: CatalogValue[] = [
     source: 'built-in',
     description: 'A short text that is different in every test, the same within one test.',
   },
-  { name: 'today', source: 'built-in', description: "Today's date as YYYY-MM-DD." },
+  {
+    name: 'today',
+    source: 'built-in',
+    description:
+      "Today's date as YYYY-MM-DD. Every date has parts: today.local as the browser writes it, today.day, today.month, today.year.",
+  },
+  {
+    name: 'tomorrow',
+    source: 'built-in',
+    description: "Tomorrow's date, with the parts of today.",
+  },
+  {
+    name: 'yesterday',
+    source: 'built-in',
+    description: "Yesterday's date, with the parts of today.",
+  },
+  {
+    name: 'in-N-days',
+    source: 'built-in',
+    description: 'The date N days from today, such as in-7-days, with the parts of today.',
+  },
+  {
+    name: 'N-days-ago',
+    source: 'built-in',
+    description: 'The date N days before today, such as 7-days-ago, with the parts of today.',
+  },
   {
     name: 'response',
     source: 'built-in',
