@@ -12,6 +12,7 @@ export const ELEMENT_TYPES = [
   'field',
   'checkbox',
   'radio button',
+  'switch',
   'dropdown',
   'option',
   'heading',
@@ -152,6 +153,11 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
     roles: ['radio'],
     plural: 'Radio buttons',
     lookup: "a radio button with this label (`getByRole('radio')`)",
+  },
+  switch: {
+    roles: ['switch'],
+    plural: 'Switches',
+    lookup: "a switch that turns something on or off, with this label (`getByRole('switch')`)",
   },
   dropdown: {
     roles: ['combobox', 'listbox'],

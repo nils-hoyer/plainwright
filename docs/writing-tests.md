@@ -115,6 +115,7 @@ part of a name and any capitals everywhere, set `exactNames: false` (see
 | `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)           |
 | `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                         |
 | `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                        |
+| `the "…" switch`       | a switch that turns something on or off, with this label (`getByRole('switch')`)                                             |
 | `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                               |
 | `the "…" option`       | an option to choose in an open list, such as a custom dropdown or search suggestions, with this text (`getByRole('option')`) |
 | `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                            |

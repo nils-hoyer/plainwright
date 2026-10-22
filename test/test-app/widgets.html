@@ -27,6 +27,16 @@
         <button type="button">Keep</button>
       </div>
 
+      <!-- Switches: a button with role switch, and a checkbox shown as one. -->
+      <button type="button" role="switch" aria-checked="false" id="dark-mode">Dark mode</button>
+      <label><input type="checkbox" role="switch" checked /> Notifications</label>
+      <script>
+        document.getElementById('dark-mode').addEventListener('click', (event) => {
+          const on = event.currentTarget.getAttribute('aria-checked') !== 'true';
+          event.currentTarget.setAttribute('aria-checked', String(on));
+        });
+      </script>
+
       <!-- A custom dropdown: a field with suggestions, shown at the end of the page (a portal). -->
       <label for="country">Country</label>
       <input

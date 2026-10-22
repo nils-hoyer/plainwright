@@ -30,8 +30,8 @@ The everyday vocabulary. Prefer these steps.
 | `I hover over the {element}`                    | Moves the mouse over the element without clicking.                                                                  | `I hover over the "Help" link`                                   |
 | `I fill {string} in the {element}`              | Replaces the content of the field with the text.                                                                    | `I fill "1234567890" in the "Username" field`                    |
 | `I clear the {element}`                         | Removes all text from the field.                                                                                    | `I clear the "Full Name" field`                                  |
-| `I check the {element}`                         | Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.                            | `I check the "I accept the terms and conditions" checkbox`       |
-| `I uncheck the {element}`                       | Unticks the checkbox. Nothing changes if it is already unticked.                                                    | `I uncheck the "Subscribe to newsletter" checkbox`               |
+| `I check the {element}`                         | Ticks the checkbox, turns on the switch or selects the radio button. Nothing changes if it already is.              | `I check the "I accept the terms and conditions" checkbox`       |
+| `I uncheck the {element}`                       | Unticks the checkbox or turns off the switch. Nothing changes if it already is.                                     | `I uncheck the "Subscribe to newsletter" checkbox`               |
 | `I select {string} in the {element}`            | Chooses the option with this visible text in the dropdown.                                                          | `I select "Germany" in the "Country" dropdown`                   |
 | `I press {string}`                              | Presses a key or key combination, such as "Enter", "Tab" or "Control+A", on the focused element.                    | `I press "Enter"`                                                |
 | `I press {string} in the {element}`             | Focuses the element and presses a key or key combination there.                                                     | `I press "Enter" in the "Email" field`                           |
@@ -40,22 +40,22 @@ The everyday vocabulary. Prefer these steps.
 
 ### Checking what you see
 
-| Step                                              | What it does                                                                             | Example                                                             |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `I see the {element}`                             | Checks that the element is visible.                                                      | `I see the "Welcome to your Dashboard" heading`                     |
-| `I do not see the {element}`                      | Checks that the element is hidden or not on the page.                                    | `I do not see the "Close" button`                                   |
-| `I see the text {string}`                         | Checks that some visible element on the page contains this text, with the same capitals. | `I see the text "Welcome back!"`                                    |
-| `I do not see the text {string}`                  | Checks that no visible element on the page contains this text, with the same capitals.   | `I do not see the text "Username and password are incorrect."`      |
-| `I see the text {string} in the {element}`        | Checks that the element contains this text, with the same capitals.                      | `I see the text "Savings" in the "Account Overview" section`        |
-| `I do not see the text {string} in the {element}` | Checks that the element does not contain this text, with the same capitals.              | `I do not see the text "Loans" in the "Account Overview" section`   |
-| `I see the value {string} in the {element}`       | Checks that the field contains exactly this value.                                       | `I see the value "Jane Doe" in the "Full Name" field`               |
-| `I see {string} selected in the {element}`        | Checks that the option with this visible text is selected in the dropdown.               | `I see "Germany" selected in the "Country" dropdown`                |
-| `I see the {element} is empty`                    | Checks that the field has no value, or that the element has no text.                     | `I see the "Full Name" field is empty`                              |
-| `I see the {element} is enabled`                  | Checks that the element can be used (it is not disabled).                                | `I see the "Log in" button is enabled`                              |
-| `I see the {element} is disabled`                 | Checks that the element is disabled and cannot be used.                                  | `I see the "Log in" button is disabled`                             |
-| `I see the {element} is checked`                  | Checks that the checkbox is ticked or the radio button is selected.                      | `I see the "I accept the terms and conditions" checkbox is checked` |
-| `I see the {element} is not checked`              | Checks that the checkbox is not ticked or the radio button is not selected.              | `I see the "Subscribe to newsletter" checkbox is not checked`       |
-| `I see {number} item(s) in the {element}`         | Checks how many visible items the list has.                                              | `I see "3" items in the "Accounts" list`                            |
+| Step                                              | What it does                                                                                   | Example                                                             |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| `I see the {element}`                             | Checks that the element is visible.                                                            | `I see the "Welcome to your Dashboard" heading`                     |
+| `I do not see the {element}`                      | Checks that the element is hidden or not on the page.                                          | `I do not see the "Close" button`                                   |
+| `I see the text {string}`                         | Checks that some visible element on the page contains this text, with the same capitals.       | `I see the text "Welcome back!"`                                    |
+| `I do not see the text {string}`                  | Checks that no visible element on the page contains this text, with the same capitals.         | `I do not see the text "Username and password are incorrect."`      |
+| `I see the text {string} in the {element}`        | Checks that the element contains this text, with the same capitals.                            | `I see the text "Savings" in the "Account Overview" section`        |
+| `I do not see the text {string} in the {element}` | Checks that the element does not contain this text, with the same capitals.                    | `I do not see the text "Loans" in the "Account Overview" section`   |
+| `I see the value {string} in the {element}`       | Checks that the field contains exactly this value.                                             | `I see the value "Jane Doe" in the "Full Name" field`               |
+| `I see {string} selected in the {element}`        | Checks that the option with this visible text is selected in the dropdown.                     | `I see "Germany" selected in the "Country" dropdown`                |
+| `I see the {element} is empty`                    | Checks that the field has no value, or that the element has no text.                           | `I see the "Full Name" field is empty`                              |
+| `I see the {element} is enabled`                  | Checks that the element can be used (it is not disabled).                                      | `I see the "Log in" button is enabled`                              |
+| `I see the {element} is disabled`                 | Checks that the element is disabled and cannot be used.                                        | `I see the "Log in" button is disabled`                             |
+| `I see the {element} is checked`                  | Checks that the checkbox is ticked, the switch is on or the radio button is selected.          | `I see the "I accept the terms and conditions" checkbox is checked` |
+| `I see the {element} is not checked`              | Checks that the checkbox is not ticked, the switch is off or the radio button is not selected. | `I see the "Subscribe to newsletter" checkbox is not checked`       |
+| `I see {number} item(s) in the {element}`         | Checks how many visible items the list has.                                                    | `I see "3" items in the "Accounts" list`                            |
 
 ### Dialogs
 

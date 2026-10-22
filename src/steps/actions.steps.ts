@@ -91,7 +91,7 @@ step({
   pattern: 'I check the {element}',
   level: 'core',
   description:
-    'Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.',
+    'Ticks the checkbox, turns on the switch or selects the radio button. Nothing changes if it already is.',
   example: 'I check the "I accept the terms and conditions" checkbox',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.check());
@@ -101,7 +101,7 @@ step({
 step({
   pattern: 'I uncheck the {element}',
   level: 'core',
-  description: 'Unticks the checkbox. Nothing changes if it is already unticked.',
+  description: 'Unticks the checkbox or turns off the switch. Nothing changes if it already is.',
   example: 'I uncheck the "Subscribe to newsletter" checkbox',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => el.uncheck());

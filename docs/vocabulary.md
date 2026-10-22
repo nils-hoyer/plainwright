@@ -32,7 +32,7 @@ Element types:
 
 <!-- generated:element-type-words -->
 
-button, link, field, checkbox, radio button, dropdown, option, heading, tab, dialog, menu item, image, section, list, list item, row, cell, message, element.
+button, link, field, checkbox, radio button, switch, dropdown, option, heading, tab, dialog, menu item, image, section, list, list item, row, cell, message, element.
 
 <!-- /generated:element-type-words -->
 
