@@ -10,7 +10,7 @@ import {
   renderStepReference,
   replaceGenerated,
 } from '../src/docs';
-import { getSteps } from '../src/index';
+import { ELEMENT_TYPES, getSteps } from '../src/index';
 
 const root = path.join(__dirname, '..');
 const check = process.argv.includes('--check');
@@ -44,7 +44,10 @@ const targets: Target[] = [
   },
   {
     file: 'docs/vocabulary.md',
-    sections: { 'core-steps': core.map((step) => `- \`${step.example}\``).join('\n') },
+    sections: {
+      'core-steps': core.map((step) => `- \`${step.example}\``).join('\n'),
+      'element-type-words': `${ELEMENT_TYPES.join(', ')}.`,
+    },
   },
   // The starter, Copilot and Claude templates repeat AGENTS.md.
   { file: 'examples/starter/AGENTS.md', content: agentInstructions },
