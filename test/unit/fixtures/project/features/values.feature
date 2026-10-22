@@ -14,3 +14,22 @@ Feature: Values
     * I remember "x" as "later"
     * I fill "{later}" in the "Name" field
     * I open the "Checkout" page
+
+  Scenario: Values used before they are remembered
+    * I fill "{early}" in the "Name" field
+    * I remember "x" as "early"
+    * I open the url "/orders/{coffee.id}"
+    * there is an order called "coffee"
+
+  Scenario: Values remembered in another scenario
+    * I fill "{later}" in the "Name" field
+    * I fill "{coffee.id}" in the "Name" field
+
+  Scenario Outline: Values remembered in each example
+    * I remember "<value>" as "picked"
+    * I fill "{picked}" in the "Name" field
+
+    Examples:
+      | value |
+      | a     |
+      | b     |

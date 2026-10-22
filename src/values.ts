@@ -6,15 +6,20 @@ import { globSync } from 'tinyglobby';
 /**
  * Values written inside quotes as `{name.path}`: `{users.admin.email}` from `data/users.json`,
  * `{env.TEST_PASSWORD}` from the environment or `.env`, `{order.id}` remembered earlier in the
- * test, and the built-in `{unique}` and `{today}`. `\{` writes a literal brace.
+ * test, and the built-in `{unique}`, `{today}` and the other dates. `\{` writes a literal brace.
  */
 const NAME = '[\\p{L}\\p{N}_-]+';
 const REFERENCE = new RegExp(`(\\\\?)\\{(${NAME}(?:\\.${NAME})*)\\}`, 'gu');
 const WHOLE_REFERENCE = new RegExp(`^\\{(${NAME}(?:\\.${NAME})*)\\}$`, 'u');
 const VALID_NAME = new RegExp(`^${NAME}$`, 'u');
 
-/** Names that are not data files or remembered values. */
-const RESERVED = ['env', 'unique', 'today'];
+/** Names that are not data files or remembered values, besides the dates. */
+const RESERVED = ['env', 'unique'];
+
+/** Dates relative to today: `today`, `tomorrow`, `yesterday`, `in-7-days`, `7-days-ago`. */
+const DATE = /^(?:today|tomorrow|yesterday|in-(\d+)-days|(\d+)-days-ago)$/;
+/** `{today.local}`: as the browser writes it; `{today.day}`, `.month`, `.year`: its parts. */
+const DATE_PARTS = ['local', 'day', 'month', 'year'];
 
 type DataFile = { value: unknown; file: string };
 
@@ -22,11 +27,14 @@ type DataFile = { value: unknown; file: string };
 const data = new Map<string, DataFile>();
 const loadedDataFiles = new Set<string>();
 
-/** Values remembered in a test, and its `{unique}`. Keyed by Playwright's TestInfo. */
-type TestValues = { values: Map<string, unknown>; unique?: string };
+/**
+ * Values remembered in a test, and its `{unique}`. Keyed by Playwright's TestInfo. `remembered`
+ * lists the names remembered since the running step started, for the report.
+ */
+type TestValues = { values: Map<string, unknown>; unique?: string; remembered: string[] };
 const testValues = new WeakMap<object, TestValues>();
 /** Used outside a running test, e.g. in unit tests. */
-const outsideTest: TestValues = { values: new Map() };
+const outsideTest: TestValues = { values: new Map(), remembered: [] };
 
 /**
  * Loads the JSON files in a folder as test data. A step refers to a value with
@@ -59,7 +67,7 @@ export function defineData(folder: string, options: { cwd?: string } = {}): stri
       continue;
     }
     const first = name.split('.')[0];
-    if (RESERVED.includes(first)) {
+    if (isReserved(first)) {
       throw new Error(`[plainwright] ${rel}: "${first}" is reserved. Rename the data file.`);
     }
     const existing = data.get(name);
@@ -90,7 +98,15 @@ export function getDataFiles(): { name: string; file: string; value: unknown }[]
 export function remember(name: string, value: unknown) {
   const problem = checkRememberName(name);
   if (problem) throw new Error(`[plainwright] ${problem}`);
-  current().values.set(name, value);
+  const values = current();
+  values.values.set(name, value);
+  values.remembered.push(name);
+}
+
+/** The values remembered since the last call, for the report. */
+export function takeRemembered(): ResolvedReference[] {
+  const { values, remembered } = current();
+  return remembered.splice(0).map((name) => ({ reference: name, shown: show(values.get(name)) }));
 }
 
 /** Why a value cannot be remembered under this name, or null when it can. */
@@ -98,7 +114,7 @@ export function checkRememberName(name: string): string | null {
   if (!VALID_NAME.test(name)) {
     return `"${name}" cannot be remembered: a name may only contain letters, digits, - and _, such as "${suggestName(name)}".`;
   }
-  if (RESERVED.includes(name)) {
+  if (isReserved(name)) {
     return `"${name}" is reserved. Remember the value under another name.`;
   }
   return null;
@@ -132,6 +148,9 @@ export class NumberReference {
   }
 }
 
+/** How the report shows a value from the environment. */
+export const HIDDEN = '(hidden)';
+
 /** One reference that was filled in, for the report. Values from the environment are hidden. */
 export type ResolvedReference = { reference: string; shown: string };
 
@@ -160,9 +179,8 @@ export function referencesIn(text: string): string[] {
 export function checkReference(reference: string, remembered: ReadonlySet<string>): string | null {
   const [root] = reference.split('.');
   if (root === 'env') return reference.includes('.') ? null : 'Write {env.NAME}.';
-  if (root === 'unique' || root === 'today') {
-    return reference === root ? null : `{${root}} has no parts.`;
-  }
+  if (root === 'unique') return reference === root ? null : '{unique} has no parts.';
+  if (dateOffset(root) !== undefined) return datePartProblem(reference);
   if (remembered.has(root)) return null;
   const found = findData(reference);
   if (found) {
@@ -203,15 +221,17 @@ function lookup(reference: string, used: ResolvedReference[], trail: string[]): 
         `[plainwright] The environment variable ${name} is not set. Set it, or add it to the .env file.`,
       );
     }
-    used.push({ reference, shown: '(hidden)' });
+    used.push({ reference, shown: HIDDEN });
     return value;
   }
   const values = current();
   if (root === 'unique' && !rest.length) {
     values.unique ??= uniqueId();
     value = values.unique;
-  } else if (root === 'today' && !rest.length) {
-    value = today();
+  } else if (dateOffset(root) !== undefined) {
+    const problem = datePartProblem(reference);
+    if (problem) throw new Error(`[plainwright] ${problem}`);
+    value = dateValue(dateOffset(root)!, rest[0], dateOptions());
   } else if (values.values.has(root)) {
     value = walk(values.values.get(root), rest, `{${root}}`, reference);
   } else {
@@ -271,7 +291,7 @@ function unknownMessage(reference: string) {
   return (
     `No value named "${root}" for {${reference}}. ` +
     (names.length ? `Known values: ${names.join(', ')}, ` : 'Known values: ') +
-    `{env.NAME}, {unique}, {today}. Add data/${root}.json, or remember a value as "${root}" first. ` +
+    `{env.NAME}, {unique}, {today} and the other dates. Add data/${root}.json, or remember a value as "${root}" first. ` +
     `For literal braces, write \\{${reference}}.`
   );
 }
@@ -284,7 +304,7 @@ function current(): TestValues {
     return outsideTest;
   }
   let values = testValues.get(info);
-  if (!values) testValues.set(info, (values = { values: new Map() }));
+  if (!values) testValues.set(info, (values = { values: new Map(), remembered: [] }));
   return values;
 }
 
@@ -297,8 +317,74 @@ function uniqueId() {
   return Date.now().toString(36).slice(-6) + Math.random().toString(36).slice(2, 6);
 }
 
-function today() {
-  const now = new Date();
+function isReserved(name: string) {
+  return RESERVED.includes(name) || DATE.test(name);
+}
+
+/** Days from today for a date name, `in-7-days` → 7, or undefined for other names. */
+export function dateOffset(name: string): number | undefined {
+  const match = DATE.exec(name);
+  if (!match) return undefined;
+  if (match[1] !== undefined) return Number(match[1]);
+  if (match[2] !== undefined) return -Number(match[2]);
+  return { today: 0, tomorrow: 1, yesterday: -1 }[name];
+}
+
+function datePartProblem(reference: string): string | null {
+  const [root, ...rest] = reference.split('.');
+  if (!rest.length || (rest.length === 1 && DATE_PARTS.includes(rest[0]))) return null;
+  return (
+    `{${reference}} is not a part of a date. A date has ` +
+    `${DATE_PARTS.map((part) => `{${root}.${part}}`).join(', ')}.`
+  );
+}
+
+export type DateOptions = {
+  now?: Date;
+  /** The browser's language, `use.locale`, for `.local`. Default: the system's. */
+  locale?: string;
+  /** `use.timezoneId`, so the date is the one the browser shows. Default: the system's. */
+  timeZone?: string;
+};
+
+/**
+ * A date some days from today: `2026-10-28`, or with a part, `21.10.2026` (`local` in de-DE),
+ * `21` (`day`), `10` (`month`), `2026` (`year`).
+ */
+export function dateValue(
+  offset: number,
+  part?: string,
+  { now = new Date(), locale, timeZone }: DateOptions = {},
+): string {
+  const today = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    })
+      .formatToParts(now)
+      .map(({ type, value }) => [type, Number(value)]),
+  );
+  // Counted in UTC, where every day has 24 hours.
+  const date = new Date(Date.UTC(today.year, today.month - 1, today.day + offset));
   const pad = (n: number) => String(n).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+  const year = String(date.getUTCFullYear());
+  const month = pad(date.getUTCMonth() + 1);
+  const day = pad(date.getUTCDate());
+  if (part === 'local') return new Intl.DateTimeFormat(locale, { timeZone: 'UTC' }).format(date);
+  if (part === 'day') return day;
+  if (part === 'month') return month;
+  if (part === 'year') return year;
+  return `${year}-${month}-${day}`;
+}
+
+/** The project's language and time zone, so dates are written as the browser writes them. */
+function dateOptions(): DateOptions {
+  try {
+    const { locale, timezoneId } = test.info().project.use;
+    return { locale, timeZone: timezoneId };
+  } catch {
+    return {};
+  }
 }

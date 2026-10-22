@@ -56,5 +56,28 @@ Feature: Test data
     * I send a "DELETE" request to "/api/orders/{order.id}"
     * I see the response status "204"
 
+  Scenario: Numbers from a message and from the address
+    * I open the "Orders from the API" page
+    * I fill "Cake" in the "Item" field
+    * I click the "Create order" button
+    * I am on the "Order" page
+    * I remember the first number in the "was created" message as "order"
+    * I delete "/api/orders/{order}" after the test
+    * I remember the last number in the url as "number-in-url"
+    * I see the "Order {number-in-url}" heading
+    * I see the text "Order #{order} was created."
+    * I remember the url as "order-page"
+    * I open the "Orders from the API" page
+    * I open the url "{order-page}"
+    * I see the "Order {order}" heading
+    * I see the text "Item: Cake"
+
+  @german
+  Scenario: Dates as the browser writes them
+    * I open the "Dates" page
+    * I see the text "Today is {today.local}."
+    * I fill "{in-7-days}" in the "Delivery date" field
+    * I see the text "Delivery on {in-7-days.local}"
+
   Scenario: A command prepares data
     * I run the command "node --version"

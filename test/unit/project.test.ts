@@ -178,7 +178,58 @@ describe('values', () => {
 
   it('rejects reserved and invalid names', () => {
     expect(() => values.remember('env', 1)).toThrow('"env" is reserved');
+    for (const date of ['today', 'tomorrow', 'yesterday', 'in-7-days', '30-days-ago']) {
+      expect(values.checkRememberName(date)).toBe(
+        `"${date}" is reserved. Remember the value under another name.`,
+      );
+    }
+    expect(values.checkRememberName('in-a-week')).toBeNull();
     expect(() => values.remember('two words', 1)).toThrow('may only contain');
+  });
+
+  it('lists what a step remembered, for the report', () => {
+    values.takeRemembered();
+    values.remember('order', '10234');
+    values.remember('page', { id: 1 });
+    expect(values.takeRemembered()).toEqual([
+      { reference: 'order', shown: '"10234"' },
+      { reference: 'page', shown: '{"id":1}' },
+    ]);
+    expect(values.takeRemembered()).toEqual([]);
+  });
+
+  it('writes dates from today, also as the browser writes them', () => {
+    // 21 October 2026, 23:30 in Berlin, already the 22nd in Tokyo.
+    const now = new Date('2026-10-21T21:30:00Z');
+    const berlin = { now, timeZone: 'Europe/Berlin' };
+    expect(values.dateValue(0, undefined, berlin)).toBe('2026-10-21');
+    expect(values.dateValue(0, undefined, { now, timeZone: 'Asia/Tokyo' })).toBe('2026-10-22');
+    expect(values.dateValue(1, undefined, berlin)).toBe('2026-10-22');
+    expect(values.dateValue(11, undefined, berlin)).toBe('2026-11-01');
+    expect(values.dateValue(-21, undefined, berlin)).toBe('2026-09-30');
+    expect(values.dateValue(0, 'local', { ...berlin, locale: 'de-DE' })).toBe('21.10.2026');
+    expect(values.dateValue(0, 'local', { ...berlin, locale: 'en-US' })).toBe('10/21/2026');
+    expect(values.dateValue(-20, 'day', berlin)).toBe('01');
+    expect(values.dateValue(-20, 'month', berlin)).toBe('10');
+    expect(values.dateValue(80, 'year', berlin)).toBe('2027');
+    // The last Sunday of October has 25 hours in Berlin.
+    expect(values.dateValue(4, undefined, berlin)).toBe('2026-10-25');
+    expect(values.dateValue(5, undefined, berlin)).toBe('2026-10-26');
+  });
+
+  it('knows the date names and their parts', () => {
+    expect(
+      ['today', 'tomorrow', 'yesterday', 'in-7-days', '30-days-ago', 'in-a-week'].map(
+        values.dateOffset,
+      ),
+    ).toEqual([0, 1, -1, 7, -30, undefined]);
+    expect(values.resolveText('{tomorrow}')).toBe(values.dateValue(1));
+    expect(values.resolveText('{in-7-days.year}')).toBe(values.dateValue(7, 'year'));
+    expect(values.checkReference('7-days-ago.local', new Set())).toBeNull();
+    expect(values.checkReference('today.week', new Set())).toBe(
+      '{today.week} is not a part of a date. A date has {today.local}, {today.day}, {today.month}, {today.year}.',
+    );
+    expect(() => values.resolveText('{tomorrow.week}')).toThrow('{tomorrow.week} is not a part');
   });
 
   it('finds the references in a text', () => {
@@ -201,6 +252,10 @@ describe('lint with project files', () => {
       ),
       '8: The environment variable ANYTHING is not set. Set it, or add it to the .env file, before the tests run.',
       '16: No page named "Checkout". Defined pages: "Login", "Order", "Orders".',
+      '19: {early} is remembered later, in line 20. Remember it before using it.',
+      '21: {coffee} is remembered later, in line 22. Remember it before using it.',
+      '25: {later} is only remembered in another scenario (line 14). Remembered values last for one test: remember it in this scenario, or put it into a file in data/.',
+      '26: {coffee} is only remembered in another scenario (line 22). Remembered values last for one test: remember it in this scenario, or put it into a file in data/.',
     ]);
   });
 });
@@ -221,6 +276,10 @@ describe('catalog', () => {
       'env.NAME',
       'unique',
       'today',
+      'tomorrow',
+      'yesterday',
+      'in-N-days',
+      'N-days-ago',
       'response',
     ]);
   });

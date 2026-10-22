@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Order</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <!-- Served at /orders/<number>: shows the order with that number from /api/orders. -->
+      <p id="created" role="status" hidden></p>
+      <h1 id="title">Order</h1>
+      <p>Item: <span id="item"></span></p>
+    </main>
+    <script>
+      const id = location.pathname.split('/').pop();
+      if (sessionStorage.getItem('created') === id) {
+        sessionStorage.removeItem('created');
+        const created = document.getElementById('created');
+        created.textContent = `Order #${id} was created.`;
+        created.hidden = false;
+      }
+      fetch(`/api/orders/${id}`)
+        .then((response) => response.json())
+        .then((order) => {
+          document.getElementById('title').textContent = `Order ${order.id}`;
+          document.getElementById('item').textContent = order.item;
+        });
+    </script>
+  </body>
+</html>

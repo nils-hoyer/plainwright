@@ -61,9 +61,27 @@ data, e.g. `"test-{unique}@example.com"`. Data files may use these values too.
 | ----------------------- | ---------------------------------------------------------------------- |
 | `{env.TEST_PASSWORD}`   | the environment variable `TEST_PASSWORD`, also from a `.env` file      |
 | `{unique}`              | a short text that differs in every test, the same within one test      |
-| `{today}`               | today's date, e.g. `2026-10-16`                                        |
+| `{today}`               | today's date, e.g. `2026-10-21`                                        |
+| `{tomorrow}`            | tomorrow's date; `{yesterday}` the day before today                    |
+| `{in-7-days}`           | the date 7 days from today, for any number of days                     |
+| `{7-days-ago}`          | the date 7 days before today                                           |
 | `{order}`, `{order.id}` | a value a step remembered earlier in the same test (see below)         |
 | `\{text}`               | the text `{text}` with its braces, when you mean the braces themselves |
+
+Dates are written `2026-10-21`, which is what a date field (`<input type="date">`) takes:
+`I fill "{in-7-days}" in the "Delivery date" field`. To check a date as the page shows it, add a
+part. "Today" is the date where the browser is: in the time zone of `use.timezoneId` in
+`playwright.config.ts` when it is set, so near midnight the test and the browser agree.
+
+| Written         | Is                                                                                                                         |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `{today.local}` | the date as the browser writes it in its language (`use.locale`): `21.10.2026` in German, `10/21/2026` in American English |
+| `{today.day}`   | the day, `21`; with two digits, `05`                                                                                       |
+| `{today.month}` | the month, `10`; with two digits, `03`                                                                                     |
+| `{today.year}`  | the year, `2026`                                                                                                           |
+
+Every date has these parts: `{in-7-days.local}`, `{tomorrow.day}`. The day, month and year are
+for date pickers with a field for each.
 
 ## Remembering values
 
@@ -82,16 +100,50 @@ the number next to it.
 * I see the text "{order-number}"
 ```
 
-| Step                                                     | What it does                                    |
-| -------------------------------------------------------- | ----------------------------------------------- |
-| `I remember "Coffee" as "item"`                          | keeps a value under a name                      |
-| `I remember the text of the "Order number" field as "x"` | keeps the text of an element or a field's value |
+Apps often show a new record's number only inside a sentence, such as "Order #10234 was
+created", or only in the address after saving, `/orders/10234`. Two steps take the number out:
+
+```gherkin
+* I click the "Save" button
+* I am on the "Order" page
+* I remember the first number in the "was created" message as "order"
+* I remember the last number in the url as "order-in-address"
+* I open the url "/orders"
+* I see the text "Order {order}" in the "Recent orders" list
+```
+
+A number is digits, with `.` or `,` between digits as the page writes them: `10234`, `12,50`,
+`1.234,56`. It is kept as text, so `00042` stays `00042`. The step waits until the element, or
+the address, has a number. Before taking the number from the address, check that the browser
+shows the new one, with a [page](pages.md) whose address is `/orders/*` (`I am on the "Order"
+page`): the old address may have a number too, such as `/customers/7/orders/new`.
+
+| Step                                                                   | What it does                                                                                         |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `I remember "Coffee" as "item"`                                        | keeps a value under a name                                                                           |
+| `I remember the text of the "Order number" field as "x"`               | keeps the text of an element or a field's value                                                      |
+| `I remember the first number in the "Confirmation" message as "order"` | keeps the first number in the text of an element, or in a field's value                              |
+| `I remember the last number in the url as "order"`                     | keeps the last number in the path of the address (`/api/v2/orders/17` gives `17`), else in the query |
+| `I remember the url as "order-page"`                                   | keeps the address, `/orders/10234` on your app, the full address on another website                  |
+
+### Values last for one test
+
+Tests run in parallel and in any order, so a value one test remembered is not there in another.
+Data that several tests need goes into a file in `data/`, or into a `Given` keyword that creates
+it in each test (see [below](#data-a-test-creates-first)). `lint` reports a value used before
+a step remembers it, and one that only another scenario remembers:
+
+```
+features/orders.feature:12: error: {order} is remembered later, in line 14. Remember it before using it. (unknown-value)
+features/orders.feature:20: error: {order} is only remembered in another scenario (line 14). Remembered values last for one test: remember it in this scenario, or put it into a file in data/. (unknown-value)
+```
 
 ## What the reviewer sees
 
 The step stays as written in the report, `I fill "{users.admin.email}" in the "Email" field`,
-and a line below it shows the value used: `{users.admin.email} = "admin@example.com"`. Values
-from the environment show as `(hidden)`.
+and a line below it shows the value used: `{users.admin.email} = "admin@example.com"`. A step
+that remembers a value shows it the same way: `remembered {order} = "10234"`. Values from the
+environment show as `(hidden)`, and so does a value remembered from one.
 
 `lint` reports names that do not exist, with what does: `No value {users.admin.phone}:
 {users.admin} has no "phone". It has "email", "name".`

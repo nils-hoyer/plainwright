@@ -6,23 +6,24 @@ syntax and in how elements are named.
 
 ## Concepts
 
-| Robot Framework                           | Plainwright                                                      |
-| ----------------------------------------- | ---------------------------------------------------------------- |
-| Test suite (`.robot` file)                | Feature file (`.feature`)                                        |
-| Test case                                 | `Scenario:`                                                      |
-| `Suite Setup` / `Test Setup`              | `Background:` (steps before every scenario)                      |
-| `Test Teardown`                           | `I delete "…" after the test` in a keyword; else fixtures        |
-| Library keyword (`Click Button`)          | Built-in step (`I click the "…" button`)                         |
-| User keyword (`*** Keywords ***`)         | Keyword: `Scenario Outline:` in `keywords/*.feature`             |
-| Keyword argument `${username}`            | Keyword parameter `"<username>"`                                 |
-| Python keyword library                    | TypeScript step with `defineStep()`                              |
-| Locator `id=username`, `css=…`, `xpath=…` | Visible name: `the "Username" field`; alias for unnamed elements |
-| Test template / data-driven tests         | `Scenario Outline:` with `Examples:`                             |
-| Tags, `--include smoke`                   | Tags, `npm test -- --grep @smoke`                                |
-| `log.html` / `report.html`                | Playwright HTML report with traces                               |
-| Variables `${VAR}`, variable files        | `data/*.json` and `.env`, written `"{users.admin.email}"`        |
-| `Set Test Variable`                       | `I remember "…" as "…"`, written `"{name}"` later in the test    |
-| `IF` / `FOR`                              | Not supported on purpose: tests stay linear and readable         |
+| Robot Framework                             | Plainwright                                                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Test suite (`.robot` file)                  | Feature file (`.feature`)                                                                                                     |
+| Test case                                   | `Scenario:`                                                                                                                   |
+| `Suite Setup` / `Test Setup`                | `Background:` (steps before every scenario)                                                                                   |
+| `Test Teardown`                             | `I delete "…" after the test` in a keyword; else fixtures                                                                     |
+| Library keyword (`Click Button`)            | Built-in step (`I click the "…" button`)                                                                                      |
+| User keyword (`*** Keywords ***`)           | Keyword: `Scenario Outline:` in `keywords/*.feature`                                                                          |
+| Keyword argument `${username}`              | Keyword parameter `"<username>"`                                                                                              |
+| Python keyword library                      | TypeScript step with `defineStep()`                                                                                           |
+| Locator `id=username`, `css=…`, `xpath=…`   | Visible name: `the "Username" field`; alias for unnamed elements                                                              |
+| Test template / data-driven tests           | `Scenario Outline:` with `Examples:`                                                                                          |
+| Tags, `--include smoke`                     | Tags, `npm test -- --grep @smoke`                                                                                             |
+| `log.html` / `report.html`                  | Playwright HTML report with traces                                                                                            |
+| Variables `${VAR}`, variable files          | `data/*.json` and `.env`, written `"{users.admin.email}"`                                                                     |
+| `Set Test Variable`                         | `I remember "…" as "…"`, written `"{name}"` later in the test                                                                 |
+| `Set Suite Variable`, `Set Global Variable` | `data/*.json`, or a `Given` keyword that creates the data in each test: values last for one test, since tests run in parallel |
+| `IF` / `FOR`                                | Not supported on purpose: tests stay linear and readable                                                                      |
 
 ## Library keywords
 
