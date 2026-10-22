@@ -1,5 +1,6 @@
 import type { TestType } from '@playwright/test';
 import { createBdd, test as bddTest } from 'playwright-bdd';
+import { keptSession } from './session';
 import { World } from './world';
 
 export type KeywordsOptions = {
@@ -29,6 +30,10 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
       { scope: 'worker', auto: true, box: true },
     ],
     exactNames: [true, { option: true }],
+    // A scenario starts with the session that a @setup scenario kept (src/session.ts).
+    storageState: async ({ storageState }, use, testInfo) => {
+      await use(keptSession(testInfo.tags) ?? storageState);
+    },
     world: async ({ page, baseURL, exactNames }, use) => {
       const world = new World(page, { baseURL, exactNames });
       await use(world);
