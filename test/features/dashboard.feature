@@ -12,9 +12,7 @@ Feature: Dashboard
 
   Scenario: An action that is not ready yet is disabled
     * I see the "Coming Soon" button is disabled
-    * I see the attribute "disabled" on the "Coming Soon" button
     * I see the "Transfer Money" button is enabled
-    * I do not see the attribute "disabled" on the "Transfer Money" button
 
   @logged-out
   Scenario: Nobody is signed in without the saved session
@@ -26,5 +24,4 @@ Feature: Dashboard
 
   Scenario: Links to the demo pages
     * I see the "Forms Demo" link
-    * I see the attribute "href" with the value "forms.html" on the "Forms Demo" link
-    * I see the attribute "href" containing "forms" on the "Forms Demo" link
+    * I see the "Forms Demo" link leads to "/forms.html"

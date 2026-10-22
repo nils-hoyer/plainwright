@@ -11,9 +11,15 @@ Feature: Advanced checks
   Scenario: An empty element
     * I see the "Empty box" section is empty
 
-  Scenario: CSS classes
-    * I see the class "bar" on the "Classed element" element
-    * I do not see the class "missing" on the "Classed element" element
+  Scenario: Open and closed
+    * I see the "Shipping" button is collapsed
+    * I click the "Shipping" button
+    * I see the "Shipping" button is expanded
+    * I see the text "Ships in 2 days."
+    * I see the "Returns" element is collapsed
+    * I click the "Returns" element
+    * I see the "Returns" element is expanded
+    * I see the text "Free returns within 30 days."
 
   Scenario: Count list items
     * I see "3" items in the "Fruits" list

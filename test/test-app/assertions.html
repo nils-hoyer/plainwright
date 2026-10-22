@@ -19,8 +19,22 @@
       </section>
       <section aria-label="Empty box" data-testid="div-empty"></section>
 
-      <!-- CSS classes -->
-      <div data-testid="classed-element" class="foo bar baz">Classed element</div>
+      <!-- Open and closed: a button that shows what it controls, and a details element. -->
+      <section aria-label="Delivery">
+        <button type="button" aria-expanded="false" aria-controls="shipping">Shipping</button>
+        <p id="shipping" hidden>Ships in 2 days.</p>
+        <details>
+          <summary>Returns</summary>
+          <p>Free returns within 30 days.</p>
+        </details>
+      </section>
+      <script>
+        document.querySelector('[aria-controls="shipping"]').addEventListener('click', (event) => {
+          const open = event.currentTarget.getAttribute('aria-expanded') !== 'true';
+          event.currentTarget.setAttribute('aria-expanded', String(open));
+          document.getElementById('shipping').hidden = !open;
+        });
+      </script>
 
       <!-- Counting list items -->
       <ul aria-label="Fruits">

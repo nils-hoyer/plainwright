@@ -51,7 +51,7 @@ step that takes an element accepts this, so no step needs its own "in the row" v
 after reading the [reviewer guide](reading-tests.md).
 
 **Advanced** steps cover special cases: typing key by key, touch, frames, tabs,
-cookies, storage, screenshots, downloads, HTML attributes and classes. They follow the same
+cookies, storage, screenshots and downloads. They follow the same
 rules. `lint` lists them as info, so a reviewer can spot them.
 
 Current core steps:
