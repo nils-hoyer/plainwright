@@ -22,6 +22,17 @@ Feature: Element types
     * I see the value "Germany" in the "Country" field
     * I do not see the "Germany" option
 
+  Scenario: Switches turn on and off
+    * I open the "Widgets" page
+    * I see the "Dark mode" switch is not checked
+    * I check the "Dark mode" switch
+    * I see the "Dark mode" switch is checked
+    * I uncheck the "Dark mode" switch
+    * I see the "Dark mode" switch is not checked
+    * I see the "Notifications" switch is checked
+    * I uncheck the "Notifications" switch
+    * I see the "Notifications" switch is not checked
+
   Scenario: An SVG with role img is an image
     * I open the "Widgets" page
     * I see the "Company logo" image
