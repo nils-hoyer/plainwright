@@ -101,10 +101,10 @@ element. The name is the button's text, the field's label, the link's text. If y
 what the name is, `npm run inspect -- "/login"` lists every element of a page by the names
 steps use.
 
-Names must match exactly, with the same capitals. Rows, list items and messages are the
-exception: they are found by text they contain, because their full text is long. To accept
-part of a name and any capitals everywhere, set `exactNames: false` (see
-[setup](setup.md#options)).
+Names must match exactly, with the same capitals, so a step means the same in every project.
+Rows, list items and messages are the exception: they are found by text they contain, because
+their full text is long. A name with a part that changes, such as the counter in "Cart (3)",
+gets an alias (see [pages](pages.md#names-that-change)).
 
 <!-- generated:element-types -->
 

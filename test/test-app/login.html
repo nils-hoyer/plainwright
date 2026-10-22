@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -45,14 +45,7 @@
 
         <p class="error" data-testid="error-message" role="alert" hidden></p>
 
-        <button
-          id="btn-submit"
-          data-testid="btn-submit"
-          type="submit"
-          disabled
-        >
-          Log in
-        </button>
+        <button id="btn-submit" data-testid="btn-submit" type="submit" disabled>Log in</button>
       </form>
 
       <a href="#" data-testid="link-forgot-password">Forgot password?</a>
@@ -105,7 +98,7 @@
       });
 
       // Credentials store (demo only – never do this in production!)
-      const USERS = { '1234567890': 'password123', '0987654321': 'admin123' };
+      const USERS = { 1234567890: 'password123', '0987654321': 'admin123' };
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();

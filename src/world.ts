@@ -13,8 +13,6 @@ import { remember } from './values';
 
 export type WorldOptions = {
   baseURL?: string;
-  /** Match element names exactly (default) or as case-insensitive substrings. */
-  exactNames: boolean;
 };
 
 export type DialogRecord = { type: string; message: string };
@@ -30,7 +28,6 @@ type DialogAction = { accept: boolean; promptText?: string };
  */
 export class World {
   readonly baseURL?: string;
-  readonly exactNames: boolean;
   /** Every dialog shown during the scenario, in order. */
   readonly dialogs: DialogRecord[] = [];
   /** The file from the last "I download the file with the ..." step. */
@@ -46,10 +43,9 @@ export class World {
   #onDialog = (dialog: Dialog) => this.#handleDialog(dialog);
   #afterTest: { title: string; action: () => Promise<void> }[] = [];
 
-  constructor(page: Page, options: WorldOptions) {
+  constructor(page: Page, options: WorldOptions = {}) {
     this.#page = page;
     this.baseURL = options.baseURL;
-    this.exactNames = options.exactNames;
     this.#context = page.context();
     // We record every dialog and apply the action from "I accept the next dialog" /
     // "I dismiss the next dialog". Unannounced dialogs are answered the way Playwright does.
@@ -94,10 +90,7 @@ export class World {
 
   /** Locator for an element named in a step, honouring aliases on the current page. */
   element(ref: ElementRef): Locator {
-    return locate(this.scope, ref, {
-      exact: this.exactNames,
-      aliases: this.#currentPage?.elements,
-    });
+    return locate(this.scope, ref, { aliases: this.#currentPage?.elements });
   }
 
   /**

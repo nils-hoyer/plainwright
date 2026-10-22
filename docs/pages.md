@@ -88,6 +88,20 @@ no alias: `the "Delete" button in the "Order 1001" row`.
 * I click the "Settings" button
 ```
 
+### Names that change
+
+A name with a part that changes, such as the counter in a "Cart (3)" button, cannot be written
+in a test that should pass with any count. Its alias finds the element by the start of its name,
+with a Playwright selector: `role=button[name=/^Cart/]` is a button whose name starts with
+"Cart". Tests then write `the "Cart" button`, and `I see the text "Cart (3)" in the "Cart"
+button` checks the count.
+
+```json
+"elements": {
+  "Cart": { "type": "button", "selector": "role=button[name=/^Cart/]" }
+}
+```
+
 ### The current page
 
 An alias applies while its page is the current page. `I open the "…" page` and
