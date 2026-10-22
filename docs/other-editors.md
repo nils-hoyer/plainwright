@@ -4,8 +4,8 @@ Editors find Plainwright's steps through a stub file: a plain JavaScript file wi
 `Given('pattern', () => {})` line per step, which `plainwright stubs` writes (see
 [why a stub file](ide-support.md#why-a-stub-file)). Any editor that reads Cucumber step
 definitions can use it, so the setup is the same everywhere: write the stub file, then point the
-editor at it. In a project set up with `init`, `npm run stubs` writes it to
-`.vscode/plainwright.steps.js`; run it again after adding keywords or steps in TypeScript. VS Code
+editor at it. In a project set up with `init`, the file is `.vscode/plainwright.steps.js`, and
+`npm test` and `npm run lint` update it after you add keywords or steps in TypeScript. VS Code
 is described in [editor support](ide-support.md). The editors on this page have not been tried
 yet; please [report problems](https://github.com/nils-hoyer/plainwright/issues).
 

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { refreshStubs, renderStubs, STUBS_FILE } from '../../src/stubs';
 import {
   chooseAssistant,
   detectPackageManager,
@@ -66,6 +67,8 @@ describe('init in an empty folder', () => {
     const pkg = JSON.parse(read(dir, 'package.json'));
     expect(pkg.private).toBe(true);
     expect(pkg.scripts.test).toBe('plainwright test');
+    // catalog is for AI assistants, which call npx; test and lint update the editor's step list.
+    expect(Object.keys(pkg.scripts)).toEqual(['test', 'report', 'lint', 'inspect']);
     // Without the app, the first test checks the address.
     expect(read(dir, 'features/example.feature')).toContain('* I am on the "Start" page');
     expect(read(dir, 'AGENTS.md')).toMatch(/^# Writing browser tests with Plainwright/);
@@ -193,5 +196,22 @@ describe('init helpers', () => {
     expect(detectPackageManager(folder({ 'yarn.lock': '' }))).toBe('yarn');
     expect(detectPackageManager(folder({ 'bun.lock': '' }))).toBe('bun');
     expect(detectPackageManager(folder({ 'package-lock.json': '' }))).toBe('npm');
+  });
+});
+
+describe("the editor's step list", () => {
+  it('is updated by test and lint when it exists or the VS Code settings name it', () => {
+    const settings = JSON.stringify({ 'cucumber.glue': [STUBS_FILE] });
+    const cloned = folder({ '.vscode/settings.json': settings });
+    refreshStubs(cloned);
+    expect(read(cloned, STUBS_FILE)).toBe(renderStubs());
+
+    const outdated = folder({ [STUBS_FILE]: '// old' });
+    refreshStubs(outdated);
+    expect(read(outdated, STUBS_FILE)).toBe(renderStubs());
+
+    const without = folder({ '.vscode/settings.json': '{}' });
+    refreshStubs(without);
+    expect(fs.existsSync(path.join(without, STUBS_FILE))).toBe(false);
   });
 });

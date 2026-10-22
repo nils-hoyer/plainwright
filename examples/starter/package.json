@@ -8,9 +8,7 @@
     "report": "playwright show-report",
     "app": "node app/server.mjs",
     "lint": "plainwright lint --features 'features/**/*.feature' --quiet",
-    "catalog": "plainwright catalog --out steps.json",
-    "inspect": "plainwright inspect",
-    "stubs": "plainwright stubs --out .vscode/plainwright.steps.js"
+    "inspect": "plainwright inspect"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
