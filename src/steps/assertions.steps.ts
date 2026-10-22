@@ -158,7 +158,8 @@ step({
 step({
   pattern: 'I see the {element} is checked',
   level: 'core',
-  description: 'Checks that the checkbox is ticked or the radio button is selected.',
+  description:
+    'Checks that the checkbox is ticked, the switch is on or the radio button is selected.',
   example: 'I see the "I accept the terms and conditions" checkbox is checked',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => expect(el).toBeChecked());
@@ -168,7 +169,8 @@ step({
 step({
   pattern: 'I see the {element} is not checked',
   level: 'core',
-  description: 'Checks that the checkbox is not ticked or the radio button is not selected.',
+  description:
+    'Checks that the checkbox is not ticked, the switch is off or the radio button is not selected.',
   example: 'I see the "Subscribe to newsletter" checkbox is not checked',
   fn: async ({ world }, element: ElementRef) => {
     await world.withElement(element, (el) => expect(el).not.toBeChecked());

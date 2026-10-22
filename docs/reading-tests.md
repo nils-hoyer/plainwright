@@ -78,6 +78,7 @@ can read and change.
 | `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it                      |
 | `the "…" checkbox`     | a checkbox with this label                                                                           |
 | `the "…" radio button` | a radio button with this label                                                                       |
+| `the "…" switch`       | a switch that turns something on or off, with this label                                             |
 | `the "…" dropdown`     | a dropdown (select box) with this label                                                              |
 | `the "…" option`       | an option to choose in an open list, such as a custom dropdown or search suggestions, with this text |
 | `the "…" heading`      | a heading with this text                                                                             |
