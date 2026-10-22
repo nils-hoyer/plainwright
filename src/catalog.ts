@@ -90,7 +90,7 @@ export const RULES = [
   'When a name repeats, name the element it is in: the "Delete" button in the "Order 1001" row.',
   'One phrase per action. No synonyms.',
   'Every step does exactly what it says.',
-  'Checks start with "I see" or "I do not see" and wait automatically. Avoid fixed waits.',
+  'Checks start with "I see" or "I do not see" and wait automatically. There are no fixed waits.',
   'Given/When/Then are optional; * works everywhere.',
   'A value from a data file, the environment or remembered earlier is written {name.path} inside the quotes: "{users.admin.email}". \\{ is a literal brace.',
 ];

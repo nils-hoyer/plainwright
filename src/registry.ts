@@ -12,6 +12,7 @@ import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
 import { ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
+import { removedMessage } from './removed';
 import { levenshtein } from './similar';
 import {
   HIDDEN,
@@ -324,6 +325,8 @@ export function findStep(text: string): StepMatch {
   const matches = findSteps(text);
   if (matches.length === 1) return matches[0];
   if (matches.length === 0) {
+    const removed = removedMessage(text);
+    if (removed) throw new Error(removed);
     const suggestions = suggestSteps(text);
     throw new Error(
       `No step matches "${text}".` +

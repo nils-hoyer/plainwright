@@ -254,7 +254,7 @@ describe('suggestions', () => {
   });
 
   it('use the example when the values do not fit', () => {
-    const text = 'I wiat "a few" seconds';
+    const text = 'I see "a few" itmes in the "Cart" list';
     expect(suggestionFor(suggestSteps(text)[0], text)).toBe(suggestSteps(text)[0].example);
   });
 });

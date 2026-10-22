@@ -12,8 +12,8 @@ Feature: Account
       | username   | password |
       | 1234567890 | secret   |
 
-  Scenario Outline: I wait "<seconds>" seconds for the report
-    * I wait "<seconds>" seconds
+  Scenario Outline: I see "<count>" orders
+    * I see "<count>" items in the "Orders" list
 
   Scenario Outline: I am logged in
     * I log in as "1234567890" with password "secret"
