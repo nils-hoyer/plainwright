@@ -1,6 +1,10 @@
 import path from 'node:path';
 import { defineConfig as definePlaywrightConfig, devices } from '@playwright/test';
-import type { PlaywrightTestConfig, ReporterDescription } from '@playwright/test';
+import type {
+  PlaywrightTestConfig,
+  PlaywrightTestProject,
+  ReporterDescription,
+} from '@playwright/test';
 import {
   cucumberReporter as bddCucumberReporter,
   defineBddConfig,
@@ -9,6 +13,7 @@ import {
 import { aiFixPromptTemplate } from './ai';
 import type { KeywordsOptions } from './fixtures';
 import { steps as builtInSteps } from './index';
+import { SETUP_TAG } from './session';
 
 export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
   /** The address of your app. `"/login"` in a test means `<baseURL>/login`. */
@@ -19,6 +24,11 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
   steps?: string | string[];
   /** More playwright-bdd options, see https://vitalets.github.io/playwright-bdd/#/configuration/options. */
   bdd?: Omit<BDDInputConfig, 'features' | 'steps'>;
+  /**
+   * Runs the scenarios tagged `@setup` once, before all others, in a project named `setup`.
+   * One that ends with `I keep the session` logs in for the other scenarios. Default: `false`.
+   */
+  setup?: boolean;
 };
 
 /**
@@ -36,7 +46,7 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
 export function defineConfig(
   config: PlainwrightConfig = {},
 ): PlaywrightTestConfig<KeywordsOptions> {
-  const { baseURL, features, steps, bdd, use, reporter, ...playwright } = config;
+  const { baseURL, features, steps, bdd, use, reporter, setup, projects, ...playwright } = config;
   const testDir = defineBddConfig({
     aiFix: { promptAttachment: true, promptTemplate: aiFixPromptTemplate },
     ...bdd,
@@ -48,12 +58,15 @@ export function defineConfig(
     // The report opens by itself when a test fails (not in CI). Its "Fix with AI" attachment
     // asks to fix the scenario; Playwright's own "Copy prompt" would ask for code.
     reporter: reporter ? withCucumberFix(reporter) : [['list'], ['html', { noCopyPrompt: true }]],
-    projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     // Screenshots to compare against are stored next to the feature files, so they can be
     // committed: features/login.feature.spec.js-snapshots/. Playwright's default is next to
     // the generated tests, a folder that is not committed.
     snapshotDir: bdd?.featuresRoot ?? '.',
     ...playwright,
+    projects: withSetup(
+      setup,
+      projects ?? [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+    ),
     use: {
       // A click or fill that finds nothing fails after 10 s and lists what the page offers.
       actionTimeout: 10_000,
@@ -86,4 +99,27 @@ function withCucumberFix(reporter: string | ReporterDescription[]): string | Rep
   return reporter.map((entry) =>
     entry[0] === BDD_CUCUMBER_REPORTER ? [CUCUMBER_REPORTER, entry[1]] : entry,
   );
+}
+
+/**
+ * With `setup: true`, a project that runs the `@setup` scenarios, in the browser of the first
+ * project, and every project after it without them.
+ */
+function withSetup<T>(setup: boolean | undefined, projects: PlaywrightTestProject<T>[]) {
+  if (!setup) return projects;
+  if (projects.some((project) => project.name === 'setup')) {
+    throw new Error(
+      '[plainwright] setup: true adds a project named "setup", and the configuration has one ' +
+        'already. Rename yours, or remove setup: true and run your own.',
+    );
+  }
+  const tag = new RegExp(`${SETUP_TAG}(?![\\w-])`);
+  return [
+    { name: 'setup', grep: tag, use: projects[0]?.use },
+    ...projects.map((project) => ({
+      ...project,
+      dependencies: [...(project.dependencies ?? []), 'setup'],
+      grepInvert: [...[project.grepInvert ?? []].flat(), tag],
+    })),
+  ];
 }
