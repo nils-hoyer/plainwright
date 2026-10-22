@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dates</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main>
+      <!-- Dates as the browser writes them, in its language (use.locale). -->
+      <h1>Dates</h1>
+      <p>Today is <span id="today"></span>.</p>
+      <label for="delivery">Delivery date</label>
+      <input id="delivery" type="date" />
+      <p id="chosen"></p>
+    </main>
+    <script>
+      document.getElementById('today').textContent = new Date().toLocaleDateString();
+      const delivery = document.getElementById('delivery');
+      delivery.addEventListener('input', () => {
+        // The field's date is midnight in UTC; written in UTC, it stays the same day.
+        document.getElementById('chosen').textContent =
+          `Delivery on ${delivery.valueAsDate.toLocaleDateString(undefined, { timeZone: 'UTC' })}`;
+      });
+    </script>
+  </body>
+</html>

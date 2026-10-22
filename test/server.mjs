@@ -51,7 +51,9 @@ createServer((request, response) => {
     );
     return;
   }
-  const file = path.join(root, path.normalize(decodeURIComponent(pathname)).replace(/^([/\\])+/, ''));
+  // An order's page has its number in the address, as in many apps: /orders/1001.
+  const page = /^\/orders\/\d+$/.test(pathname) ? '/order.html' : pathname;
+  const file = path.join(root, path.normalize(decodeURIComponent(page)).replace(/^([/\\])+/, ''));
   const target = pathname.endsWith('/') ? path.join(file, 'index.html') : file;
   if (!target.startsWith(root) || !isFile(target)) {
     response.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');

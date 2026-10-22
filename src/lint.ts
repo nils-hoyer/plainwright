@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { featureSteps, parseGherkin } from './gherkin';
+import { FeatureStep, featureSteps, parseGherkin, scenarioSteps } from './gherkin';
 import { ElementRef } from './elements';
 import { checkKeywords, fillPlaceholders, getKeywords, keywordOf, sameWording } from './keywords';
 import { appPagesFile, getPageDefinitions, isUrlPattern } from './pages';
@@ -74,16 +74,18 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
     withoutColliding(findSteps(text, tags), colliding);
   for (const absolute of files) {
     const file = path.relative(cwd, absolute) || absolute;
-    let steps;
+    let steps: FeatureStep[];
+    let scenarios: FeatureStep[][];
     try {
-      steps = featureSteps(parseGherkin(fs.readFileSync(absolute, 'utf8'), file), file);
+      const document = parseGherkin(fs.readFileSync(absolute, 'utf8'), file);
+      steps = featureSteps(document, file);
+      scenarios = scenarioSteps(document, file);
     } catch (error) {
       messages.push(...fromLocatedErrors(String((error as Error).message), 'syntax', file));
       continue;
     }
-    // Names that steps in this file remember, also inside keywords, for {name} references.
-    const remembered = new Set(
-      steps.flatMap(({ text, tags }) => rememberedNames(find, text, tags)),
+    const remembered = rememberedInOrder(scenarios, (step) =>
+      rememberedNames(find, step.text, step.tags),
     );
     for (const { text, line, tags } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
@@ -176,9 +178,10 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           );
         }
       }
+      const order = remembered.of({ text, line, tags });
       for (const reference of new Set(valueTexts(args).flatMap(referencesIn))) {
-        const problem = checkReference(reference, remembered);
-        if (problem) add('error', 'unknown-value', problem);
+        const problem = checkReference(reference, order.before);
+        if (problem) add('error', 'unknown-value', order.explain(reference) ?? problem);
         // CI often sets secrets only for the test run, so this is a warning.
         const variable = /^env\.(.+)$/.exec(reference)?.[1];
         if (variable && process.env[variable] === undefined) {
@@ -314,6 +317,56 @@ function rememberedNames(
   return keyword.steps.flatMap((sub) =>
     rememberedNames(find, fillPlaceholders(sub.text, values), undefined, depth + 1),
   );
+}
+
+/**
+ * For each step, the names remembered before it in its scenario, also inside keywords, and why
+ * a name is not among them: remembered later, or only in another scenario. Values last for one
+ * test, so a name remembered anywhere else is not there when the step runs.
+ */
+function rememberedInOrder(scenarios: FeatureStep[][], namesOf: (step: FeatureStep) => string[]) {
+  const key = ({ line, text, tags }: Pick<FeatureStep, 'line' | 'text' | 'tags'>) =>
+    `${line}\u0000${text}\u0000${tags.join(' ')}`;
+  /** The first line that remembers a name, in the whole file. */
+  const anywhere = new Map<string, number>();
+  const orders = new Map<string, { before: Set<string>; later: Map<string, number> }>();
+  for (const scenario of scenarios) {
+    const names = scenario.map(namesOf);
+    scenario.forEach((step, i) => {
+      for (const name of names[i]) if (!anywhere.has(name)) anywhere.set(name, step.line);
+      // A Background step runs in every scenario; it is checked in the first.
+      if (orders.has(key(step))) return;
+      const later = new Map<string, number>();
+      for (let j = scenario.length - 1; j >= i; j--) {
+        for (const name of names[j]) later.set(name, scenario[j].line);
+      }
+      orders.set(key(step), { before: new Set(names.slice(0, i).flat()), later });
+    });
+  }
+  return {
+    of(step: Pick<FeatureStep, 'line' | 'text' | 'tags'>) {
+      const { before, later } = orders.get(key(step)) ?? {
+        before: new Set<string>(),
+        later: new Map(),
+      };
+      return {
+        before: before as ReadonlySet<string>,
+        explain(reference: string): string | undefined {
+          const [name] = reference.split('.');
+          if (later.has(name)) {
+            return `{${name}} is remembered later, in line ${later.get(name)}. Remember it before using it.`;
+          }
+          if (anywhere.has(name)) {
+            return (
+              `{${name}} is only remembered in another scenario (line ${anywhere.get(name)}). ` +
+              'Remembered values last for one test: remember it in this scenario, or put it into a file in data/.'
+            );
+          }
+          return undefined;
+        },
+      };
+    },
+  };
 }
 
 /** The quoted values of a step as written: texts, element names and numbers. */
