@@ -28,9 +28,15 @@ click, hover over, focus on, fill … in, clear, check, uncheck, select … in, 
 with, drag … to, tap, scroll, switch to, open, go back, reload, accept, dismiss, take a
 screenshot.
 
-Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
-menu item, image, section, list, list item, row, cell, message, element. See the
-[writing tests](writing-tests.md#elements).
+Element types:
+
+<!-- generated:element-type-words -->
+
+button, link, field, checkbox, radio button, dropdown, option, heading, tab, dialog, menu item, image, section, list, list item, row, cell, message, element.
+
+<!-- /generated:element-type-words -->
+
+See [writing tests](writing-tests.md#elements).
 
 An element can be named inside another one: `the "Delete" button in the "Order 1001" row`. Every
 step that takes an element accepts this, so no step needs its own "in the row" variant.
