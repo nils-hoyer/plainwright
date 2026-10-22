@@ -153,6 +153,16 @@ environment show as `(hidden)`, and so does a value remembered from one.
 Paths are relative to the project folder: `I upload the file "files/invoice.pdf" with the
 "Upload" button` uses `files/invoice.pdf` in your project.
 
+A file the app offers for download can go back in, for an export that is imported again. It keeps
+the name the app gave it.
+
+```gherkin
+* I download the file with the "Export" button
+* I open the "Import" page
+* I upload the downloaded file with the "Choose file" button
+* I see the text "orders.csv" in the "Chosen file" section
+```
+
 ## Data a test creates first
 
 Some tests need data that does not exist yet: a new order, an account in a certain state. Write

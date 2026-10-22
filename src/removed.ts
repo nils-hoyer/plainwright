@@ -27,6 +27,8 @@ const ATTRIBUTE_VALUE =
   'For a link: I see the "…" link leads to "/…". For a menu or an accordion: I see the "…" button is expanded. For a check no step has, write a step in TypeScript (docs/writing-steps.md).';
 const CLASS =
   'A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".';
+const SAVE_DOWNLOAD =
+  'To import the file again: I upload the downloaded file with the "Import" button. To check it: I see the text "…" in the downloaded file. Steps no longer write files at a path of their own.';
 const PAGE_LOAD =
   'Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.';
 
@@ -102,6 +104,7 @@ export const REMOVED_STEPS: readonly RemovedStep[] = [
     removedIn: '0.3.0',
     instead: CLASS,
   },
+  { pattern: 'I save the downloaded file to {string}', removedIn: '0.3.0', instead: SAVE_DOWNLOAD },
 ];
 
 const expressions = new Map<RemovedStep, CucumberExpression>();
