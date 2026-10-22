@@ -158,11 +158,7 @@ For special cases. `lint` lists where they are used.
 
 | Step                                            | What it does                                                              | Example                                                |
 | ----------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `I wait {number} second(s)`                     | Pauses the test for this many seconds.                                    | `I wait "2" seconds`                                   |
-| `I wait {number} millisecond(s)`                | Pauses the test for this many milliseconds.                               | `I wait "500" milliseconds`                            |
 | `I see the {element} within {number} second(s)` | Checks that the element becomes visible, waiting up to this many seconds. | `I see the "Report ready" heading within "30" seconds` |
-| `I wait for the page to load`                   | Waits until the browser reports that the page and its images have loaded. | `I wait for the page to load`                          |
-| `I wait for network idle`                       | Waits until the page has made no network requests for half a second.      | `I wait for network idle`                              |
 
 ### Cookies and storage
 
@@ -213,3 +209,14 @@ For special cases. `lint` lists where they are used.
 | `I see the response status {number}`                        | Checks the status code of the answer to the last request, e.g. "200" or "404".                                                | `I see the response status "201"`                                          |
 | `I see the response field {string} with the value {string}` | Checks a field in the answer to the last request; "items.0.name" is the name of the first item.                               | `I see the response field "status" with the value "paid"`                  |
 | `I run the command {string}`                                | Runs the command in the project folder, e.g. a script that fills the database, and fails when the command fails.              | `I run the command "npm run db:seed"`                                      |
+
+## Removed steps
+
+Steps a release removed, with what to write instead. `lint` says the same where one is still used.
+
+| Step                             | Removed in | Instead                                                                                                                                                         |
+| -------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `I wait {number} second(s)`      | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
+| `I wait {number} millisecond(s)` | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
+| `I wait for the page to load`    | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |
+| `I wait for network idle`        | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |

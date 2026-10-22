@@ -56,7 +56,7 @@ npx plainwright lint --features "features/**/*.feature"
 
 | Rule                     | Severity | Reports                                                                                                   |
 | ------------------------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| `undefined-step`         | error    | A step that matches no step, with the closest existing one.                                               |
+| `undefined-step`         | error    | A step that matches no step, with the closest existing one, or a removed step, with what replaces it.     |
 | `ambiguous-step`         | error    | A step that matches several steps.                                                                        |
 | `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                             |
 | `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which can only be checked.         |
@@ -68,7 +68,7 @@ npx plainwright lint --features "features/**/*.feature"
 | `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                             |
 | `syntax`                 | error    | A feature file Gherkin cannot read.                                                                       |
 | `step-example`           | error    | A step definition whose `example` does not match it, or also matches another step.                        |
-| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                                                    |
+| `discouraged-step`       | warning  | A step of your project marked `discouraged`, with its better alternative.                                 |
 | `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [steps in TypeScript](writing-steps.md#parameter-types).  |
 | `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                                                  |
 

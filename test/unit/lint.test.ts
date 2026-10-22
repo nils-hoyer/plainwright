@@ -17,8 +17,7 @@ describe('lint', () => {
       `${file}:5: error: "#submit" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
       `${file}:6: error: Unknown step "I clik the "Log in" button". Did you mean "I click the "Log in" button"? (undefined-step)`,
       `${file}:7: error: "[data-testid='username']" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
-      `${file}:8: warning: Fixed waits slow tests down and still break on slow days. Check for what the user waits for instead, e.g. I see the text "...". (discouraged-step)`,
-      `${file}:8: info: "I wait {number} second(s)" is an advanced step. (advanced-step)`,
+      `${file}:8: error: "I wait "2" seconds" was removed in 0.3.0. Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. (undefined-step)`,
       `${file}:9: info: "I focus on the {element}" is an advanced step. (advanced-step)`,
       `${file}:10: error: ".order-row" looks like a selector. Name the element by what the user sees, or add an alias in the page's file in pages/. (selector)`,
     ]);
@@ -44,7 +43,7 @@ describe('lint', () => {
   });
 
   it('summarizes the counts', () => {
-    expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
+    expect(summarize(messages)).toBe('6 errors, 0 warnings, 1 info');
   });
 
   it('checks only element names for selectors and only opened addresses for URLs', () => {
