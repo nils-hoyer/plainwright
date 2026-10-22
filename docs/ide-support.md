@@ -13,10 +13,10 @@ suggests it. You get:
 - a warning on a step that does not exist;
 - suggestions and checks in the files in `pages/` (see [pages](pages.md#suggestions-in-vs-code)).
 
-After adding keywords or steps in TypeScript, the editor knows them after the next `npm test`,
-which updates its step list. `npm run stubs` updates it without running the tests. Run it once
-after cloning the project too: the file it writes, `.vscode/plainwright.steps.js`, is not
-committed.
+After adding keywords or steps in TypeScript, the editor knows them after the next `npm test`
+or `npm run lint`, which update its step list, `.vscode/plainwright.steps.js`. The file is not
+committed; after cloning the project, either of them writes it, because `.vscode/settings.json`
+names it.
 
 ## Setting it up by hand
 
@@ -57,8 +57,8 @@ executed.
 
 ## Known limits
 
-- "Go to definition" opens the stub, not the real definition. `npm run catalog` writes
-  `steps.json` with the file and line of every project step and keyword.
+- "Go to definition" opens the stub, not the real definition. `npx plainwright catalog --out
+steps.json` writes the file and line of every project step and keyword.
 - The stub format follows the extension's documented detection rules (the tree-sitter queries of
   `@cucumber/language-service`). It has not been tried in every editor yet; please
   [report problems](https://github.com/nils-hoyer/plainwright/issues).

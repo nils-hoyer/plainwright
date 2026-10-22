@@ -9,7 +9,7 @@ import { formatLintMessage, lintFeatures, summarize } from './lint';
 import { loadPlaywrightConfig, loadStepFiles, resolveFiles } from './load';
 import { getPageDefinitions, isUrlPattern } from './pages';
 import { runTests } from './run';
-import { renderStubs } from './stubs';
+import { refreshStubs, renderStubs } from './stubs';
 // Registers the built-in steps.
 import './index';
 
@@ -61,7 +61,8 @@ Options:
 
 Checks feature files without a browser: unknown or ambiguous steps, unknown pages and values,
 selectors, absolute URLs, fixed waits, advanced steps (info) and keyword definitions. Prints
-file:line: severity: message (rule), and exits with 1 when there is an error.
+file:line: severity: message (rule), and exits with 1 when there is an error. Also updates
+the editor's step list, .vscode/plainwright.steps.js, like plainwright test.
 
 Options:
   --features <glob>    The feature files to check. Repeat for several patterns.
@@ -166,6 +167,7 @@ async function main(argv: string[]): Promise<number> {
       // The configuration may set environment variables, such as defaults for {env.NAME}.
       await loadPlaywrightConfig();
       const messages = lintFeatures(files).filter((m) => !values.quiet || m.severity !== 'info');
+      refreshStubs(process.cwd());
       for (const message of messages) console.log(formatLintMessage(message));
       console.log(`${files.length} feature file(s): ${summarize(messages)}`);
       return messages.some((m) => m.severity === 'error') ? 1 : 0;

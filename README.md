@@ -99,7 +99,7 @@ file in `keywords/`. The title is the new step, and each `"<name>"` in it is a v
 when you use it. Files in `keywords/` load by themselves, and any test can then use the keyword
 like a built-in step. The report shows the login steps nested under `I log in as …`. The last
 step waits until the app has logged in, so the next step does not start too early. The editor
-suggests the new step after the next `npm test`, or right away after `npm run stubs`.
+suggests the new step after the next `npm test` or `npm run lint`.
 More in [keywords](docs/keywords.md).
 
 ```gherkin
