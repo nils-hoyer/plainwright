@@ -34,23 +34,3 @@ step({
     await world.page.evaluate(() => window.scrollTo(0, 0));
   },
 });
-
-step({
-  pattern: 'I scroll down by {number} pixels',
-  level: 'advanced',
-  description: 'Scrolls the page down by this many pixels.',
-  example: 'I scroll down by "500" pixels',
-  fn: async ({ world }, pixels: number) => {
-    await world.page.evaluate((dy) => window.scrollBy(0, dy), pixels);
-  },
-});
-
-step({
-  pattern: 'I scroll up by {number} pixels',
-  level: 'advanced',
-  description: 'Scrolls the page up by this many pixels.',
-  example: 'I scroll up by "200" pixels',
-  fn: async ({ world }, pixels: number) => {
-    await world.page.evaluate((dy) => window.scrollBy(0, -dy), pixels);
-  },
-});

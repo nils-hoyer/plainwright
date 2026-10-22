@@ -40,7 +40,6 @@ import './steps/actions.steps';
 import './steps/assertions.steps';
 import './steps/dialogs.steps';
 import './steps/tabs.steps';
-import './steps/input.steps';
 import './steps/scroll.steps';
 import './steps/wait.steps';
 import './steps/storage.steps';

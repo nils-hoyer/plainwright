@@ -13,8 +13,8 @@ keywords. Step text is public API: renaming a step is a breaking change (see
    `the "Log in" button`, `the "Email" field`. CSS, XPath and test IDs stay out of feature files.
    An element without a visible name gets an alias in its page's file in `pages/`.
 3. **One phrase per action. No synonyms.** Text goes into a field with `fill`, never also
-   `type` or `enter`. `I type "…" on the keyboard` is a different action: an advanced step that
-   presses the keys one by one in whatever has the focus.
+   `type` or `enter`. `I type "…" in the "…" field` is a different action: an advanced step that
+   presses the keys one by one, for fields that react to every key.
 4. **Every step does exactly what it says**, documented in one sentence.
 5. **Checks start with `I see` / `I do not see`** and wait automatically. No fixed waits in the
    core vocabulary.
@@ -50,7 +50,7 @@ step that takes an element accepts this, so no step needs its own "in the row" v
 **Core** steps are the everyday vocabulary (about 35). A reviewer must understand all of them
 after reading the [reviewer guide](reading-tests.md).
 
-**Advanced** steps cover special cases: fixed waits, mouse coordinates, touch, frames, tabs,
+**Advanced** steps cover special cases: fixed waits, typing key by key, touch, frames, tabs,
 cookies, storage, screenshots, downloads, HTML attributes and classes. They follow the same
 rules. `lint` lists them as info, so a reviewer can spot them.
 
