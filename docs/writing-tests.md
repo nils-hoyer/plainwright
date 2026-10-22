@@ -108,28 +108,40 @@ part of a name and any capitals everywhere, set `exactNames: false` (see
 
 <!-- generated:element-types -->
 
-| Written as             | Finds                                                                                                                      |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                            |
-| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                |
-| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)         |
-| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                       |
-| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                      |
-| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                             |
-| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                          |
-| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                  |
-| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                          |
-| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`) |
-| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                           |
-| `the "…" section`      | an area of the page (landmark region) with this name (`getByRole('region')`)                                               |
-| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                |
-| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                              |
-| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                           |
-| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                            |
-| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                   |
-| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)                    |
+| Written as             | Finds                                                                                                                        |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name (`getByRole('button')`)                                                                              |
+| `the "…" link`         | a link with this text (`getByRole('link')`)                                                                                  |
+| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it (`getByLabel`, `getByPlaceholder`)           |
+| `the "…" checkbox`     | a checkbox with this label (`getByRole('checkbox')`)                                                                         |
+| `the "…" radio button` | a radio button with this label (`getByRole('radio')`)                                                                        |
+| `the "…" dropdown`     | a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)                                               |
+| `the "…" option`       | an option to choose in an open list, such as a custom dropdown or search suggestions, with this text (`getByRole('option')`) |
+| `the "…" heading`      | a heading with this text (`getByRole('heading')`)                                                                            |
+| `the "…" tab`          | a tab with this name (`getByRole('tab')`)                                                                                    |
+| `the "…" dialog`       | a dialog or alert dialog with this title (`getByRole('dialog')`, `'alertdialog'`)                                            |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked (`getByRole('menuitem')`, `'menuitemcheckbox'`, `'menuitemradio'`)   |
+| `the "…" image`        | an image with this alternative text or name (`getByAltText`, `getByRole('img')`)                                             |
+| `the "…" section`      | an area of the page (landmark region) with this name (`getByRole('region')`)                                                 |
+| `the "…" list`         | a list with this name (`getByRole('list')`)                                                                                  |
+| `the "…" list item`    | a list item that contains this text (`getByRole('listitem')`)                                                                |
+| `the "…" row`          | a table row that contains this text, e.g. in its first cell (`getByRole('row')`)                                             |
+| `the "…" cell`         | a table cell with this text (`getByRole('cell')`, `'gridcell'`)                                                              |
+| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text (`getByRole('alert')`, `'status'`)                     |
+| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)                      |
 
 <!-- /generated:element-types -->
+
+### Dropdowns
+
+A select box is a dropdown: `I select "Germany" in the "Country" dropdown` chooses from it. A
+custom dropdown or a search that suggests as you type shows a list of options, often somewhere
+else on the page than the field. Open it, or type, and click the option:
+
+```gherkin
+* I type "Ger" in the "Country" field
+* I click the "Germany" option
+```
 
 ### Elements with the same name
 

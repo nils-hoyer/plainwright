@@ -13,6 +13,7 @@ export const ELEMENT_TYPES = [
   'checkbox',
   'radio button',
   'dropdown',
+  'option',
   'heading',
   'tab',
   'dialog',
@@ -157,6 +158,14 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
     plural: 'Dropdowns',
     lookup: "a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)",
   },
+  // Custom dropdowns and search suggestions often show their options elsewhere on the page (a
+  // portal), outside the dropdown, so an option is looked up on the whole page.
+  option: {
+    roles: ['option'],
+    plural: 'Options',
+    lookup:
+      "an option to choose in an open list, such as a custom dropdown or search suggestions, with this text (`getByRole('option')`)",
+  },
   heading: {
     roles: ['heading'],
     plural: 'Headings',
@@ -234,6 +243,19 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
       'any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)',
   },
 };
+
+/**
+ * The nodes of a snapshot without the options of a select box (`combobox`): no click reaches
+ * them, `I select` chooses them.
+ */
+export function clickableNodes(nodes: AriaNode[]): AriaNode[] {
+  const inSelect = new Set(
+    nodes
+      .filter((node) => node.role === 'combobox')
+      .flatMap((node) => node.descendants.filter((d) => d.role === 'option')),
+  );
+  return nodes.filter((node) => !inSelect.has(node));
+}
 
 /** The element type a role from `ariaSnapshot()` belongs to, e.g. `textbox` → `field`. */
 export function elementTypeOfRole(role: string): ElementType | undefined {
@@ -342,7 +364,9 @@ export function describeMissing(
       : '';
   const lines = [`No ${ref.label} found${where}.`];
   const roles: readonly string[] = ELEMENT_TYPE_SPECS[ref.type].roles;
-  const nodes = parseAriaSnapshot(snapshot).filter((node) => roles.includes(node.role));
+  const nodes = clickableNodes(parseAriaSnapshot(snapshot)).filter((node) =>
+    roles.includes(node.role),
+  );
   const names = [...new Set(nodes.map((node) => labelOf(ref.type, node)).filter(Boolean))];
   if (roles.length) {
     const quoted = names.map((name) => `"${name}"`);

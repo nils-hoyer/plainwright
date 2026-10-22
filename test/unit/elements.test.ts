@@ -318,6 +318,25 @@ describe('aria snapshot', () => {
     });
   });
 
+  it('lists the options a click can reach, not those of a select box', () => {
+    const page = `
+- combobox "Country":
+  - option "Germany" [selected]
+  - option "France"
+- combobox "Search"
+- listbox "Suggestions":
+  - option "Coffee"
+  - option "Coffee beans"
+`;
+    expect(groupSnapshot(page).elements).toEqual({
+      dropdown: ['Country', 'Search', 'Suggestions'],
+      option: ['Coffee', 'Coffee beans'],
+    });
+    expect(describeMissing(new ElementRef('Coffe', 'option'), page)).toMatch(
+      /^No "Coffe" option found\.\nOptions on this page: "Coffee", "Coffee beans"\./,
+    );
+  });
+
   it('explains a missing element inside a container with what the container offers', () => {
     const row = `
 - row "Order 1001 Edit":
