@@ -193,6 +193,40 @@ checks the layout of a tablet. There is no step that changes the window size dur
 phone's touch screen and mobile browser are set when the browser opens, so such a step could only
 make the window smaller.
 
+## Filling the database before the tests
+
+Data that every test needs, such as the products of a shop, goes into the database once per
+run, before the first test. Two places in `playwright.config.ts` run a script of yours for that:
+the `webServer` command, which starts your app, and `globalSetup`, a file Playwright runs once
+before all tests. Data that one test needs is created by that test, through your app's API: see
+[data a test creates first](test-data.md#data-a-test-creates-first).
+
+```ts
+export default defineConfig({
+  baseURL: 'http://localhost:3000',
+  // Fill the database, then start the app.
+  webServer: { command: 'npm run db:seed && npm run start', url: 'http://localhost:3000' },
+});
+```
+
+When the app runs elsewhere, a `globalSetup` file runs the script instead:
+
+```ts
+// global-setup.ts
+import { execSync } from 'node:child_process';
+
+export default function globalSetup() {
+  execSync('npm run db:seed', { stdio: 'inherit' });
+}
+```
+
+```ts
+export default defineConfig({
+  baseURL: 'https://staging.example.com',
+  globalSetup: './global-setup.ts',
+});
+```
+
 ## Running in CI
 
 The tests run like any Playwright tests; below is a GitHub Actions workflow. Secrets come from
