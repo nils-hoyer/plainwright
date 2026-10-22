@@ -13,6 +13,15 @@ Feature: Element types
     * I see the "Show grid" menu item
     * I see the "Compact" menu item
 
+  Scenario: Options of a custom dropdown, shown elsewhere on the page
+    * I open the "Widgets" page
+    * I type "Ge" in the "Country" field
+    * I see the "Georgia" option
+    * I do not see the "Greece" option
+    * I click the "Germany" option
+    * I see the value "Germany" in the "Country" field
+    * I do not see the "Germany" option
+
   Scenario: An SVG with role img is an image
     * I open the "Widgets" page
     * I see the "Company logo" image

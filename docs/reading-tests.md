@@ -71,26 +71,27 @@ can read and change.
 
 <!-- generated:element-types -->
 
-| Written as             | Finds                                                                                     |
-| ---------------------- | ----------------------------------------------------------------------------------------- |
-| `the "…" button`       | a button with this name                                                                   |
-| `the "…" link`         | a link with this text                                                                     |
-| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it           |
-| `the "…" checkbox`     | a checkbox with this label                                                                |
-| `the "…" radio button` | a radio button with this label                                                            |
-| `the "…" dropdown`     | a dropdown (select box) with this label                                                   |
-| `the "…" heading`      | a heading with this text                                                                  |
-| `the "…" tab`          | a tab with this name                                                                      |
-| `the "…" dialog`       | a dialog or alert dialog with this title                                                  |
-| `the "…" menu item`    | a menu item with this name, also one that can be ticked                                   |
-| `the "…" image`        | an image with this alternative text or name                                               |
-| `the "…" section`      | an area of the page (landmark region) with this name                                      |
-| `the "…" list`         | a list with this name                                                                     |
-| `the "…" list item`    | a list item that contains this text                                                       |
-| `the "…" row`          | a table row that contains this text, e.g. in its first cell                               |
-| `the "…" cell`         | a table cell with this text                                                               |
-| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text                     |
-| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases |
+| Written as             | Finds                                                                                                |
+| ---------------------- | ---------------------------------------------------------------------------------------------------- |
+| `the "…" button`       | a button with this name                                                                              |
+| `the "…" link`         | a link with this text                                                                                |
+| `the "…" field`        | a text field with this label, or else this placeholder, the grey hint inside it                      |
+| `the "…" checkbox`     | a checkbox with this label                                                                           |
+| `the "…" radio button` | a radio button with this label                                                                       |
+| `the "…" dropdown`     | a dropdown (select box) with this label                                                              |
+| `the "…" option`       | an option to choose in an open list, such as a custom dropdown or search suggestions, with this text |
+| `the "…" heading`      | a heading with this text                                                                             |
+| `the "…" tab`          | a tab with this name                                                                                 |
+| `the "…" dialog`       | a dialog or alert dialog with this title                                                             |
+| `the "…" menu item`    | a menu item with this name, also one that can be ticked                                              |
+| `the "…" image`        | an image with this alternative text or name                                                          |
+| `the "…" section`      | an area of the page (landmark region) with this name                                                 |
+| `the "…" list`         | a list with this name                                                                                |
+| `the "…" list item`    | a list item that contains this text                                                                  |
+| `the "…" row`          | a table row that contains this text, e.g. in its first cell                                          |
+| `the "…" cell`         | a table cell with this text                                                                          |
+| `the "…" message`      | a notice, such as a toast or an error banner, that contains this text                                |
+| `the "…" element`      | any element showing exactly this text; mostly for names your team defined, called aliases            |
 
 <!-- /generated:element-types -->
 

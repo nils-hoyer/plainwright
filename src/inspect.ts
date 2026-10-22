@@ -3,6 +3,7 @@ import { parseAriaSnapshot } from './aria';
 import {
   ElementAlias,
   ELEMENT_TYPES,
+  clickableNodes,
   elementTypeOfRole,
   ElementType,
   labelOf,
@@ -130,7 +131,7 @@ export function groupSnapshot(
   const elements: InspectResult['elements'] = {};
   const unnamed: InspectResult['unnamed'] = {};
   const counts: Partial<Record<ElementType, Record<string, number>>> = {};
-  for (const node of parseAriaSnapshot(snapshot)) {
+  for (const node of clickableNodes(parseAriaSnapshot(snapshot))) {
     const type = elementTypeOfRole(node.role);
     if (!type) continue;
     const name = labelOf(type, node);
