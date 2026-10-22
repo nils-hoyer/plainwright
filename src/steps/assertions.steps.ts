@@ -259,66 +259,87 @@ step({
 });
 
 step({
-  pattern: 'I see the attribute {string} on the {element}',
+  pattern: 'I see the {element} leads to {string}',
   level: 'advanced',
-  description: 'Checks that the element has this HTML attribute, with any value.',
-  example: 'I see the attribute "disabled" on the "Coming Soon" button',
-  fn: async ({ world }, attribute: string, element: ElementRef) => {
-    await world.withElement(element, (el) => expect(el).toHaveAttribute(attribute));
-  },
-});
-
-step({
-  pattern: 'I do not see the attribute {string} on the {element}',
-  level: 'advanced',
-  description: 'Checks that the element does not have this HTML attribute.',
-  example: 'I do not see the attribute "disabled" on the "Transfer Money" button',
-  fn: async ({ world }, attribute: string, element: ElementRef) => {
-    await world.withElement(element, (el) => expect(el).not.toHaveAttribute(attribute));
-  },
-});
-
-step({
-  pattern: 'I see the attribute {string} with the value {string} on the {element}',
-  level: 'advanced',
-  description: 'Checks that the HTML attribute of the element has exactly this value.',
-  example: 'I see the attribute "href" with the value "/help" on the "Help" link',
-  fn: async ({ world }, attribute: string, value: string, element: ElementRef) => {
-    await world.withElement(element, (el) => expect(el).toHaveAttribute(attribute, value));
-  },
-});
-
-step({
-  pattern: 'I see the attribute {string} containing {string} on the {element}',
-  level: 'advanced',
-  description: 'Checks that the HTML attribute of the element contains this text.',
-  example: 'I see the attribute "href" containing "help" on the "Help" link',
-  fn: async ({ world }, attribute: string, text: string, element: ElementRef) => {
+  description: 'Checks the address the link leads to, absolute or relative to the base URL.',
+  example: 'I see the "Help" link leads to "/help"',
+  fn: async ({ world }, element: ElementRef, address: string) => {
     await world.withElement(element, (el) =>
-      expect(el).toHaveAttribute(attribute, new RegExp(escapeRegExp(text))),
+      expect
+        .poll(
+          () =>
+            el.evaluate(
+              (node) => (node as HTMLAnchorElement).href || node.getAttribute('href'),
+              undefined,
+              {
+                timeout: 1000,
+              },
+            ),
+          { message: `Expected the ${element} to lead to "${address}"` },
+        )
+        .toBe(world.url(address)),
     );
   },
 });
 
 step({
-  pattern: 'I see the class {string} on the {element}',
+  pattern: 'I see the {element} is expanded',
   level: 'advanced',
-  description: 'Checks that the element has this CSS class (among others).',
-  example: 'I see the class "highlighted" on the "Styled box" element',
-  fn: async ({ world }, className: string, element: ElementRef) => {
-    await world.withElement(element, (el) => expect(el).toContainClass(className));
+  description:
+    'Checks that the element shows what it opens, such as a menu or a section of an accordion (aria-expanded, or an open details element).',
+  example: 'I see the "Shipping" button is expanded',
+  fn: async ({ world }, element: ElementRef) => {
+    await checkExpanded(world, element, true);
   },
 });
 
 step({
-  pattern: 'I do not see the class {string} on the {element}',
+  pattern: 'I see the {element} is collapsed',
   level: 'advanced',
-  description: 'Checks that the element does not have this CSS class.',
-  example: 'I do not see the class "hidden" on the "Styled box" element',
-  fn: async ({ world }, className: string, element: ElementRef) => {
-    await world.withElement(element, (el) => expect(el).not.toContainClass(className));
+  description:
+    'Checks that the element hides what it opens, such as a closed menu or a closed section of an accordion.',
+  example: 'I see the "Shipping" button is collapsed',
+  fn: async ({ world }, element: ElementRef) => {
+    await checkExpanded(world, element, false);
   },
 });
+
+/**
+ * Whether the element is expanded, as Playwright works it out for the accessibility tree:
+ * an element with `aria-expanded`, or a `<details>` element, also by its `<summary>`.
+ */
+async function checkExpanded(world: World, element: ElementRef, expanded: boolean) {
+  await world.withElement(element, async (el) => {
+    const state = () =>
+      el.evaluate(
+        (node) => {
+          const details = node instanceof HTMLDetailsElement ? node : node.parentElement;
+          if (
+            details instanceof HTMLDetailsElement &&
+            (node === details || node.tagName === 'SUMMARY')
+          ) {
+            return details.open;
+          }
+          const attribute = node.getAttribute('aria-expanded');
+          return attribute === null ? null : attribute === 'true';
+        },
+        undefined,
+        { timeout: 1000 },
+      );
+    try {
+      await expect
+        .poll(state, {
+          message: `Expected the ${element} to be ${expanded ? 'expanded' : 'collapsed'}`,
+        })
+        .toBe(expanded);
+    } catch (error) {
+      if ((await state().catch(() => undefined)) !== null) throw error;
+      throw new Error(
+        `[plainwright] The ${element} does not open or close anything: it has no aria-expanded and is no details element.`,
+      );
+    }
+  });
+}
 
 /**
  * Visible elements that contain the text with the same capitals, like `toContainText`.
