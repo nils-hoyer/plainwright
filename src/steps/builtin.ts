@@ -8,7 +8,6 @@ export const CATEGORIES = [
   'Checking what you see',
   'Dialogs',
   'Tabs and frames',
-  'Keyboard, mouse and touch',
   'Scrolling',
   'Waiting',
   'Cookies and storage',

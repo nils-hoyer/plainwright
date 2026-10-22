@@ -82,12 +82,14 @@ For special cases. `lint` lists where they are used.
 
 ### Clicking and typing
 
-| Step                                             | What it does                                                                                           | Example                                                                              |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                    | `I right click the "Order 1001" row`                                                 |
-| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                            | `I focus on the "Full Name" field`                                                   |
-| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                  | `I select option "3" in the "Country" dropdown`                                      |
-| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens. | `I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button` |
+| Step                                             | What it does                                                                                                                                                      | Example                                                                              |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                                                                               | `I right click the "Order 1001" row`                                                 |
+| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                                                                                       | `I focus on the "Full Name" field`                                                   |
+| `I type {string} in the {element}`               | Types the text into the field key by key, without clearing it first, for fields that react to every key, such as a date with a mask or a search with suggestions. | `I type "21102026" in the "Birthday" field`                                          |
+| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                                                                             | `I select option "3" in the "Country" dropdown`                                      |
+| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens.                                                            | `I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button` |
+| `I tap the {element}`                            | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                                                                | `I tap the "Menu" button`                                                            |
 
 ### Checking what you see
 
@@ -125,34 +127,13 @@ For special cases. `lint` lists where they are used.
 | `I switch to the {string} frame` | Continues inside the embedded frame (iframe) with this title or name, or with this alias. | `I switch to the "Greeting" frame` |
 | `I switch to the main frame`     | Leaves the embedded frame and continues on the page itself.                               | `I switch to the main frame`       |
 
-### Keyboard, mouse and touch
-
-| Step                                                | What it does                                                                                                         | Example                                     |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| `I type {string} on the keyboard`                   | Types the text key by key into the focused element, without clearing it first. To replace a field value, use I fill. | `I type "Hello" on the keyboard`            |
-| `I hold down the key {string}`                      | Presses the key and keeps it pressed until I release the key.                                                        | `I hold down the key "Shift"`               |
-| `I release the key {string}`                        | Releases a key that was held down.                                                                                   | `I release the key "Shift"`                 |
-| `I insert the text {string}`                        | Inserts the text into the focused element at once, without key presses (like pasting).                               | `I insert the text "嗨"`                    |
-| `I click at x {number} y {number}`                  | Clicks at this position, in pixels from the top left corner of the page view.                                        | `I click at x "200" y "150"`                |
-| `I double click at x {number} y {number}`           | Double-clicks at this position, in pixels from the top left corner of the page view.                                 | `I double click at x "200" y "150"`         |
-| `I right click at x {number} y {number}`            | Right-clicks at this position, in pixels from the top left corner of the page view.                                  | `I right click at x "200" y "150"`          |
-| `I move the mouse to x {number} y {number}`         | Moves the mouse to this position, in pixels from the top left corner of the page view.                               | `I move the mouse to x "200" y "150"`       |
-| `I press the mouse button`                          | Presses the left mouse button and keeps it pressed until I release the mouse button.                                 | `I press the mouse button`                  |
-| `I press the {string} mouse button`                 | Presses the "left", "right" or "middle" mouse button and keeps it pressed.                                           | `I press the "left" mouse button`           |
-| `I release the mouse button`                        | Releases the mouse button that was pressed.                                                                          | `I release the mouse button`                |
-| `I scroll the mouse wheel by x {number} y {number}` | Turns the mouse wheel by this many pixels sideways (x) and down (y).                                                 | `I scroll the mouse wheel by x "0" y "100"` |
-| `I tap the {element}`                               | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                   | `I tap the "Menu" button`                   |
-| `I tap at x {number} y {number}`                    | Taps at this position on a touch screen. Needs a browser with touch enabled (hasTouch).                              | `I tap at x "300" y "200"`                  |
-
 ### Scrolling
 
-| Step                                 | What it does                               | Example                              |
-| ------------------------------------ | ------------------------------------------ | ------------------------------------ |
-| `I scroll to the {element}`          | Scrolls until the element is in view.      | `I scroll to the "Contact" section`  |
-| `I scroll to the bottom of the page` | Scrolls to the end of the page.            | `I scroll to the bottom of the page` |
-| `I scroll to the top of the page`    | Scrolls to the start of the page.          | `I scroll to the top of the page`    |
-| `I scroll down by {number} pixels`   | Scrolls the page down by this many pixels. | `I scroll down by "500" pixels`      |
-| `I scroll up by {number} pixels`     | Scrolls the page up by this many pixels.   | `I scroll up by "200" pixels`        |
+| Step                                 | What it does                          | Example                              |
+| ------------------------------------ | ------------------------------------- | ------------------------------------ |
+| `I scroll to the {element}`          | Scrolls until the element is in view. | `I scroll to the "Contact" section`  |
+| `I scroll to the bottom of the page` | Scrolls to the end of the page.       | `I scroll to the bottom of the page` |
+| `I scroll to the top of the page`    | Scrolls to the start of the page.     | `I scroll to the top of the page`    |
 
 ### Waiting
 
@@ -216,9 +197,24 @@ For special cases. `lint` lists where they are used.
 
 Steps a release removed, with what to write instead. `lint` says the same where one is still used.
 
-| Step                             | Removed in | Instead                                                                                                                                                         |
-| -------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `I wait {number} second(s)`      | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
-| `I wait {number} millisecond(s)` | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
-| `I wait for the page to load`    | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |
-| `I wait for network idle`        | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |
+| Step                                                | Removed in | Instead                                                                                                                                                                                                                               |
+| --------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `I wait {number} second(s)`                         | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds.                                                                       |
+| `I wait {number} millisecond(s)`                    | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds.                                                                       |
+| `I wait for the page to load`                       | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                                                                                            |
+| `I wait for network idle`                           | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                                                                                            |
+| `I type {string} on the keyboard`                   | 0.3.0      | Name the field: I type "…" in the "…" field, which also presses the keys one by one. To replace its content, I fill "…" in the "…" field.                                                                                             |
+| `I hold down the key {string}`                      | 0.3.0      | Press a key or a combination with I press "Shift+A", or I press "…" in the "…" field. To hold a key while doing something else, write a step in TypeScript (docs/writing-steps.md).                                                   |
+| `I release the key {string}`                        | 0.3.0      | Press a key or a combination with I press "Shift+A", or I press "…" in the "…" field. To hold a key while doing something else, write a step in TypeScript (docs/writing-steps.md).                                                   |
+| `I insert the text {string}`                        | 0.3.0      | Name the field: I fill "…" in the "…" field.                                                                                                                                                                                          |
+| `I click at x {number} y {number}`                  | 0.3.0      | Name the element instead: I click the "…" button. A position breaks when the layout changes, and a reviewer cannot tell what is there. For a canvas, a map or a signature pad, write a step in TypeScript (docs/writing-steps.md).    |
+| `I double click at x {number} y {number}`           | 0.3.0      | Name the element instead: I click the "…" button. A position breaks when the layout changes, and a reviewer cannot tell what is there. For a canvas, a map or a signature pad, write a step in TypeScript (docs/writing-steps.md).    |
+| `I right click at x {number} y {number}`            | 0.3.0      | Name the element instead: I click the "…" button. A position breaks when the layout changes, and a reviewer cannot tell what is there. For a canvas, a map or a signature pad, write a step in TypeScript (docs/writing-steps.md).    |
+| `I move the mouse to x {number} y {number}`         | 0.3.0      | Name the element instead: I hover over the "…" link. A position breaks when the layout changes, and a reviewer cannot tell what is there. For a canvas, a map or a signature pad, write a step in TypeScript (docs/writing-steps.md). |
+| `I press the mouse button`                          | 0.3.0      | Drag with I drag the "…" list item to the "…" list. For drawing, write a step in TypeScript (docs/writing-steps.md).                                                                                                                  |
+| `I press the {string} mouse button`                 | 0.3.0      | Drag with I drag the "…" list item to the "…" list. For drawing, write a step in TypeScript (docs/writing-steps.md).                                                                                                                  |
+| `I release the mouse button`                        | 0.3.0      | Drag with I drag the "…" list item to the "…" list. For drawing, write a step in TypeScript (docs/writing-steps.md).                                                                                                                  |
+| `I scroll the mouse wheel by x {number} y {number}` | 0.3.0      | Scroll to what you need instead: I scroll to the "…" section, or to the bottom of the page. Clicks and checks scroll by themselves.                                                                                                   |
+| `I tap at x {number} y {number}`                    | 0.3.0      | Name the element instead: I tap the "…" button. A position breaks when the layout changes, and a reviewer cannot tell what is there. For a canvas, a map or a signature pad, write a step in TypeScript (docs/writing-steps.md).      |
+| `I scroll down by {number} pixels`                  | 0.3.0      | Scroll to what you need instead: I scroll to the "…" section, or to the bottom of the page. Clicks and checks scroll by themselves.                                                                                                   |
+| `I scroll up by {number} pixels`                    | 0.3.0      | Scroll to what you need instead: I scroll to the "…" section, or to the bottom of the page. Clicks and checks scroll by themselves.                                                                                                   |
