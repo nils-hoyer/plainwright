@@ -17,6 +17,7 @@ import {
   suggestionFor,
   suggestSteps,
 } from './registry';
+import { removedMessage, removedStep } from './removed';
 import { levenshtein } from './similar';
 
 export type KeywordStep = { keyword: string; text: string; line: number; column: number };
@@ -144,12 +145,18 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
       }
 
       let matches = findSteps(sub.text);
-      // A parameter can stand for a number, e.g. I wait "<seconds>" seconds.
+      // A parameter can stand for a number, e.g. I see "<count>" items in the "Cart" list.
+      const numbers = Object.fromEntries(keyword.params.map((name) => [name, '1']));
+      if (!matches.length) matches = findSteps(fillPlaceholders(sub.text, numbers));
       if (!matches.length) {
-        const values = Object.fromEntries(keyword.params.map((name) => [name, '1']));
-        matches = findSteps(fillPlaceholders(sub.text, values));
-      }
-      if (!matches.length) {
+        const removed = removedMessage(
+          sub.text,
+          removedStep(sub.text) ?? removedStep(fillPlaceholders(sub.text, numbers)),
+        );
+        if (removed) {
+          errors.push(`${subWhere}: ${removed}`);
+          continue;
+        }
         const suggestions = suggestSteps(sub.text);
         errors.push(
           `${subWhere}: No step matches "${sub.text}".` +

@@ -32,6 +32,12 @@ A renamed step keeps its old wording for at least one minor release, marked `dis
 `lint` warns with the new wording. The pull request that renames a step names the old and new
 wording, and the release notes link to it.
 
+## Removing steps
+
+A removed step stays in the list of [removed steps](steps.md#removed-steps) with what to write
+instead, and `lint`, keywords and test runs give that instead of "unknown step" wherever it is
+still used. The release notes list the same.
+
 ## Release notes
 
 Every release is listed on the

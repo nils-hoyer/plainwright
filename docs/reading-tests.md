@@ -136,7 +136,6 @@ with `I create "…" at "/api/…"`, and removes it after the test with `I delet
 
 - Text in quotes that looks like code (`"#submit"`, `"//div[2]"`, `"[data-testid=…]"`): tests
   should name what the user sees.
-- `I wait "2" seconds`: a fixed pause. Usually a check (`I see …`) should replace it.
 - A scenario without any `I see` step: it does things, but checks nothing.
 
 ## Opening the report
