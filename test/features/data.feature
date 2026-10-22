@@ -78,6 +78,3 @@ Feature: Test data
     * I see the text "Today is {today.local}."
     * I fill "{in-7-days}" in the "Delivery date" field
     * I see the text "Delivery on {in-7-days.local}"
-
-  Scenario: A command prepares data
-    * I run the command "node --version"

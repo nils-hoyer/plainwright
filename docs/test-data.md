@@ -218,13 +218,12 @@ All these are advanced steps: they belong in keywords more than in tests, and `l
 as info. For what they cannot do, such as a database connection or a mock server, developers
 can write a fixture in TypeScript: see [steps in TypeScript](writing-steps.md#fixtures).
 
-| Step                                                            | What it does                                                                   |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| `I create "order" at "/api/orders" with "{new-order}"`          | sends the data (POST), checks it worked, remembers the answer                  |
-| `I delete "/api/orders/{order.id}" after the test`              | deletes it when the test is over; already gone counts as deleted               |
-| `I send a "GET" request to "/api/orders"`                       | sends a request; the answer is `{response}`                                    |
-| `I send a "PATCH" request to "/api/orders/{order.id}" with "…"` | sends a request with data                                                      |
-| `I see the response status "200"`                               | checks the status of the last answer                                           |
-| `I see the response field "status" with the value "paid"`       | checks a field of the last answer; `items.0.name` reaches into lists           |
-| `I run the command "npm run db:seed"`                           | runs a command in the project folder, e.g. your script that fills the database |
-| `I see the text "Total" in the downloaded file`                 | checks the content of the last download                                        |
+| Step                                                            | What it does                                                         |
+| --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `I create "order" at "/api/orders" with "{new-order}"`          | sends the data (POST), checks it worked, remembers the answer        |
+| `I delete "/api/orders/{order.id}" after the test`              | deletes it when the test is over; already gone counts as deleted     |
+| `I send a "GET" request to "/api/orders"`                       | sends a request; the answer is `{response}`                          |
+| `I send a "PATCH" request to "/api/orders/{order.id}" with "…"` | sends a request with data                                            |
+| `I see the response status "200"`                               | checks the status of the last answer                                 |
+| `I see the response field "status" with the value "paid"`       | checks a field of the last answer; `items.0.name` reaches into lists |
+| `I see the text "Total" in the downloaded file`                 | checks the content of the last download                              |
