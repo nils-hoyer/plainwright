@@ -32,11 +32,10 @@ pages/
 * I am on the "Dashboard" page
 ```
 
-| Step                            | What it does                                                     |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `I open the "Login" page`       | opens the address of the page and makes it the current page      |
-| `I am on the "Dashboard" page`  | checks the address of the page and makes it the current page     |
-| `I use the page object "Login"` | makes it the current page without opening or checking (advanced) |
+| Step                           | What it does                                                            |
+| ------------------------------ | ----------------------------------------------------------------------- |
+| `I open the "Login" page`      | opens the address of the page                                           |
+| `I am on the "Dashboard" page` | checks that the browser shows the address of the page, and waits for it |
 
 ### Addresses with wildcards
 
@@ -102,12 +101,16 @@ button` checks the count.
 }
 ```
 
-### The current page
+### Where an alias applies
 
-An alias applies while its page is the current page. `I open the "…" page` and
-`I am on the "…" page` set the current page; `I open the url "…"` clears it. When a click leads
-to another page, add `I am on the "…" page` so that its aliases apply. Elements found by their
-visible name work on any page.
+An alias applies on its page: the page whose `url` matches the address the browser shows, however
+the test got there, by name, by address or by a click. On other pages the same name is looked up
+by what the user sees, so an alias for an unlabelled "Search" field on the Orders page does not
+hide a labelled "Search" field elsewhere. Elements found by their visible name work on any page.
+
+After a click that leads to another page, add `I am on the "…" page`: it waits until the browser
+shows that page's address, so the next step finds the new page's aliases and does not start too
+early.
 
 ```gherkin
 * I open the "Orders" page
@@ -115,6 +118,14 @@ visible name work on any page.
 * I am on the "Order" page
 * I click the "Print" button
 ```
+
+- **Several pages at one address,** such as the steps of a wizard or the views of a single-page
+  app that does not change its address: give each the same `url`. Their aliases apply together;
+  two of them must not give the same name different selectors.
+- **A page file without `url`** applies on every page, for parts that every page has, such as a
+  header with icon buttons.
+- **Exactly this address wins:** when a page with `/orders/1001` and a page with `/orders/*`
+  both match, the first one's alias wins, and a page without `url` comes last.
 
 ## Suggestions in VS Code
 

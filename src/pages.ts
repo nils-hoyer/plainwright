@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'tinyglobby';
-import { ELEMENT_TYPES, type ElementAlias, type ElementType } from './elements';
+import { ELEMENT_TYPES, escapeRegExp, type ElementAlias, type ElementType } from './elements';
 
 /**
  * An alias for one element type: `{ type: 'button', selector: '[data-testid=settings]' }` makes
@@ -200,6 +200,36 @@ function definePageFile(file: string): PageDefinition {
 const PAGE_KEYS = ['$schema', 'name', 'url', 'elements'];
 const TYPED_ALIAS = '{ "type": "button", "selector": "selector" } for one element type';
 const PAGE_KEYS_TEXT = '"name", "url" and "elements"';
+
+/**
+ * Matches an address with any query string or hash. In a page's address, `*` stands for any
+ * text without `/`, `**` for any text. `resolve` makes a relative address absolute.
+ */
+export function addressPattern(url: string | RegExp, resolve: (path: string) => string): RegExp {
+  if (url instanceof RegExp) return url;
+  const resolved = resolve(url);
+  const start = /^[a-z]+:\/\//i.test(resolved) ? '^' : '';
+  const pattern = resolved
+    .split(/(\*\*|\*)/)
+    .map((part) => (part === '**' ? '.*' : part === '*' ? '[^/?#]*' : escapeRegExp(part)))
+    .join('');
+  return new RegExp(`${start}${pattern}(?:[?#].*)?$`);
+}
+
+/**
+ * The pages the browser shows at this address, most specific first: those with exactly this
+ * address, then those with `*` in theirs, then pages without an address, which apply everywhere.
+ */
+export function pagesAt(address: string, resolve: (path: string) => string): PageDefinition[][] {
+  const ranks: PageDefinition[][] = [[], [], []];
+  for (const page of pages.values()) {
+    if (page.url === undefined) ranks[2].push(page);
+    else if (addressPattern(page.url, resolve).test(address)) {
+      ranks[isUrlPattern(page.url) ? 1 : 0].push(page);
+    }
+  }
+  return ranks;
+}
 
 /** Whether the address has `*`, so it can only be checked, not opened. */
 export function isUrlPattern(url: string | RegExp | undefined): boolean {

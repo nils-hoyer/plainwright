@@ -237,7 +237,7 @@ describe('aria snapshot', () => {
 
   it('points to the pages folder when no page is open', () => {
     expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot)).toContain(
-      `add an alias in the page's file in pages/, "elements": { "Sign up": "<selector>" }, and open the page by name`,
+      `add an alias to a file in pages/ whose "url" is this address: "elements": { "Sign up": "<selector>" }.`,
     );
   });
 

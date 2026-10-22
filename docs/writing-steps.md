@@ -47,7 +47,8 @@ and `in the "…" row`, and lists what the page offers when it is missing.
 | ----------------------------------- | ----------------------------------------------------------------------------------------- |
 | `world.page`                        | the active browser tab                                                                    |
 | `world.scope`                       | where elements are looked up: the active frame, or else the tab                           |
-| `world.currentPage`                 | the [page](pages.md) whose aliases are in use                                             |
+| `world.currentPage`                 | the [page](pages.md) the browser shows, by its address                                    |
+| `world.aliases()`                   | the aliases that apply at the address the browser shows                                   |
 | `world.element(ref)`                | a Locator for an `{element}` parameter, using aliases and `in the "…" row`                |
 | `world.withElement(ref, action)`    | runs `action` on the element; when it is missing, the error lists what the page offers    |
 | `world.url(path)`                   | an address relative to `baseURL`                                                          |

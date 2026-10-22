@@ -7,8 +7,8 @@ import type {
   Page,
 } from '@playwright/test';
 import { test } from '@playwright/test';
-import { describeMissing, ElementRef, locate, Scope } from './elements';
-import { getPageDefinition, getPageSource, PageDefinition } from './pages';
+import { describeMissing, ElementAlias, ElementRef, locate, Scope } from './elements';
+import { getPageSource, PageDefinition, pagesAt } from './pages';
 import { remember } from './values';
 
 export type WorldOptions = {
@@ -23,8 +23,8 @@ export type ApiResponse = { method: string; url: string; status: number; body: u
 type DialogAction = { accept: boolean; promptText?: string };
 
 /**
- * State shared by the steps of one scenario: the active tab, frame and page definition,
- * dialogs that were shown and the last download.
+ * State shared by the steps of one scenario: the active tab and frame, dialogs that were shown
+ * and the last download. Which page's aliases apply follows from the address the tab shows.
  */
 export class World {
   readonly baseURL?: string;
@@ -37,7 +37,6 @@ export class World {
 
   #page: Page;
   #frame: FrameLocator | null = null;
-  #currentPage?: PageDefinition;
   #nextDialog?: DialogAction;
   #context: BrowserContext;
   #onDialog = (dialog: Dialog) => this.#handleDialog(dialog);
@@ -62,21 +61,40 @@ export class World {
     return this.#frame ?? this.#page;
   }
 
-  /** The page definition whose aliases are in use, set by "I open the ... page". */
+  /** The page the active tab shows, by its address: the most specific one, for messages. */
   get currentPage(): PageDefinition | undefined {
-    return this.#currentPage;
+    const [exact, patterns] = this.#pages();
+    return exact[0] ?? patterns[0];
   }
 
-  usePage(name: string): PageDefinition {
-    this.#currentPage = getPageDefinition(name);
-    this.#frame = null;
-    return this.#currentPage;
+  /**
+   * The aliases that apply now: those of the pages whose address the active tab shows, and of
+   * pages without an address. A more specific page wins: exactly this address over an address
+   * with `*`, over no address. Two pages that are equally specific must not disagree.
+   */
+  aliases(): Record<string, ElementAlias> {
+    const aliases: Record<string, ElementAlias> = {};
+    for (const rank of this.#pages()) {
+      const fromRank = new Map<string, PageDefinition>();
+      for (const page of rank) {
+        for (const [key, alias] of Object.entries(page.elements)) {
+          const other = fromRank.get(key);
+          if (other && other.elements[key] !== alias) {
+            throw new Error(
+              `[plainwright] The pages "${other.name}" and "${page.name}" both apply at ` +
+                `${this.address()} and give ${key} different aliases. Rename one of them.`,
+            );
+          }
+          fromRank.set(key, page);
+          if (!Object.hasOwn(aliases, key)) aliases[key] = alias;
+        }
+      }
+    }
+    return aliases;
   }
 
-  /** Stops using the aliases of the current page definition. */
-  clearPage() {
-    this.#currentPage = undefined;
-    this.#frame = null;
+  #pages(): PageDefinition[][] {
+    return pagesAt(this.#page.url(), (path) => this.url(path));
   }
 
   switchToTab(page: Page) {
@@ -90,7 +108,7 @@ export class World {
 
   /** Locator for an element named in a step, honouring aliases on the current page. */
   element(ref: ElementRef): Locator {
-    return locate(this.scope, ref, { aliases: this.#currentPage?.elements });
+    return locate(this.scope, ref, { aliases: this.aliases() });
   }
 
   /**
@@ -219,7 +237,7 @@ export class World {
       ? this.element(missing.container).first()
       : this.scope.locator('body');
     const snapshot = await where.ariaSnapshot({ timeout: 2000 }).catch(() => '');
-    const page = this.#currentPage?.name;
+    const page = this.currentPage?.name;
     addHint(
       error,
       describeMissing(missing, snapshot, {

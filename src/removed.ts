@@ -31,6 +31,8 @@ const SAVE_DOWNLOAD =
   'To import the file again: I upload the downloaded file with the "Import" button. To check it: I see the text "…" in the downloaded file. Steps no longer write files at a path of their own.';
 const COMMAND =
   'A reviewer cannot judge a shell command, and it depends on the shell. Fill the database once per run with globalSetup or the webServer command in playwright.config.ts (docs/setup.md), and create the data one test needs through the app: I create "…" at "/api/…" with "…".';
+const PAGE_OBJECT =
+  'Aliases apply on the page whose address the browser shows, so there is nothing to switch to. Pages that share one address, such as the steps of a wizard, get the same "url": their aliases apply together. A page without a "url" applies everywhere.';
 const PAGE_LOAD =
   'Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.';
 
@@ -108,6 +110,7 @@ export const REMOVED_STEPS: readonly RemovedStep[] = [
   },
   { pattern: 'I save the downloaded file to {string}', removedIn: '0.3.0', instead: SAVE_DOWNLOAD },
   { pattern: 'I run the command {string}', removedIn: '0.3.0', instead: COMMAND },
+  { pattern: 'I use the page object {string}', removedIn: '0.3.0', instead: PAGE_OBJECT },
 ];
 
 const expressions = new Map<RemovedStep, CucumberExpression>();

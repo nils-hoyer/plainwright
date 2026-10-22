@@ -1,6 +1,5 @@
 import { expect } from '@playwright/test';
-import { getPageDefinition, isUrlPattern } from '../pages';
-import type { World } from '../world';
+import { addressPattern, getPageDefinition, isUrlPattern } from '../pages';
 import { category, escapeRegExp } from './builtin';
 
 const step = category('Pages and navigation');
@@ -8,11 +7,10 @@ const step = category('Pages and navigation');
 step({
   pattern: 'I open the {string} page',
   level: 'core',
-  description:
-    'Opens the address of the page defined with this name and uses the element names defined for it.',
+  description: 'Opens the address of the page defined with this name.',
   example: 'I open the "Login" page',
   fn: async ({ world }, name: string) => {
-    const page = world.usePage(name);
+    const page = getPageDefinition(name);
     if (typeof page.url !== 'string' || isUrlPattern(page.url)) {
       throw new Error(
         page.url
@@ -21,15 +19,14 @@ step({
           : `[plainwright] The page "${name}" has no address to open. Add its "url".`,
       );
     }
-    await world.page.goto(page.url as string);
+    await world.page.goto(page.url);
   },
 });
 
 step({
   pattern: 'I am on the {string} page',
   level: 'core',
-  description:
-    'Checks that the browser shows the address of this page and uses the element names defined for it.',
+  description: 'Checks that the browser shows the address of this page, waiting until it does.',
   example: 'I am on the "Dashboard" page',
   fn: async ({ world }, name: string) => {
     const page = getPageDefinition(name);
@@ -37,20 +34,8 @@ step({
       throw new Error(`[plainwright] The page "${name}" has no address to check. Add its "url".`);
     }
     await expect(world.page, `Expected to be on the "${name}" page`).toHaveURL(
-      urlPattern(page.url, world),
+      addressPattern(page.url, (path) => world.url(path)),
     );
-    world.usePage(name);
-  },
-});
-
-step({
-  pattern: 'I use the page object {string}',
-  level: 'advanced',
-  description:
-    'Uses the element names defined for this page without opening it or checking the address.',
-  example: 'I use the page object "Login"',
-  fn: ({ world }, name: string) => {
-    world.usePage(name);
   },
 });
 
@@ -60,7 +45,6 @@ step({
   description: 'Opens a web address, absolute or relative to the base URL.',
   example: 'I open the url "/login"',
   fn: async ({ world }, url: string) => {
-    world.clearPage();
     await world.page.goto(url);
   },
 });
@@ -144,18 +128,3 @@ step({
     await expect(world.page).toHaveTitle(new RegExp(escapeRegExp(text)));
   },
 });
-
-/**
- * Matches the page URL with any query string or hash. `*` in the address stands for any text
- * without `/`, `**` for any text.
- */
-function urlPattern(url: string | RegExp, world: World): RegExp {
-  if (url instanceof RegExp) return url;
-  const resolved = world.url(url);
-  const start = /^[a-z]+:\/\//i.test(resolved) ? '^' : '';
-  const pattern = resolved
-    .split(/(\*\*|\*)/)
-    .map((part) => (part === '**' ? '.*' : part === '*' ? '[^/?#]*' : escapeRegExp(part)))
-    .join('');
-  return new RegExp(`${start}${pattern}(?:[?#].*)?$`);
-}
