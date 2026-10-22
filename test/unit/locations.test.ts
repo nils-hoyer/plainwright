@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { withSourceMap } from '../../src/locations';
+import { generatedStepLines, withSourceMap } from '../../src/locations';
+import { withGeneratedLines } from '../../src/reporter';
 
 const dir = path.join(__dirname, 'fixtures/locations');
 // A generated test file as bddgen writes it, next to its feature file.
@@ -54,5 +55,40 @@ describe('locations in feature files', () => {
 
   it('leaves files it does not understand alone', () => {
     expect(withSourceMap('test("x", () => {});', file, dir)).toBeUndefined();
+  });
+
+  it('finds the lines of a test in the generated file, for the Cucumber reporters', () => {
+    expect(generatedStepLines(code, 10, dir)).toEqual({
+      feature: path.join(dir, 'mistakes.feature'),
+      lines: new Map([
+        [4, 7],
+        [7, 11],
+        [8, 12],
+      ]),
+    });
+    expect(generatedStepLines(code, 99, dir)).toBeUndefined();
+  });
+
+  it('gives the Cucumber reporters a copy of the result with the lines in the generated file', () => {
+    const feature = path.join(dir, 'mistakes.feature');
+    const keyword = { file: path.join(dir, 'keywords.feature'), line: 4, column: 5 };
+    const inner = { title: 'inner', location: keyword, steps: [] as unknown[] };
+    const outer = {
+      title: 'outer',
+      location: { file: feature, line: 7, column: 5 },
+      steps: [inner],
+    };
+    const result = { status: 'passed', steps: [outer] };
+    const moved = withGeneratedLines(result as never, file, generatedStepLines(code, 10, dir)!);
+    const [step] = moved.steps;
+    expect(step.location).toEqual({ file, line: 11, column: 5 });
+    expect(step.title).toBe('outer');
+    expect(moved.status).toBe('passed');
+    // A step in a keyword file keeps its line, even where the feature has a step on that line.
+    expect(step.steps[0].location).toEqual(keyword);
+    expect(step.steps[0].parent).toBe(step);
+    // The HTML report gets the result as it was.
+    expect(outer.location.file).toBe(feature);
+    expect(result.steps[0]).toBe(outer);
   });
 });
