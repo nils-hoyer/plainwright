@@ -51,7 +51,7 @@ const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 const OPEN_URL = 'I open the url {string}';
 const OPEN_PAGE = 'I open the {string} page';
 const CHECK_PAGE = 'I am on the {string} page';
-const PAGE_STEPS = [OPEN_PAGE, CHECK_PAGE, 'I use the page object {string}'];
+const PAGE_STEPS = [OPEN_PAGE, CHECK_PAGE];
 
 /**
  * Checks feature files against the registered steps. Also checks loaded keywords and that

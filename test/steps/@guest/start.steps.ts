@@ -1,4 +1,4 @@
-import { defineStep } from '../../../src/index';
+import { defineStep, getPageDefinition } from '../../../src/index';
 
 // The folder name @guest limits this step to scenarios tagged @guest.
 // test/steps/@member/ defines the same wording for @member scenarios.
@@ -8,6 +8,6 @@ defineStep({
   example: 'I open the start page',
   category: 'Start page',
   fn: async ({ world }) => {
-    await world.page.goto(String(world.usePage('Login').url));
+    await world.page.goto(String(getPageDefinition('Login').url));
   },
 });

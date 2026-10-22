@@ -396,7 +396,7 @@ export function describeMissing(
       ? `If the element has no visible name, add an alias to ${pageFile}: ${alias}.`
       : pageName
         ? `If the element has no visible name, add an alias: definePage('${pageName}', { elements: { '${ref.name}': '<selector>' } }).`
-        : `If the element has no visible name, add an alias in the page's file in pages/, ${alias}, and open the page by name: I open the "…" page.`,
+        : `If the element has no visible name, add an alias to a file in pages/ whose "url" is this address: ${alias}.`,
   );
   return lines.join('\n');
 }

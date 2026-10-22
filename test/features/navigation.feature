@@ -32,8 +32,7 @@ Feature: Pages and navigation
     And I do not see the url containing "login"
     And I see the page title containing "Dash"
 
-  Scenario: Use the element names of a page without opening it
+  Scenario: Aliases apply on the page the browser shows, also when opened by its address
     Given I open the url "/orders.html"
-    And I use the page object "Orders"
     When I fill "1001" in the "Search" field
     Then I see the value "1001" in the "Search" field

@@ -160,6 +160,34 @@ describe('page files', () => {
     expect(schema.definitions.typedAlias.properties.type.enum).toEqual([...ELEMENT_TYPES]);
   });
 
+  it('give the aliases of the page whose address the browser shows', async () => {
+    const { library } = await folder({});
+    library.definePage('Orders', { url: '/orders', elements: { Search: '#search' } });
+    library.definePage('Order', { url: '/orders/*', elements: { Print: '.print' } });
+    library.definePage('Header', { elements: { Menu: '.menu', Search: '#header-search' } });
+    library.definePage('Step 1', { url: '/wizard', elements: { Next: '#next', Back: '#back' } });
+    library.definePage('Step 2', { url: '/wizard', elements: { Next: '#next', Done: '#done' } });
+    library.definePage('Other step', { url: '/wizard', elements: { Back: '.back' } });
+    let address = 'about:blank';
+    const page = { url: () => address, context: () => ({ on() {}, off() {} }) };
+    const world = new library.World(page as never, { baseURL: 'http://localhost:3000' });
+
+    address = 'http://localhost:3000/orders?sort=date';
+    expect(world.aliases()).toEqual({ Search: '#search', Menu: '.menu' });
+    expect(world.currentPage?.name).toBe('Orders');
+    address = 'http://localhost:3000/orders/1001';
+    expect(world.aliases()).toEqual({ Print: '.print', Menu: '.menu', Search: '#header-search' });
+    expect(world.currentPage?.name).toBe('Order');
+    address = 'http://localhost:3000/products';
+    expect(world.aliases()).toEqual({ Menu: '.menu', Search: '#header-search' });
+    expect(world.currentPage).toBeUndefined();
+    // Pages that share an address may repeat an alias, but not change it.
+    address = 'http://localhost:3000/wizard';
+    expect(() => world.aliases()).toThrow(
+      'The pages "Step 1" and "Other step" both apply at /wizard and give Back different aliases. Rename one of them.',
+    );
+  });
+
   it("are not loaded from an app's pages/ folder", async () => {
     const { dir } = await folder({
       'pages/index.tsx': 'export default function Home() {}',

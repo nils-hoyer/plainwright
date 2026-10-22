@@ -43,6 +43,8 @@ Adjust the paths below if this project keeps features or steps elsewhere.
   `the "Delete" button in the "Order 1001" row`, `the "Toggle" checkbox in the "Buy milk" list item`.
 - Open pages by name (`I open the "Login" page`) when the project defines them (`pages` in
   steps.json), otherwise by address relative to the base URL (`I open the url "/login"`).
+  After a click that leads to another page, check it with `I am on the "…" page`: it waits for
+  the new address, and the aliases of that page apply from then on.
 - Checks start with `I see` / `I do not see` and wait on their own. There are no fixed waits;
   for an element that takes long, write `I see the "…" heading within "30" seconds`.
 - Every scenario checks something: it ends with at least one `I see` step.
