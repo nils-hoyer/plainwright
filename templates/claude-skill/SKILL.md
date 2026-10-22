@@ -63,7 +63,9 @@ Adjust the paths below if this project keeps features or steps elsewhere.
 - Data a test needs first is a `Given` keyword such as `there is an order for "<item>"`: it
   creates the data with `I create "…" at "/api/…" with "{…}"` and removes it with
   `I delete "…" after the test`. Do not create test data by clicking through other screens when
-  the app has an API for it.
+  the app has an API for it. Requests (`I create …`, `I send a "…" request`,
+  `I see the response …`) belong in keywords like this one, not in scenarios: a scenario says
+  what a user does and sees.
 - Do not invent steps. If nothing fits, propose a keyword. A TypeScript step (`defineStep()` with
   `description` and `example`) is only for what existing steps cannot express; ask first.
 

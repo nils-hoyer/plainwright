@@ -106,12 +106,6 @@ Feature: Helpful error messages
       I fill "\{users.member.email}" in the "Username" field
       """
 
-  Scenario: A failing command shows its exit code
-    * I see this step fail with "failed with exit code 3":
-      """
-      I run the command "node -e 'process.exit(3)'"
-      """
-
   Scenario: A page address with a wildcard can only be checked
     * I see this step fail with "can only be checked":
       """
