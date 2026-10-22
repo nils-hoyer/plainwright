@@ -57,10 +57,13 @@ A step finds an element by what the user sees. Some elements show nothing usable
 button, a field without a label. Give them a name in the page's file under `elements`. Tests use
 the names, and the selector stays in the page file.
 
-`Search` works with any element type: `the "Search" field`. The second key names the type too,
-so only `the "Settings" button` uses the alias, and a "Settings" dialog is still found by its
-title. A selector is CSS, or any Playwright selector such as `text=Total`. For anything more
-specific, `definePage()` in TypeScript also takes a function that returns a Locator (see
+`Search` works with any element type: `the "Search" field`. `Settings` names the type too, so
+only `the "Settings" button` uses the alias, and a "Settings" dialog is still found by its
+title; VS Code suggests the types (see [below](#suggestions-in-vs-code)). When one name stands
+for elements of several types, list them: `"Total": [{ "type": "cell", "selector": "#total" },
+{ "type": "heading", "selector": "h2" }]`. A selector is CSS, or any Playwright selector such as
+`text=Total`. For anything more specific, `definePage()` in TypeScript also takes a function
+that returns a Locator (see
 [steps in TypeScript](writing-steps.md#pages-and-data-in-typescript)).
 
 Use aliases sparingly: an element without a visible name is usually also a problem for people
@@ -74,7 +77,7 @@ no alias: `the "Delete" button in the "Order 1001" row`.
   "url": "/orders",
   "elements": {
     "Search": "[data-testid=search]",
-    "\"Settings\" button": "[data-testid=settings]"
+    "Settings": { "type": "button", "selector": "[data-testid=settings]" }
   }
 }
 ```

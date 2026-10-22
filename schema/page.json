@@ -6,7 +6,9 @@
   "type": "object",
   "required": ["name"],
   "properties": {
-    "$schema": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
     "name": {
       "type": "string",
       "minLength": 1,
@@ -20,9 +22,64 @@
     },
     "elements": {
       "type": "object",
-      "description": "Names for elements without a usable visible name (aliases). The key is the name used in feature files, or name and type as written in the step (\"\\\"Settings\\\" button\"); the value is a selector.",
-      "additionalProperties": { "type": "string" }
+      "description": "Names for elements without a usable visible name (aliases). The key is the name used in feature files: \"Search\" for the \"Search\" field. The value is a selector, or { \"type\": \"button\", \"selector\": \"…\" } when only that element type should use it, or a list of those for one name with several types.",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "A selector that every element type uses: CSS, or any Playwright selector such as text=Total."
+          },
+          {
+            "$ref": "#/definitions/typedAlias"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/typedAlias"
+            },
+            "minItems": 1
+          }
+        ]
+      }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "definitions": {
+    "typedAlias": {
+      "type": "object",
+      "required": ["selector"],
+      "properties": {
+        "type": {
+          "enum": [
+            "button",
+            "link",
+            "field",
+            "checkbox",
+            "radio button",
+            "switch",
+            "dropdown",
+            "option",
+            "heading",
+            "tab",
+            "dialog",
+            "menu item",
+            "image",
+            "section",
+            "list",
+            "list item",
+            "row",
+            "cell",
+            "message",
+            "element"
+          ],
+          "description": "The element type that uses the selector: only the \"Settings\" button, not a \"Settings\" dialog. Without it, every type does."
+        },
+        "selector": {
+          "type": "string",
+          "description": "CSS, or any Playwright selector such as text=Total."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

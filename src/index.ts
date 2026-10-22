@@ -5,7 +5,7 @@ export type { KeywordsFixtures, KeywordsOptions } from './fixtures';
 export { World } from './world';
 export type { DialogRecord, WorldOptions } from './world';
 export { definePage, definePages, getPageDefinition, getPageDefinitions } from './pages';
-export type { PageDefinition, PageOptions } from './pages';
+export type { PageDefinition, PageOptions, TypedAlias } from './pages';
 export { ElementRef, ELEMENT_TYPES, locate } from './elements';
 export type { ElementAlias, ElementType, Scope } from './elements';
 export { defineStep, findStep, findSteps, getSteps } from './registry';

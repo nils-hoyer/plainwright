@@ -1,7 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'tinyglobby';
-import type { ElementAlias } from './elements';
+import { ELEMENT_TYPES, type ElementAlias, type ElementType } from './elements';
+
+/**
+ * An alias for one element type: `{ type: 'button', selector: '[data-testid=settings]' }` makes
+ * only `the "Settings" button` use the selector. Without `type`, every type does.
+ */
+export type TypedAlias = { type?: ElementType; selector: ElementAlias };
 
 export type PageOptions = {
   /**
@@ -11,11 +17,12 @@ export type PageOptions = {
   url?: string | RegExp;
   /**
    * Aliases for elements without a usable visible name. The key is the name used in feature
-   * files (`'Search'`), or name and type as written in the step (`'"Settings" button'`) when
-   * the same name means different elements. Value: a selector string, or a function that
-   * returns a Locator.
+   * files (`'Search'`). The value is a selector string or a function that returns a Locator, or
+   * `{ type: 'button', selector }` when only that element type should use it; a list of those
+   * when the same name means elements of different types. A key with name and type as written
+   * in the step (`'"Settings" button'`) works too.
    */
-  elements?: Record<string, ElementAlias>;
+  elements?: Record<string, ElementAlias | TypedAlias | TypedAlias[]>;
 };
 
 export type PageDefinition = {
@@ -54,14 +61,47 @@ export function definePage(
         ' Page names must be different.',
     );
   }
+  const elements = aliasesByLabel(options.elements ?? {}, (message) => {
+    throw new Error(`[plainwright] ${source ? `${source}: ` : `The page "${name}": `}${message}`);
+  });
   if (source) sources.set(name, source);
   const page: PageDefinition = Object.freeze({
     name,
     url: options.url,
-    elements: Object.freeze({ ...options.elements }),
+    elements: Object.freeze(elements),
   });
   pages.set(name, page);
   return page;
+}
+
+/**
+ * The aliases as the lookup uses them: `{ Settings: { type: 'button', selector } }` becomes
+ * `{ '"Settings" button': selector }`; the other forms stay as they are.
+ */
+function aliasesByLabel(
+  elements: NonNullable<PageOptions['elements']>,
+  fail: (message: string) => never,
+): Record<string, ElementAlias> {
+  const result: Record<string, ElementAlias> = {};
+  const add = (key: string, alias: ElementAlias) => {
+    if (Object.hasOwn(result, key)) fail(`The element ${key} has two aliases.`);
+    result[key] = alias;
+  };
+  for (const [name, value] of Object.entries(elements)) {
+    if (typeof value === 'string' || typeof value === 'function') {
+      add(name, value);
+      continue;
+    }
+    for (const { type, selector } of [value].flat()) {
+      if (type !== undefined && !ELEMENT_TYPES.includes(type)) {
+        fail(
+          `"${type}" is not an element type, in the alias "${name}". Use one of: ${ELEMENT_TYPES.join(', ')}.`,
+        );
+      }
+      add(type ? `"${name}" ${type}` : name, selector);
+    }
+  }
+  return result;
 }
 
 /** The file in a pages folder the page comes from, relative to the project folder, if any. */
@@ -132,21 +172,33 @@ function definePageFile(file: string): PageDefinition {
     return fail('The "url" of the page must be text, e.g. "/login".');
   }
   const elements = page.elements;
-  if (
-    elements !== undefined &&
-    (!isObject(elements) || Object.values(elements).some((value) => typeof value !== 'string'))
-  ) {
-    return fail('Write "elements" as { "Name": "selector" }.');
+  if (elements !== undefined && !isObject(elements)) {
+    return fail(`Write "elements" as { "Name": "selector" }, or ${TYPED_ALIAS}.`);
+  }
+  for (const [name, value] of Object.entries(elements ?? {})) {
+    if (typeof value === 'string') continue;
+    const items = [value].flat();
+    const valid = items.every(
+      (item) =>
+        isObject(item) &&
+        typeof item.selector === 'string' &&
+        (item.type === undefined || typeof item.type === 'string') &&
+        Object.keys(item).every((key) => key === 'type' || key === 'selector'),
+    );
+    if (!valid || !items.length) {
+      return fail(`Write the alias "${name}" as "selector", or ${TYPED_ALIAS}.`);
+    }
   }
   loadedFiles.add(file);
   return definePage(
     page.name,
-    { url: page.url, elements: elements as Record<string, string> | undefined },
+    { url: page.url, elements: elements as PageOptions['elements'] },
     rel,
   );
 }
 
 const PAGE_KEYS = ['$schema', 'name', 'url', 'elements'];
+const TYPED_ALIAS = '{ "type": "button", "selector": "selector" } for one element type';
 const PAGE_KEYS_TEXT = '"name", "url" and "elements"';
 
 /** Whether the address has `*`, so it can only be checked, not opened. */
