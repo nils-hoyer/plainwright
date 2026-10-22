@@ -33,6 +33,11 @@ Feature: Element types
     * I uncheck the "Notifications" switch
     * I see the "Notifications" switch is not checked
 
+  Scenario: A name with a part that changes, found by its alias
+    * I open the "Widgets" page
+    * I see the "Cart" button
+    * I see the text "Cart (3)" in the "Cart" button
+
   Scenario: An SVG with role img is an image
     * I open the "Widgets" page
     * I see the "Company logo" image

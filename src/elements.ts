@@ -114,7 +114,7 @@ type ElementTypeSpec = {
    */
   roles: readonly AriaRole[];
   /** A lookup other than by role and accessible name. */
-  locate?: (scope: Scope, name: string, exact: boolean) => Locator;
+  locate?: (scope: Scope, name: string) => Locator;
   /** What the hint and `inspect` show for a node of this type. Default: its accessible name. */
   label?: (node: AriaNode) => string;
   plural: string;
@@ -135,10 +135,10 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   },
   field: {
     roles: ['textbox', 'searchbox', 'spinbutton'],
-    locate: (scope, name, exact) =>
+    locate: (scope, name) =>
       scope
-        .getByLabel(name, { exact })
-        .or(scope.getByPlaceholder(name, { exact }))
+        .getByLabel(name, { exact: true })
+        .or(scope.getByPlaceholder(name, { exact: true }))
         .and(scope.locator(FIELD_SELECTOR)),
     plural: 'Fields',
     lookup:
@@ -195,8 +195,8 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   },
   image: {
     roles: ['img'],
-    locate: (scope, name, exact) =>
-      scope.getByAltText(name, { exact }).or(scope.getByRole('img', { name, exact })),
+    locate: (scope, name) =>
+      scope.getByAltText(name, { exact: true }).or(scope.getByRole('img', { name, exact: true })),
     plural: 'Images',
     lookup: "an image with this alternative text or name (`getByAltText`, `getByRole('img')`)",
   },
@@ -214,14 +214,14 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   // is the text of all its cells). These types match by the text they contain.
   'list item': {
     roles: ['listitem'],
-    locate: (scope, name, exact) => containing(scope.getByRole('listitem'), name, exact),
+    locate: (scope, name) => containing(scope.getByRole('listitem'), name),
     label: firstText,
     plural: 'List items',
     lookup: "a list item that contains this text (`getByRole('listitem')`)",
   },
   row: {
     roles: ['row'],
-    locate: (scope, name, exact) => containing(scope.getByRole('row'), name, exact),
+    locate: (scope, name) => containing(scope.getByRole('row'), name),
     label: (node) =>
       node.descendants.find((d) => CELL_ROLES.includes(d.role) && d.name)?.name ?? '',
     plural: 'Rows',
@@ -234,8 +234,8 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   },
   message: {
     roles: ['alert', 'status'],
-    locate: (scope, name, exact) =>
-      containing(scope.getByRole('alert').or(scope.getByRole('status')), name, exact),
+    locate: (scope, name) =>
+      containing(scope.getByRole('alert').or(scope.getByRole('status')), name),
     label: firstText,
     plural: 'Messages',
     lookup:
@@ -243,7 +243,7 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
   },
   element: {
     roles: [],
-    locate: (scope, name, exact) => scope.getByText(name, { exact }),
+    locate: (scope, name) => scope.getByText(name, { exact: true }),
     plural: 'Elements',
     lookup:
       'any element showing exactly this text; mostly for names your team defined, called aliases (`getByText`)',
@@ -290,12 +290,12 @@ export const LOOKUP_DESCRIPTION = mapTypes((spec) => spec.lookup);
 const CELL_ROLES = ['cell', 'gridcell', 'columnheader', 'rowheader'];
 
 /**
- * Elements that contain the text: with the same capitals when `exact`, else ignoring them.
- * Spaces match any whitespace or none, because the text of table cells may run together.
+ * Elements that contain the text, with the same capitals. Spaces match any whitespace or none,
+ * because the text of table cells may run together.
  */
-function containing(elements: Locator, text: string, exact: boolean): Locator {
+function containing(elements: Locator, text: string): Locator {
   const words = text.trim().split(/\s+/).map(escapeRegExp);
-  return elements.filter({ hasText: new RegExp(words.join('\\s*'), exact ? '' : 'i') });
+  return elements.filter({ hasText: new RegExp(words.join('\\s*')) });
 }
 
 /** The first text in the node, e.g. `Buy milk` for a list item with a checkbox and a label. */
@@ -314,21 +314,21 @@ function mapTypes<T>(fn: (spec: ElementTypeSpec) => T): Record<ElementType, T> {
 }
 
 export type LocateOptions = {
-  exact: boolean;
   aliases?: Readonly<Record<string, ElementAlias>>;
 };
 
 /**
  * Builds the Locator for an element reference, inside its container if it names one.
- * Order: alias on the current page → lookup by role, label or text.
+ * Order: alias on the current page → lookup by role, label or text. Names match exactly, with
+ * the same capitals; list items, rows and messages match text they contain.
  * An alias key is the name alone (`'Settings'`) and covers every element type. Containers are
  * looked up the same way.
  */
-export function locate(scope: Scope, ref: ElementRef, options: LocateOptions): Locator {
+export function locate(scope: Scope, ref: ElementRef, options: LocateOptions = {}): Locator {
   const within = ref.container ? locate(scope, ref.container, options) : scope;
   const alias = findAlias(options.aliases, ref.name);
   if (alias !== undefined) return typeof alias === 'string' ? within.locator(alias) : alias(within);
-  return locateByType(within, ref, options.exact);
+  return locateByType(within, ref);
 }
 
 export function findAlias(
@@ -343,12 +343,12 @@ export function ownEntry<T>(record: Readonly<Record<string, T>> | undefined, key
   return record && Object.hasOwn(record, key) ? record[key] : undefined;
 }
 
-export function locateByType(scope: Scope, ref: ElementRef, exact: boolean): Locator {
+export function locateByType(scope: Scope, ref: ElementRef): Locator {
   const { name, type } = ref;
   const spec = ELEMENT_TYPE_SPECS[type];
-  if (spec.locate) return spec.locate(scope, name, exact);
+  if (spec.locate) return spec.locate(scope, name);
   return spec.roles
-    .map((role) => scope.getByRole(role, { name, exact }))
+    .map((role) => scope.getByRole(role, { name, exact: true }))
     .reduce((found, other) => found.or(other));
 }
 

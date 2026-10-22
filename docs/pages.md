@@ -89,6 +89,20 @@ The icon-only button opens a dialog with the title "Settings". Named "Settings",
 also stand for `the "Settings" dialog`, so the button gets a name of its own, and the dialog is
 still found by its title.
 
+### Names that change
+
+A name with a part that changes, such as the counter in a "Cart (3)" button, cannot be written
+in a test that should pass with any count. Its alias finds the element by the start of its name,
+with a Playwright selector: `role=button[name=/^Cart/]` is a button whose name starts with
+"Cart". Tests then write `the "Cart" button`, and `I see the text "Cart (3)" in the "Cart"
+button` checks the count.
+
+```json
+"elements": {
+  "Cart": "role=button[name=/^Cart/]"
+}
+```
+
 ### The current page
 
 An alias applies while its page is the current page. `I open the "…" page` and
