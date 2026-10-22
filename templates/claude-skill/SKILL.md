@@ -43,8 +43,8 @@ Adjust the paths below if this project keeps features or steps elsewhere.
   `the "Delete" button in the "Order 1001" row`, `the "Toggle" checkbox in the "Buy milk" list item`.
 - Open pages by name (`I open the "Login" page`) when the project defines them (`pages` in
   steps.json), otherwise by address relative to the base URL (`I open the url "/login"`).
-- Checks start with `I see` / `I do not see` and wait on their own. Never add fixed waits
-  (`I wait "2" seconds`).
+- Checks start with `I see` / `I do not see` and wait on their own. There are no fixed waits;
+  for an element that takes long, write `I see the "…" heading within "30" seconds`.
 - Every scenario checks something: it ends with at least one `I see` step.
 - Values from elsewhere are written in braces inside the quotes: `"{users.admin.email}"` from
   `data/users.json`, `"{env.TEST_PASSWORD}"` for secrets, `"{order.id}"` for a value an earlier

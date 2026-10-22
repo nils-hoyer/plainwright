@@ -70,6 +70,7 @@ describe('defineKeywords', () => {
       `${file}:5: No step matches "I clik the "Search" button". Did you mean "I click the "Search" button"?`,
       `${file}:3: The parameter <term> of "I search for "<term>"" is not used in any step.`,
       `${file}:8: The parameter <email> of "I sign up as "<name>" with "<email>"" is not used in any step.`,
+      `${file}:13: "I wait "<seconds>" seconds" was removed in 0.3.0. Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds.`,
     ]);
   });
 

@@ -3,6 +3,7 @@ import path from 'node:path';
 import { FeatureStep, featureSteps, parseGherkin, scenarioSteps } from './gherkin';
 import { ElementRef } from './elements';
 import { checkKeywords, fillPlaceholders, getKeywords, keywordOf, sameWording } from './keywords';
+import { removedMessage } from './removed';
 import { appPagesFile, getPageDefinitions, isUrlPattern } from './pages';
 import {
   findSteps,
@@ -102,6 +103,11 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         if (elsewhere.length) {
           const needed = [...new Set(elsewhere.map(({ step }) => step.tags.join(' and ')))];
           add('error', 'undefined-step', onlyForTagsMessage(text, needed.join(' or ')));
+          continue;
+        }
+        const removed = removedMessage(text);
+        if (removed) {
+          add('error', 'undefined-step', removed);
           continue;
         }
         const suggestion = suggestSteps(text)[0];
