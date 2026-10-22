@@ -136,6 +136,59 @@ export default defineConfig({
 BASE_URL=https://staging.example.com npm test
 ```
 
+## Other browsers and phones
+
+`defineConfig()` runs the tests in Chromium. For Firefox, WebKit (the engine of Safari) or a
+phone, add `projects` to `playwright.config.ts`: each project runs the tests once, in its browser.
+Your `projects` replace the default one, so the list names Chromium too. Playwright's `devices`
+have the settings of common browsers and phones; a phone such as `devices['iPhone 13']` has its
+screen size, a touch screen and a mobile browser.
+
+Scenarios that only make sense on a phone, such as a menu that only small screens show, get a tag
+such as `@mobile`. The phone project runs only those (`grep`), and the others leave them out
+(`grepInvert`). Without the tags, every scenario runs on every project.
+
+```ts
+import { devices } from '@playwright/test';
+import { defineConfig } from '@nils.hoyer/plainwright/config';
+
+export default defineConfig({
+  baseURL: 'http://localhost:3000',
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] }, grepInvert: /@mobile/ },
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] }, grepInvert: /@mobile/ },
+    { name: 'webkit', use: { ...devices['Desktop Safari'] }, grepInvert: /@mobile/ },
+    { name: 'phone', use: { ...devices['iPhone 13'] }, grep: /@mobile/ },
+  ],
+});
+```
+
+```gherkin
+@mobile
+Feature: Menu on a phone
+
+  Scenario: The menu opens with a tap
+    * I open the url "/"
+    * I tap the "Menu" button
+    * I see the "Orders" link
+```
+
+`init` installs only Chromium. Install the other browsers once, and add them to the install step
+of the [CI workflow](#running-in-ci): `npx playwright install --with-deps chromium firefox webkit`.
+An iPhone runs in WebKit, an Android phone such as `devices['Pixel 7']` in Chromium. To run one
+project, name it:
+
+```bash
+npx playwright install firefox webkit
+npm test -- --project firefox
+```
+
+A window size of your own goes into `use`, for example
+`use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } }` for a project that
+checks the layout of a tablet. There is no step that changes the window size during a test: a
+phone's touch screen and mobile browser are set when the browser opens, so such a step could only
+make the window smaller.
+
 ## Running in CI
 
 The tests run like any Playwright tests; below is a GitHub Actions workflow. Secrets come from
