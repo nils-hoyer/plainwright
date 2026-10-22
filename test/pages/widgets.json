@@ -1,4 +1,7 @@
 {
   "name": "Widgets",
-  "url": "/widgets.html"
+  "url": "/widgets.html",
+  "elements": {
+    "Cart": "role=button[name=/^Cart/]"
+  }
 }

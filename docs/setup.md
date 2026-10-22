@@ -89,7 +89,6 @@ export default defineConfig({
 export default defineConfig({
   baseURL: 'http://localhost:3000',
   webServer: { command: 'npm run start', url: 'http://localhost:3000' },
-  use: { exactNames: false },
 });
 ```
 
@@ -118,7 +117,6 @@ Playwright's `expect.timeout`.
 | Option          | Default                                            | Meaning                                                                                                                |
 | --------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `baseURL`       | none                                               | Address of the app. Page addresses and `I open the url "/…"` are relative to it.                                       |
-| `exactNames`    | `true`                                             | Element names must match exactly, with the same capitals. `false` also accepts part of a name, any capitals.           |
 | `actionTimeout` | 10 s (`defineConfig()`), else none                 | How long a click or fill waits for its element. A missing element fails soon and the error lists what the page offers. |
 | `trace`         | `retain-on-failure` (`defineConfig()`), else `off` | `retain-on-failure` keeps a replay of every failed test in the report.                                                 |
 

@@ -89,7 +89,8 @@ describe('{element} parameter', () => {
 });
 
 describe('locate', () => {
-  const exact = { exact: true };
+  // Names match exactly, with the same capitals.
+  const exact = {};
 
   it.each([
     ['button', `getByRole("button", {"name":"X","exact":true})`],
@@ -131,25 +132,19 @@ describe('locate', () => {
     );
   });
 
-  it('can match names as substrings', () => {
-    expect(describeLocator(new ElementRef('Log', 'button'), { exact: false })).toBe(
-      `getByRole("button", {"name":"Log","exact":false})`,
-    );
-  });
-
   it('prefers an alias of the current page', () => {
     const aliases = { Search: '[data-testid="search"]' };
-    expect(describeLocator(new ElementRef('Search', 'field'), { ...exact, aliases })).toBe(
+    expect(describeLocator(new ElementRef('Search', 'field'), { aliases })).toBe(
       'locator("[data-testid=\\"search\\"]")',
     );
   });
 
   it('uses an alias for every element type', () => {
     const aliases = { Settings: '#settings' };
-    expect(describeLocator(new ElementRef('Settings', 'button'), { ...exact, aliases })).toBe(
+    expect(describeLocator(new ElementRef('Settings', 'button'), { aliases })).toBe(
       'locator("#settings")',
     );
-    expect(describeLocator(new ElementRef('Settings', 'dialog'), { ...exact, aliases })).toBe(
+    expect(describeLocator(new ElementRef('Settings', 'dialog'), { aliases })).toBe(
       'locator("#settings")',
     );
   });
@@ -164,9 +159,7 @@ describe('locate', () => {
   it('uses aliases for containers too', () => {
     const ref = new ElementRef('Delete', 'button', new ElementRef('Orders', 'section'));
     const aliases = { Orders: '#orders', Delete: '.delete' };
-    expect(describeLocator(ref, { ...exact, aliases })).toBe(
-      'locator("#orders").locator(".delete")',
-    );
+    expect(describeLocator(ref, { aliases })).toBe('locator("#orders").locator(".delete")');
   });
 
   it.each([
@@ -176,9 +169,6 @@ describe('locate', () => {
   ] as const)('finds a %s by the text it contains', (type, elements) => {
     expect(describeLocator(new ElementRef('Buy milk', type), exact)).toBe(
       `${elements}.filter({"hasText":/Buy\\s*milk/})`,
-    );
-    expect(describeLocator(new ElementRef('Buy milk', type), { exact: false })).toBe(
-      `${elements}.filter({"hasText":/Buy\\s*milk/i})`,
     );
   });
 
@@ -190,7 +180,7 @@ describe('locate', () => {
 
   it('calls alias functions with the scope', () => {
     const aliases = { Delete: (scope: Scope) => scope.getByText('row 1') };
-    expect(describeLocator(new ElementRef('Delete', 'button'), { ...exact, aliases })).toBe(
+    expect(describeLocator(new ElementRef('Delete', 'button'), { aliases })).toBe(
       'getByText("row 1")',
     );
   });

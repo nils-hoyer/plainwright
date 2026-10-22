@@ -3,10 +3,8 @@ import { createBdd, test as bddTest } from 'playwright-bdd';
 import { keptSession } from './session';
 import { World } from './world';
 
-export type KeywordsOptions = {
-  /** Match element names exactly (default `true`). Set `use: { exactNames: false }` for substring matches. */
-  exactNames: boolean;
-};
+/** Plainwright's options under `use`. There are none since `exactNames` was removed in 0.3.0. */
+export type KeywordsOptions = Record<never, never>;
 
 export type KeywordsFixtures = {
   world: World;
@@ -29,13 +27,13 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
       },
       { scope: 'worker', auto: true, box: true },
     ],
-    exactNames: [true, { option: true }],
     // A scenario starts with the session that a @setup scenario kept (src/session.ts).
     storageState: async ({ storageState }, use, testInfo) => {
       await use(keptSession(testInfo.tags) ?? storageState);
     },
-    world: async ({ page, baseURL, exactNames }, use) => {
-      const world = new World(page, { baseURL, exactNames });
+    world: async ({ page, baseURL }, use, testInfo) => {
+      checkOptions(testInfo.project.use);
+      const world = new World(page, { baseURL });
       await use(world);
       try {
         await world.runAfterTest();
@@ -65,4 +63,16 @@ export function useTest<T extends TestType<any, any>>(projectTest: T): T {
   // to every feature and makes that one the most extended.
   createBdd(projectTest).BeforeAll({ name: 'use project fixtures' }, () => {});
   return projectTest;
+}
+
+/** Options that Plainwright no longer has: fail with what replaces them. */
+export function checkOptions(use: object | undefined) {
+  if (use && 'exactNames' in use) {
+    throw new Error(
+      '[plainwright] exactNames was removed in 0.3.0: element names always match exactly, with ' +
+        'the same capitals, so a step means the same in every project. Remove it from use in ' +
+        'playwright.config.ts. For a name with a part that changes, such as "Cart (3)", add an ' +
+        'alias: see docs/pages.md.',
+    );
+  }
 }
