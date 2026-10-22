@@ -142,7 +142,8 @@ The tests run like any Playwright tests; below is a GitHub Actions workflow. Sec
 the repository's secrets, as environment variables; there is no `.env` file in CI. The report
 does not open by itself in CI: download the `playwright-report` artifact of the run and open its
 `index.html`. If your app must run for the tests, start it with `webServer` in the
-configuration (see [above](#the-configuration)).
+configuration (see [above](#the-configuration)). For JUnit or Cucumber reports, which CI servers
+and test management tools read, see [reports for CI](reports-for-ci.md).
 
 Screenshots to compare against, from `I see the page matches the screenshot "…"`, are stored
 per operating system (see [writing tests](writing-tests.md#checks-against-a-screenshot)). CI on
