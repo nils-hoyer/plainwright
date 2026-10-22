@@ -166,12 +166,12 @@ For special cases. `lint` lists where they are used.
 
 ### Downloads
 
-| Step                                             | What it does                                                              | Example                                                   |
-| ------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `I download the file with the {element}`         | Clicks the element and waits until the file it offers has downloaded.     | `I download the file with the "Export" button`            |
-| `I see the downloaded file {string}`             | Checks the file name of the last download.                                | `I see the downloaded file "orders.csv"`                  |
-| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals. | `I see the text "Total" in the downloaded file`           |
-| `I save the downloaded file to {string}`         | Saves the last download at this path, relative to the project folder.     | `I save the downloaded file to "test-results/report.csv"` |
+| Step                                              | What it does                                                                                                                                     | Example                                                 |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| `I download the file with the {element}`          | Clicks the element and waits until the file it offers has downloaded.                                                                            | `I download the file with the "Export" button`          |
+| `I see the downloaded file {string}`              | Checks the file name of the last download.                                                                                                       | `I see the downloaded file "orders.csv"`                |
+| `I see the text {string} in the downloaded file`  | Checks that the last download contains this text, with the same capitals.                                                                        | `I see the text "Total" in the downloaded file`         |
+| `I upload the downloaded file with the {element}` | Chooses the last download, with its own file name, in the file field or in the file dialog the element opens, such as to import an export again. | `I upload the downloaded file with the "Import" button` |
 
 ### Test data and APIs
 
@@ -221,3 +221,4 @@ Steps a release removed, with what to write instead. `lint` says the same where 
 | `I see the attribute {string} containing {string} on the {element}`     | 0.3.0      | For a link: I see the "…" link leads to "/…". For a menu or an accordion: I see the "…" button is expanded. For a check no step has, write a step in TypeScript (docs/writing-steps.md).                                              |
 | `I see the class {string} on the {element}`                             | 0.3.0      | A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".                                       |
 | `I do not see the class {string} on the {element}`                      | 0.3.0      | A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".                                       |
+| `I save the downloaded file to {string}`                                | 0.3.0      | To import the file again: I upload the downloaded file with the "Import" button. To check it: I see the text "…" in the downloaded file. Steps no longer write files at a path of their own.                                          |

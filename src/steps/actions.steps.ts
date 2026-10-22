@@ -196,7 +196,8 @@ step({
   },
 });
 
-async function upload(world: World, element: ElementRef, files: string[]) {
+/** Chooses the files, with paths relative to the project folder, in the file field or dialog. */
+export async function upload(world: World, element: ElementRef, files: string[]) {
   const paths = files.map((file) => path.resolve(process.cwd(), file));
   await world.withElement(element, async (el) => {
     const isFileInput = await el.evaluate(

@@ -1,8 +1,8 @@
 import fs from 'node:fs';
-import path from 'node:path';
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import type { ElementRef } from '../elements';
 import type { World } from '../world';
+import { upload } from './actions.steps';
 import { category } from './builtin';
 
 const step = category('Downloads');
@@ -48,12 +48,17 @@ step({
 });
 
 step({
-  pattern: 'I save the downloaded file to {string}',
+  pattern: 'I upload the downloaded file with the {element}',
   level: 'advanced',
-  description: 'Saves the last download at this path, relative to the project folder.',
-  example: 'I save the downloaded file to "test-results/report.csv"',
-  fn: async ({ world }, filePath: string) => {
-    await lastDownload(world).saveAs(path.resolve(process.cwd(), filePath));
+  description:
+    'Chooses the last download, with its own file name, in the file field or in the file dialog the element opens, such as to import an export again.',
+  example: 'I upload the downloaded file with the "Import" button',
+  fn: async ({ world }, element: ElementRef) => {
+    const download = lastDownload(world);
+    // Playwright keeps a download under a random name; an import may need the real one.
+    const file = test.info().outputPath('downloads', download.suggestedFilename());
+    await download.saveAs(file);
+    await upload(world, element, [file]);
   },
 });
 
