@@ -14,6 +14,7 @@ import {
   suggestionFor,
   suggestSteps,
 } from './registry';
+import { SETUP_STEPS, SETUP_TAG } from './session';
 import { rememberedName } from './steps/builtin';
 import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
@@ -37,7 +38,8 @@ export type LintMessage = {
     | 'unknown-page'
     | 'page-address'
     | 'unknown-value'
-    | 'remember-name';
+    | 'remember-name'
+    | 'setup-step';
   message: string;
 };
 
@@ -191,6 +193,13 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       if (name !== undefined && !referencesIn(name).length) {
         const problem = checkRememberName(name);
         if (problem) add('error', 'remember-name', problem);
+      }
+      if (SETUP_STEPS.includes(step.pattern) && !tags.includes(SETUP_TAG)) {
+        add(
+          'error',
+          'setup-step',
+          `"${text}" only works in a scenario tagged ${SETUP_TAG}, which runs before the others when the configuration has setup: true.`,
+        );
       }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {

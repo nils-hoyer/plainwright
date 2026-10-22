@@ -43,4 +43,56 @@ describe('defineConfig', () => {
       [plainwrightReporter, { $type: 'html', outputFile: 'reports/cucumber.html' }],
     ]);
   });
+
+  it('runs the @setup scenarios first with setup: true, in the browser of the first project', () => {
+    const chrome = { defaultBrowserType: 'chromium' };
+    expect(defineConfig({ bdd: { outputDir: '.gen-5' }, setup: true }).projects).toEqual([
+      { name: 'setup', grep: /@setup(?![\w-])/, use: expect.objectContaining(chrome) },
+      {
+        name: 'chromium',
+        use: expect.objectContaining(chrome),
+        dependencies: ['setup'],
+        grepInvert: [/@setup(?![\w-])/],
+      },
+    ]);
+    const { projects } = defineConfig({
+      bdd: { outputDir: '.gen-6' },
+      setup: true,
+      projects: [
+        { name: 'firefox', use: { browserName: 'firefox' }, grepInvert: /@mobile/ },
+        { name: 'phone', grep: /@mobile/, dependencies: ['seed'] },
+      ],
+    });
+    expect(
+      projects?.map(({ name, use, grep, grepInvert, dependencies }) => ({
+        name,
+        use,
+        grep,
+        grepInvert,
+        dependencies,
+      })),
+    ).toEqual([
+      { name: 'setup', use: { browserName: 'firefox' }, grep: /@setup(?![\w-])/ },
+      {
+        name: 'firefox',
+        use: { browserName: 'firefox' },
+        grepInvert: [/@mobile/, /@setup(?![\w-])/],
+        dependencies: ['setup'],
+      },
+      {
+        name: 'phone',
+        grep: /@mobile/,
+        grepInvert: [/@setup(?![\w-])/],
+        dependencies: ['seed', 'setup'],
+      },
+    ]);
+    // The tag, not tags that start with it.
+    expect('Seed @setup-data'.match(projects![0].grep as RegExp)).toBeNull();
+  });
+
+  it('refuses setup: true next to a project named setup', () => {
+    expect(() =>
+      defineConfig({ bdd: { outputDir: '.gen-7' }, setup: true, projects: [{ name: 'setup' }] }),
+    ).toThrow('setup: true adds a project named "setup"');
+  });
 });
