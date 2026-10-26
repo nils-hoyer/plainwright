@@ -70,8 +70,8 @@ and load it with `definePages('<folder>')` in a file in `steps/`.
 
 `playwright.config.ts` needs one line besides the address of your app. `defineConfig()` sets up
 what Plainwright needs: tests in `features/`, your own steps (if any) in `steps/`,
-Plainwright's ready-made steps, Chromium, the [options](#options), and a "Fix with AI" prompt
-for failed tests in the report. Every
+Plainwright's ready-made steps, Chromium ([other browsers](#other-browsers-and-phones)), the
+[options](#options), and a "Fix with AI" prompt for failed tests in the report. Every
 [Playwright option](https://playwright.dev/docs/test-configuration) can be added or changed, for
 example `webServer` to start your app, as in the second example. The table lists the keys
 `defineConfig()` adds.
@@ -175,8 +175,10 @@ Feature: Menu on a phone
 
 `init` installs only Chromium. Install the other browsers once, and add them to the install step
 of the [CI workflow](#running-in-ci): `npx playwright install --with-deps chromium firefox webkit`.
-An iPhone runs in WebKit, an Android phone such as `devices['Pixel 7']` in Chromium. To run one
-project, name it:
+An iPhone runs in WebKit, an Android phone such as `devices['Pixel 7']` in Chromium. Screenshots
+to compare against are stored per project, such as `start-firefox-linux.png` next to
+`start-chromium-linux.png`, so the first run of a new project stores its own (see
+[writing tests](writing-tests.md#checks-against-a-screenshot)). To run one project, name it:
 
 ```bash
 npx playwright install firefox webkit
@@ -187,7 +189,7 @@ A window size of your own goes into `use`, for example
 `use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } }` for a project that
 checks the layout of a tablet. There is no step that changes the window size during a test: a
 phone's touch screen and mobile browser are set when the browser opens, so such a step could only
-make the window smaller.
+change the size of the window, not make it a phone.
 
 ## Running in CI
 
