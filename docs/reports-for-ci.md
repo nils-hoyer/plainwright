@@ -50,7 +50,9 @@ Take `cucumberReporter` from `@nils.hoyer/plainwright/config`, also with
 [your own Playwright configuration](setup.md#with-your-own-playwright-configuration).
 playwright-bdd's own finds none of the steps, because Plainwright reports each step at its line in
 the feature file; it would mark every step as skipped. `defineConfig()` puts Plainwright's in its
-place when you use playwright-bdd's.
+place when you use playwright-bdd's. In your own configuration, list only Plainwright's: with
+several Cucumber reports, the first one collects the results for all of them, so one of
+playwright-bdd's before it marks the steps skipped in every report.
 
 ## Handing the report to CI
 
@@ -74,6 +76,7 @@ report, as in the workflow in [setup](setup.md#running-in-ci):
 
 ```yaml
 test:
+  image: node:lts
   script:
     - npm ci
     - npx playwright install --with-deps chromium
