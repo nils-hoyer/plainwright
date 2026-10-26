@@ -12,7 +12,7 @@ option on to Playwright. Their own documentation lists all options:
 
 A step that does not exist, or a keyword with a problem, stops the run before any test starts,
 with the step that comes closest. The run also updates the editor's step list,
-`.vscode/plainwright.steps.js`, when the project has one.
+`.vscode/plainwright.steps.js`, when the project has one or `.vscode/settings.json` names it.
 
 | Command                                 | Short                  | What it does                                                           |
 | --------------------------------------- | ---------------------- | ---------------------------------------------------------------------- |
