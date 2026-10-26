@@ -213,5 +213,17 @@ describe("the editor's step list", () => {
     const without = folder({ '.vscode/settings.json': '{}' });
     refreshStubs(without);
     expect(fs.existsSync(path.join(without, STUBS_FILE))).toBe(false);
+
+    const commented = folder({
+      '.vscode/settings.json': `{\n  // "cucumber.glue": ["${STUBS_FILE}"]\n}`,
+    });
+    refreshStubs(commented);
+    expect(fs.existsSync(path.join(commented, STUBS_FILE))).toBe(false);
+  });
+
+  it('does not stop test or lint when it cannot be written', () => {
+    const blocked = folder();
+    fs.mkdirSync(path.join(blocked, STUBS_FILE), { recursive: true });
+    expect(() => refreshStubs(blocked)).not.toThrow();
   });
 });

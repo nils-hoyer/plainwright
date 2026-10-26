@@ -25,9 +25,9 @@ at it and at your feature files.
 
 - Keep the stub file **out of** playwright-bdd's `steps` glob, otherwise steps would be
   registered twice.
-- `plainwright test` updates `.vscode/plainwright.steps.js` when it exists. A stub file
-  elsewhere needs `plainwright stubs` again after adding steps or keywords, for example in a
-  `postinstall` or `pretest` script.
+- `plainwright test` and `plainwright lint` update `.vscode/plainwright.steps.js` when it
+  exists or the settings name it. A stub file elsewhere needs `plainwright stubs` again after
+  adding steps or keywords, for example in a `postinstall` or `pretest` script.
 
 ```bash
 npx plainwright stubs --out .vscode/plainwright.steps.js
@@ -57,8 +57,8 @@ executed.
 
 ## Known limits
 
-- "Go to definition" opens the stub, not the real definition. `npx plainwright catalog --out
-steps.json` writes the file and line of every project step and keyword.
+- "Go to definition" opens the stub, not the real definition. The file and line of every
+  project step and keyword are in the catalog: `npx plainwright catalog --out steps.json`.
 - The stub format follows the extension's documented detection rules (the tree-sitter queries of
   `@cucumber/language-service`). It has not been tried in every editor yet; please
   [report problems](https://github.com/nils-hoyer/plainwright/issues).

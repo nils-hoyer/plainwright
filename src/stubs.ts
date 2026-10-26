@@ -38,23 +38,30 @@ export function renderStubs(): string {
 /**
  * Rewrites the editor's step list when keywords or steps changed, so new keywords show up in the
  * editor after the next `plainwright test` or `plainwright lint`. It writes the file when it
- * exists or when the VS Code settings name it: the file is not committed, so it is missing after
- * a clone.
+ * exists or when the VS Code settings name it outside a comment: the file is not committed, so it
+ * is missing after a clone. The list is only for the editor, so a file that cannot be written
+ * never stops a test run or lint.
  */
 export function refreshStubs(cwd: string) {
   const file = path.join(cwd, STUBS_FILE);
-  const exists = fs.existsSync(file);
-  if (!exists && !readText(path.join(cwd, '.vscode/settings.json')).includes(STUBS_FILE)) return;
-  const stubs = renderStubs();
-  if (exists && fs.readFileSync(file, 'utf8') === stubs) return;
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, stubs);
+  try {
+    const exists = fs.existsSync(file);
+    if (!exists && !namedInSettings(cwd)) return;
+    const stubs = renderStubs();
+    if (exists && fs.readFileSync(file, 'utf8') === stubs) return;
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, stubs);
+  } catch {
+    // The editor then keeps the list it has.
+  }
 }
 
-function readText(file: string) {
-  try {
-    return fs.readFileSync(file, 'utf8');
-  } catch {
-    return '';
-  }
+/** Whether .vscode/settings.json names the step list on a line that is not a // comment. */
+function namedInSettings(cwd: string) {
+  const settings = path.join(cwd, '.vscode/settings.json');
+  if (!fs.existsSync(settings)) return false;
+  return fs
+    .readFileSync(settings, 'utf8')
+    .split('\n')
+    .some((line) => line.includes(STUBS_FILE) && !line.trimStart().startsWith('//'));
 }
