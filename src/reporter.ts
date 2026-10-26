@@ -20,7 +20,8 @@ type Lines = ReturnType<typeof generatedStepLines>;
  * file: without this, every step of a passing test would be "skipped". The other reporters keep
  * the lines in the feature file.
  *
- * Use it with cucumberReporter() from the configuration, which also replaces playwright-bdd's.
+ * Use it with cucumberReporter() from the configuration. defineConfig() also puts it in place of
+ * playwright-bdd's.
  */
 export default class CucumberReporter implements Reporter {
   readonly #reporter: Reporter;
