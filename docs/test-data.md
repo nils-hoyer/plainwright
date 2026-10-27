@@ -232,8 +232,10 @@ Feature: Orders
 ### Steps for test data and APIs
 
 All these are advanced steps: they belong in keywords more than in tests, and `lint` marks them
-as info. For what they cannot do, such as a database connection or a mock server, developers
-can write a fixture in TypeScript: see [steps in TypeScript](writing-steps.md#fixtures).
+as info. Data that every test needs goes into the database once per run, before the tests: see
+[filling the database](setup.md#filling-the-database-before-the-tests). For what these steps
+cannot do, such as a database connection or a mock server, developers can write a fixture in
+TypeScript: see [steps in TypeScript](writing-steps.md#fixtures).
 
 | Step                                                            | What it does                                                         |
 | --------------------------------------------------------------- | -------------------------------------------------------------------- |
