@@ -21,7 +21,9 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
   {
     // Boxed, so it does not show up as a step in the report.
     plainwrightChecks: [
-      async ({}, use) => {
+      async ({}, use, workerInfo) => {
+        // Before the browser starts. defineConfig() checks earlier; this covers an own configuration.
+        checkOptions(workerInfo.project.use);
         for (const check of workerChecks) check();
         await use();
       },
@@ -31,8 +33,7 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
     storageState: async ({ storageState }, use, testInfo) => {
       await use(keptSession(testInfo.tags) ?? storageState);
     },
-    world: async ({ page, baseURL }, use, testInfo) => {
-      checkOptions(testInfo.project.use);
+    world: async ({ page, baseURL }, use) => {
       const world = new World(page, { baseURL });
       await use(world);
       try {
