@@ -5,15 +5,40 @@ import { defineStep, findStep, findSteps } from '../../src/index';
 import { lintFeatures } from '../../src/lint';
 import { REMOVED_STEPS, removedMessage, removedStep } from '../../src/removed';
 
+const examples = [
+  ['I wait "500" milliseconds', 'I wait {number} millisecond(s)'],
+  ['I wait "1" millisecond', 'I wait {number} millisecond(s)'],
+  ['I wait "{delay}" milliseconds', 'I wait {number} millisecond(s)'],
+  ['I wait for the page to load', 'I wait for the page to load'],
+  ['I wait for network idle', 'I wait for network idle'],
+  ['I type "Hello" on the keyboard', 'I type {string} on the keyboard'],
+  ['I hold down the key "Shift"', 'I hold down the key {string}'],
+  ['I release the key "Shift"', 'I release the key {string}'],
+  ['I insert the text "嗨"', 'I insert the text {string}'],
+  ['I click at x "200" y "150"', 'I click at x {number} y {number}'],
+  ['I double click at x "200" y "150"', 'I double click at x {number} y {number}'],
+  ['I right click at x "200" y "150"', 'I right click at x {number} y {number}'],
+  ['I move the mouse to x "200" y "150"', 'I move the mouse to x {number} y {number}'],
+  ['I press the mouse button', 'I press the mouse button'],
+  ['I press the "left" mouse button', 'I press the {string} mouse button'],
+  ['I release the mouse button', 'I release the mouse button'],
+  [
+    'I scroll the mouse wheel by x "0" y "100"',
+    'I scroll the mouse wheel by x {number} y {number}',
+  ],
+  ['I tap at x "300" y "200"', 'I tap at x {number} y {number}'],
+  ['I scroll down by "500" pixels', 'I scroll down by {number} pixels'],
+  ['I scroll up by "200" pixels', 'I scroll up by {number} pixels'],
+] as const;
+
 describe('removed steps', () => {
-  it.each([
-    ['I wait "500" milliseconds', 'I wait {number} millisecond(s)'],
-    ['I wait "1" millisecond', 'I wait {number} millisecond(s)'],
-    ['I wait "{delay}" milliseconds', 'I wait {number} millisecond(s)'],
-    ['I wait for the page to load', 'I wait for the page to load'],
-    ['I wait for network idle', 'I wait for network idle'],
-  ])('"%s" is the removed step "%s"', (text, pattern) => {
+  it.each(examples)('"%s" is the removed step "%s"', (text, pattern) => {
     expect(removedStep(text)?.pattern).toBe(pattern);
+  });
+
+  it('each have an example here', () => {
+    const tested = new Set(examples.map(([, pattern]) => pattern));
+    for (const { pattern } of REMOVED_STEPS) expect(tested).toContain(pattern);
   });
 
   it.each([
@@ -21,18 +46,15 @@ describe('removed steps', () => {
     'I wait "2" minutes',
     'I wait 500 milliseconds',
     'I reload the page',
+    'I type "Hello" in the "Name" field',
+    'I tap the "Menu" button',
   ])('"%s" is no removed step', (text) => {
     expect(removedStep(text)).toBeUndefined();
     expect(removedMessage(text)).toBeUndefined();
   });
 
   it('match no step that exists', () => {
-    const texts = [
-      'I wait "500" milliseconds',
-      'I wait for the page to load',
-      'I wait for network idle',
-    ];
-    for (const text of texts) expect(findSteps(text)).toEqual([]);
+    for (const [text] of examples) expect(findSteps(text)).toEqual([]);
   });
 
   it('name what replaces them in findStep()', () => {
