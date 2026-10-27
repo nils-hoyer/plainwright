@@ -55,6 +55,7 @@ const examples = [
   ],
   ['I download the file with the "Export" button', 'I download the file with the {element}'],
   ['I save the downloaded file to "report.csv"', 'I save the downloaded file to {string}'],
+  ['I run the command "npm run db:seed"', 'I run the command {string}'],
 ] as const;
 
 describe('removed steps', () => {
