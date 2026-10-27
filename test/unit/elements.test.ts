@@ -327,13 +327,18 @@ describe('aria snapshot', () => {
 - listbox "Suggestions":
   - option "Coffee"
   - option "Coffee beans"
+- combobox "City" [expanded]:
+  - textbox "City"
+  - listbox:
+    - option "Berlin"
 `;
     expect(groupSnapshot(page).elements).toEqual({
-      dropdown: ['Country', 'Search', 'Suggestions'],
-      option: ['Coffee', 'Coffee beans'],
+      dropdown: ['Country', 'Search', 'Suggestions', 'City'],
+      field: ['City'],
+      option: ['Coffee', 'Coffee beans', 'Berlin'],
     });
     expect(describeMissing(new ElementRef('Coffe', 'option'), page)).toMatch(
-      /^No "Coffe" option found\.\nOptions on this page: "Coffee", "Coffee beans"\./,
+      /^No "Coffe" option found\.\nOptions on this page: "Coffee", "Coffee beans", "Berlin"\./,
     );
   });
 
