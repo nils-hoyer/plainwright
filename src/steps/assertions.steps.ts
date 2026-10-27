@@ -264,21 +264,31 @@ step({
   description: 'Checks the address the link leads to, absolute or relative to the base URL.',
   example: 'I see the "Help" link leads to "/help"',
   fn: async ({ world }, element: ElementRef, address: string) => {
-    await world.withElement(element, (el) =>
-      expect
-        .poll(
-          () =>
-            el.evaluate(
-              (node) => (node as HTMLAnchorElement).href || node.getAttribute('href'),
-              undefined,
-              {
-                timeout: 1000,
-              },
-            ),
-          { message: `Expected the ${element} to lead to "${address}"` },
-        )
-        .toBe(world.url(address)),
-    );
+    await world.withElement(element, async (el) => {
+      // The href as the browser resolves it, like a click would follow it.
+      const href = () =>
+        el.evaluate(
+          (node) => {
+            const raw = node.getAttribute('href');
+            if (raw === null) return null;
+            try {
+              return new URL(raw, node.baseURI).href;
+            } catch {
+              return raw;
+            }
+          },
+          undefined,
+          { timeout: 1000 },
+        );
+      try {
+        await expect
+          .poll(href, { message: `Expected the ${element} to lead to "${address}"` })
+          .toBe(absoluteUrl(world.url(address)));
+      } catch (error) {
+        if ((await href().catch(() => undefined)) !== null) throw error;
+        throw new Error(`[plainwright] The ${element} leads nowhere: it has no href.`);
+      }
+    });
   },
 });
 
@@ -304,22 +314,28 @@ step({
   },
 });
 
+/** The URL as the browser writes it (`https://example.com/`), or the text when it is not one. */
+function absoluteUrl(url: string): string {
+  try {
+    return new URL(url).href;
+  } catch {
+    return url;
+  }
+}
+
 /**
- * Whether the element is expanded, as Playwright works it out for the accessibility tree:
- * an element with `aria-expanded`, or a `<details>` element, also by its `<summary>`.
+ * Whether the element is expanded: an element with `aria-expanded`, or a `<details>` element,
+ * also named by its `<summary>` or by a heading in it. It reads `aria-expanded` on any element,
+ * also one whose role does not support it, where the accessibility tree would leave it out.
  */
 async function checkExpanded(world: World, element: ElementRef, expanded: boolean) {
   await world.withElement(element, async (el) => {
     const state = () =>
       el.evaluate(
         (node) => {
-          const details = node instanceof HTMLDetailsElement ? node : node.parentElement;
-          if (
-            details instanceof HTMLDetailsElement &&
-            (node === details || node.tagName === 'SUMMARY')
-          ) {
-            return details.open;
-          }
+          const details =
+            node instanceof HTMLDetailsElement ? node : node.closest('summary')?.parentElement;
+          if (details instanceof HTMLDetailsElement) return details.open;
           const attribute = node.getAttribute('aria-expanded');
           return attribute === null ? null : attribute === 'true';
         },
