@@ -66,6 +66,7 @@ export function defineConfig(
     projects: withSetup(
       setup,
       projects ?? [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+      playwright.grepInvert,
     ),
     use: {
       // A click or fill that finds nothing fails after 10 s and lists what the page offers.
@@ -103,9 +104,14 @@ function withCucumberFix(reporter: string | ReporterDescription[]): string | Rep
 
 /**
  * With `setup: true`, a project that runs the `@setup` scenarios, in the browser of the first
- * project, and every project after it without them.
+ * project, and every project after it without them. A project's `grepInvert` replaces the one of
+ * the configuration, so that one is kept where a project has none.
  */
-function withSetup<T>(setup: boolean | undefined, projects: PlaywrightTestProject<T>[]) {
+function withSetup<T>(
+  setup: boolean | undefined,
+  projects: PlaywrightTestProject<T>[],
+  grepInvert: PlaywrightTestConfig['grepInvert'],
+) {
   if (!setup) return projects;
   if (projects.some((project) => project.name === 'setup')) {
     throw new Error(
@@ -113,13 +119,19 @@ function withSetup<T>(setup: boolean | undefined, projects: PlaywrightTestProjec
         'already. Rename yours, or remove setup: true and run your own.',
     );
   }
-  const tag = new RegExp(`${SETUP_TAG}(?![\\w-])`);
+  // The tag itself, not tags that start with it such as @setup-data. Playwright matches against
+  // the title and the tags, separated by spaces.
+  const tag = new RegExp(`(?<!\\S)${SETUP_TAG}(?!\\S)`);
+  // Playwright refuses dependencies for a project that runs after others (`teardown`).
+  const teardowns = new Set(projects.flatMap((project) => project.teardown ?? []));
   return [
     { name: 'setup', grep: tag, use: projects[0]?.use },
     ...projects.map((project) => ({
       ...project,
-      dependencies: [...(project.dependencies ?? []), 'setup'],
-      grepInvert: [...[project.grepInvert ?? []].flat(), tag],
+      ...(project.name && teardowns.has(project.name)
+        ? {}
+        : { dependencies: [...(project.dependencies ?? []), 'setup'] }),
+      grepInvert: [...[project.grepInvert ?? grepInvert ?? []].flat(), tag],
     })),
   ];
 }
