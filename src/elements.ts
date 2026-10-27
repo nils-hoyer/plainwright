@@ -159,7 +159,7 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
     lookup: "a dropdown (select box) with this label (`getByRole('combobox')`, `'listbox'`)",
   },
   // Custom dropdowns and search suggestions often show their options elsewhere on the page (a
-  // portal), outside the dropdown, so an option is looked up on the whole page.
+  // portal), outside the dropdown, so the docs name an option without the dropdown it is in.
   option: {
     roles: ['option'],
     plural: 'Options',
@@ -245,14 +245,21 @@ const ELEMENT_TYPE_SPECS: Record<ElementType, ElementTypeSpec> = {
 };
 
 /**
- * The nodes of a snapshot without the options of a select box (`combobox`): no click reaches
- * them, `I select` chooses them.
+ * The nodes of a snapshot without the options of a select box: no click reaches them,
+ * `I select` chooses them. A select box is a `combobox` with its options right inside. The
+ * options of a custom dropdown sit in a `listbox`, which the snapshot also shows inside the
+ * `combobox` when it is connected with `aria-owns`; those can be clicked.
  */
 export function clickableNodes(nodes: AriaNode[]): AriaNode[] {
   const inSelect = new Set(
     nodes
       .filter((node) => node.role === 'combobox')
-      .flatMap((node) => node.descendants.filter((d) => d.role === 'option')),
+      .flatMap((node) => {
+        const inList = new Set(
+          node.descendants.filter((d) => d.role === 'listbox').flatMap((d) => d.descendants),
+        );
+        return node.descendants.filter((d) => d.role === 'option' && !inList.has(d));
+      }),
   );
   return nodes.filter((node) => !inSelect.has(node));
 }
