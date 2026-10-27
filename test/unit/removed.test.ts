@@ -29,6 +29,30 @@ const examples = [
   ['I tap at x "300" y "200"', 'I tap at x {number} y {number}'],
   ['I scroll down by "500" pixels', 'I scroll down by {number} pixels'],
   ['I scroll up by "200" pixels', 'I scroll up by {number} pixels'],
+  [
+    'I see the attribute "disabled" on the "Coming Soon" button',
+    'I see the attribute {string} on the {element}',
+  ],
+  [
+    'I do not see the attribute "disabled" on the "Transfer Money" button',
+    'I do not see the attribute {string} on the {element}',
+  ],
+  [
+    'I see the attribute "href" with the value "/help" on the "Help" link',
+    'I see the attribute {string} with the value {string} on the {element}',
+  ],
+  [
+    'I see the attribute "href" containing "help" on the "Help" link',
+    'I see the attribute {string} containing {string} on the {element}',
+  ],
+  [
+    'I see the class "highlighted" on the "Styled box" element',
+    'I see the class {string} on the {element}',
+  ],
+  [
+    'I do not see the class "hidden" on the "Styled box" element',
+    'I do not see the class {string} on the {element}',
+  ],
 ] as const;
 
 describe('removed steps', () => {
