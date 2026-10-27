@@ -334,13 +334,20 @@ function rememberedInOrder(scenarios: FeatureStep[][], namesOf: (step: FeatureSt
     const names = scenario.map(namesOf);
     scenario.forEach((step, i) => {
       for (const name of names[i]) if (!anywhere.has(name)) anywhere.set(name, step.line);
-      // A Background step runs in every scenario; it is checked in the first.
-      if (orders.has(key(step))) return;
+      const before = new Set(names.slice(0, i).flat());
       const later = new Map<string, number>();
       for (let j = scenario.length - 1; j >= i; j--) {
         for (const name of names[j]) later.set(name, scenario[j].line);
       }
-      orders.set(key(step), { before: new Set(names.slice(0, i).flat()), later });
+      // A Background step runs in every scenario, an outline step once per example: a name
+      // counts only when it is remembered before the step in each of them.
+      const known = orders.get(key(step));
+      if (!known) {
+        orders.set(key(step), { before, later });
+        return;
+      }
+      for (const name of known.before) if (!before.has(name)) known.before.delete(name);
+      for (const [name, line] of later) if (!known.later.has(name)) known.later.set(name, line);
     });
   }
   return {

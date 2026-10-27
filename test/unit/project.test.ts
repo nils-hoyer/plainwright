@@ -258,6 +258,19 @@ describe('lint with project files', () => {
       '26: {coffee} is only remembered in another scenario (line 22). Remembered values last for one test: remember it in this scenario, or put it into a file in data/.',
     ]);
   });
+
+  it('checks the order in every scenario a step runs in', async () => {
+    const { lint } = await load();
+    const spy = vi.spyOn(process, 'cwd').mockReturnValue(cwd);
+    const messages = lint
+      .lintFeatures([path.join(cwd, 'features/order.feature')], cwd)
+      .filter((message) => message.rule === 'unknown-value');
+    spy.mockRestore();
+    expect(messages.map((message) => `${message.line}: ${message.message}`)).toEqual([
+      '11: {picked} is only remembered in another scenario (line 10). Remembered values last for one test: remember it in this scenario, or put it into a file in data/.',
+      '21: {in-rule} is remembered later, in line 24. Remember it before using it.',
+    ]);
+  });
 });
 
 describe('catalog', () => {
