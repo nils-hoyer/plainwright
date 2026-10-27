@@ -131,3 +131,10 @@ Feature: Helpful error messages
       """
       I see the "Greeting" section is expanded
       """
+
+  Scenario: An element without an address leads nowhere
+    * I open the "Assertions" page
+    * I see this step fail with "The \"Shipping\" button leads nowhere: it has no href.":
+      """
+      I see the "Shipping" button leads to "/shipping"
+      """

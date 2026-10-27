@@ -20,6 +20,12 @@ Feature: Advanced checks
     * I click the "Returns" element
     * I see the "Returns" element is expanded
     * I see the text "Free returns within 30 days."
+    * I see the "Warranty" heading is expanded
+    * I click the "Warranty" heading
+    * I see the "Warranty" heading is collapsed
+
+  Scenario: Where a link leads
+    * I see the "Return form" link leads to "/forms.html?tab=returns#form"
 
   Scenario: Count list items
     * I see "3" items in the "Fruits" list

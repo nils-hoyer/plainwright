@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,14 +12,14 @@
 
       <!-- Text content (exact and partial text, empty element) -->
       <section aria-label="Greeting">
-        <p data-testid="text-exact" class="content active">Hello World</p>
+        <p data-testid="text-exact">Hello World</p>
       </section>
       <section aria-label="Notes">
         <p data-testid="text-partial">This contains some text.</p>
       </section>
       <section aria-label="Empty box" data-testid="div-empty"></section>
 
-      <!-- Open and closed: a button that shows what it controls, and a details element. -->
+      <!-- Open and closed: a button that shows what it controls, and details elements. -->
       <section aria-label="Delivery">
         <button type="button" aria-expanded="false" aria-controls="shipping">Shipping</button>
         <p id="shipping" hidden>Ships in 2 days.</p>
@@ -27,6 +27,11 @@
           <summary>Returns</summary>
           <p>Free returns within 30 days.</p>
         </details>
+        <details open>
+          <summary><h2>Warranty</h2></summary>
+          <p>Two years on every order.</p>
+        </details>
+        <p><a href="forms.html?tab=returns#form">Return form</a></p>
       </section>
       <script>
         document.querySelector('[aria-controls="shipping"]').addEventListener('click', (event) => {
@@ -38,9 +43,9 @@
 
       <!-- Counting list items -->
       <ul aria-label="Fruits">
-        <li class="list-item">Apple</li>
-        <li class="list-item">Banana</li>
-        <li class="list-item">Cherry</li>
+        <li>Apple</li>
+        <li>Banana</li>
+        <li>Cherry</li>
       </ul>
 
       <!-- Accessible description -->
