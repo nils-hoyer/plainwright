@@ -136,7 +136,8 @@ part of a name and any capitals everywhere, set `exactNames: false` (see
 
 A select box is a dropdown: `I select "Germany" in the "Country" dropdown` chooses from it. A
 custom dropdown or a search that suggests as you type shows a list of options, often somewhere
-else on the page than the field. Open it, or type, and click the option:
+else on the page than the field. So name the option on its own, not in the dropdown. Open the
+list, or type, and click the option:
 
 ```gherkin
 * I type "Ger" in the "Country" field
