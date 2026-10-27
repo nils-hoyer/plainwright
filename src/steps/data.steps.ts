@@ -47,7 +47,13 @@ step({
       let text = '';
       try {
         await expect
-          .poll(async () => numbersIn((text = await textOf(el, 1000)))[0])
+          .poll(async () => {
+            // An error inside the poll ends it, so wait for the element here. Several elements
+            // fail right away.
+            if ((await el.count()) === 0) return undefined;
+            text = await textOf(el, 1000);
+            return numbersIn(text)[0];
+          })
           .not.toBeUndefined();
       } catch (error) {
         // A missing element, or several, is explained by withElement().
