@@ -33,12 +33,13 @@ describe('lint', () => {
     ]);
   });
 
-  it('reports a session kept outside a @setup scenario', () => {
+  it('reports a session kept outside a @setup scenario or for something that is not a tag', () => {
     const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/setup.feature')], root)
       .filter((message) => message.severity === 'error')
       .map(formatLintMessage);
     expect(errors).toEqual([
-      `test/unit/fixtures/lint/setup.feature:9: error: "I keep the session" only works in a scenario tagged @setup, which runs before the others when the configuration has setup: true. (setup-step)`,
+      `test/unit/fixtures/lint/setup.feature:7: error: "admin" is not a tag. Write the tag the scenarios have, with @, such as "@admin". (setup-step)`,
+      `test/unit/fixtures/lint/setup.feature:10: error: "I keep the session" only works in a scenario tagged @setup, which runs before the others when the configuration has setup: true. (setup-step)`,
     ]);
   });
 

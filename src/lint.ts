@@ -14,7 +14,7 @@ import {
   suggestionFor,
   suggestSteps,
 } from './registry';
-import { SETUP_STEPS, SETUP_TAG } from './session';
+import { checkSessionTag, SETUP_STEPS, SETUP_TAG } from './session';
 import { rememberedName } from './steps/builtin';
 import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
@@ -200,6 +200,10 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           'setup-step',
           `"${text}" only works in a scenario tagged ${SETUP_TAG}, which runs before the others when the configuration has setup: true.`,
         );
+      }
+      if (step.pattern === SETUP_STEPS[1] && !referencesIn(String(args[0])).length) {
+        const problem = checkSessionTag(String(args[0]));
+        if (problem) add('error', 'setup-step', problem);
       }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {
