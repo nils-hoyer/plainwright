@@ -70,12 +70,38 @@ step({
   pattern: 'I type {string} in the {element}',
   level: 'advanced',
   description:
-    'Types the text into the field key by key, without clearing it first, for fields that react to every key, such as a date with a mask or a search with suggestions.',
+    'Types the text key by key after what is already in the field, for fields that react to every key, such as a date with a mask or a search with suggestions.',
   example: 'I type "21102026" in the "Birthday" field',
   fn: async ({ world }, text: string, element: ElementRef) => {
-    await world.withElement(element, (el) => el.pressSequentially(text));
+    await world.withElement(element, async (el) => {
+      await el.evaluate(focusAtEnd);
+      await el.pressSequentially(text);
+    });
   },
 });
+
+/**
+ * Focuses the field with the cursor after its content. Playwright types at the start of a field
+ * that does not have the focus yet. A field that has the focus keeps its cursor, so a key pressed
+ * in it before (such as Home) still counts.
+ */
+function focusAtEnd(node: Element): void {
+  if (node === document.activeElement || !(node instanceof HTMLElement)) return;
+  node.focus();
+  if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement) {
+    try {
+      node.setSelectionRange(node.value.length, node.value.length);
+    } catch {
+      // Some inputs, such as email and number, have no cursor position to set.
+    }
+  } else if (node.isContentEditable) {
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    range.collapse(false);
+    window.getSelection()?.removeAllRanges();
+    window.getSelection()?.addRange(range);
+  }
+}
 
 step({
   pattern: 'I clear the {element}',
