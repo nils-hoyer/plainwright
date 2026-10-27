@@ -171,15 +171,9 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
       hideOwnFrames(error);
       throw error;
     }
-    const remembered = takeRemembered();
-    // A value made from a secret stays hidden.
-    const secret = used.some((u) => u.shown === HIDDEN);
-    if (remembered.length) {
-      await showValues(
-        'remembered ',
-        remembered.map((r) => (secret ? { ...r, shown: HIDDEN } : r)),
-      );
-    }
+    // A value made from a secret stays hidden, also in later steps.
+    const remembered = takeRemembered({ secret: used.some((u) => u.shown === HIDDEN) });
+    if (remembered.length) await showValues('remembered ', remembered);
     return result;
   };
   wrapped.toString = () => fn.toString();

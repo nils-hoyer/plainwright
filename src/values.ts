@@ -29,12 +29,18 @@ const loadedDataFiles = new Set<string>();
 
 /**
  * Values remembered in a test, and its `{unique}`. Keyed by Playwright's TestInfo. `remembered`
- * lists the names remembered since the running step started, for the report.
+ * lists the names remembered since the running step started, for the report; `secrets` the
+ * names of values made from the environment, which the report hides.
  */
-type TestValues = { values: Map<string, unknown>; unique?: string; remembered: string[] };
+type TestValues = {
+  values: Map<string, unknown>;
+  unique?: string;
+  remembered: string[];
+  secrets: Set<string>;
+};
 const testValues = new WeakMap<object, TestValues>();
 /** Used outside a running test, e.g. in unit tests. */
-const outsideTest: TestValues = { values: new Map(), remembered: [] };
+const outsideTest: TestValues = { values: new Map(), remembered: [], secrets: new Set() };
 
 /**
  * Loads the JSON files in a folder as test data. A step refers to a value with
@@ -100,13 +106,20 @@ export function remember(name: string, value: unknown) {
   if (problem) throw new Error(`[plainwright] ${problem}`);
   const values = current();
   values.values.set(name, value);
+  values.secrets.delete(name);
   values.remembered.push(name);
 }
 
-/** The values remembered since the last call, for the report. */
-export function takeRemembered(): ResolvedReference[] {
-  const { values, remembered } = current();
-  return remembered.splice(0).map((name) => ({ reference: name, shown: show(values.get(name)) }));
+/**
+ * The values remembered since the last call, for the report. With `secret`, they were made from
+ * the environment: the report hides them here and wherever they are used later.
+ */
+export function takeRemembered({ secret = false } = {}): ResolvedReference[] {
+  const { values, remembered, secrets } = current();
+  return remembered.splice(0).map((name) => {
+    if (secret) secrets.add(name);
+    return { reference: name, shown: secret ? HIDDEN : show(values.get(name)) };
+  });
 }
 
 /** Why a value cannot be remembered under this name, or null when it can. */
@@ -234,6 +247,10 @@ function lookup(reference: string, used: ResolvedReference[], trail: string[]): 
     value = dateValue(dateOffset(root)!, rest[0], dateOptions());
   } else if (values.values.has(root)) {
     value = walk(values.values.get(root), rest, `{${root}}`, reference);
+    if (values.secrets.has(root)) {
+      used.push({ reference, shown: HIDDEN });
+      return value;
+    }
   } else {
     const found = findData(reference);
     if (!found) throw new Error(`[plainwright] ${unknownMessage(reference)}`);
@@ -304,7 +321,9 @@ function current(): TestValues {
     return outsideTest;
   }
   let values = testValues.get(info);
-  if (!values) testValues.set(info, (values = { values: new Map(), remembered: [] }));
+  if (!values) {
+    testValues.set(info, (values = { values: new Map(), remembered: [], secrets: new Set() }));
+  }
   return values;
 }
 
