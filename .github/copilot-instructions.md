@@ -36,8 +36,8 @@ test/
 ## Rules for steps
 
 Follow [docs/vocabulary.md](../docs/vocabulary.md): values in quotes, elements by visible name
-plus type, one phrase per action, checks start with "I see" / "I do not see", no fixed waits in
-core. Built-in steps only use the `world` fixture. Every step needs a one-sentence description
+plus type, one phrase per action, checks start with "I see" / "I do not see", no fixed waits.
+Built-in steps only use the `world` fixture. Every step needs a one-sentence description
 and an example that matches it and no other step (unit tests check this). `{name}` references
 in quoted values are filled in by the registry before a step runs; a step never resolves them
 itself.
