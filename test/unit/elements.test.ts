@@ -47,6 +47,7 @@ describe('{element} parameter', () => {
     ['I click the "Log in" button', 'Log in', 'button'],
     ['I click the "Yes" radio button', 'Yes', 'radio button'],
     ['I click the "Save as" menu item', 'Save as', 'menu item'],
+    ['I check the "Dark mode" switch', 'Dark mode', 'switch'],
     ['I click the "Say \\"hi\\"" button', 'Say "hi"', 'button'],
     ['I click the "C:\\temp" button', 'C:\\temp', 'button'],
   ])('%s', (text, name, type) => {
@@ -95,6 +96,7 @@ describe('locate', () => {
     ['link', `getByRole("link", {"name":"X","exact":true})`],
     ['checkbox', `getByRole("checkbox", {"name":"X","exact":true})`],
     ['radio button', `getByRole("radio", {"name":"X","exact":true})`],
+    ['switch', `getByRole("switch", {"name":"X","exact":true})`],
     ['heading', `getByRole("heading", {"name":"X","exact":true})`],
     ['tab', `getByRole("tab", {"name":"X","exact":true})`],
     [
