@@ -88,6 +88,10 @@ must never be committed: `init` adds the folder to `.gitignore`. Every run logs 
 the tests with the sessions of the last run, without the setup, add `--no-deps`:
 `npm test -- --no-deps`.
 
+A file stays until it is deleted, also after its setup scenario is gone. When you rename the tag
+of a session or remove a setup scenario, delete the folder `playwright/.auth`, so no scenario
+starts with an old session.
+
 ## Inspecting pages behind the login
 
 `inspect` takes a session too, so it lists the elements a logged-in user sees. Run the setup
