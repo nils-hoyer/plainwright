@@ -198,6 +198,22 @@ describe('values', () => {
     expect(values.takeRemembered()).toEqual([]);
   });
 
+  it('hides a value made from the environment, also where it is used later', () => {
+    values.remember('password', 'secret');
+    expect(values.takeRemembered({ secret: true })).toEqual([
+      { reference: 'password', shown: '(hidden)' },
+    ]);
+    const used: { reference: string; shown: string }[] = [];
+    expect(values.resolveText('{password}', used)).toBe('secret');
+    expect(used).toEqual([{ reference: 'password', shown: '(hidden)' }]);
+    // Remembered again from a value that is not secret, it is shown.
+    values.remember('password', 'plain');
+    values.takeRemembered();
+    const usedLater: { reference: string; shown: string }[] = [];
+    expect(values.resolveText('{password}', usedLater)).toBe('plain');
+    expect(usedLater).toEqual([{ reference: 'password', shown: '"plain"' }]);
+  });
+
   it('writes dates from today, also as the browser writes them', () => {
     // 21 October 2026, 23:30 in Berlin, already the 22nd in Tokyo.
     const now = new Date('2026-10-21T21:30:00Z');

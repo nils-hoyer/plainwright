@@ -143,7 +143,7 @@ features/orders.feature:20: error: {order} is only remembered in another scenari
 The step stays as written in the report, `I fill "{users.admin.email}" in the "Email" field`,
 and a line below it shows the value used: `{users.admin.email} = "admin@example.com"`. A step
 that remembers a value shows it the same way: `remembered {order} = "10234"`. Values from the
-environment show as `(hidden)`, and so does a value remembered from one.
+environment show as `(hidden)`, and so does a value remembered from one, also in later steps.
 
 `lint` reports names that do not exist, with what does: `No value {users.admin.phone}:
 {users.admin} has no "phone". It has "email", "name".`
