@@ -63,8 +63,8 @@ alias in its [page file](pages.md), not a selector in the test.
 
 **Lint.** `npx plainwright lint --features "features/**/*.feature"` reports unknown steps with
 the closest existing step, removed steps with what replaces them, ambiguous steps, unknown pages
-and values, selectors, absolute URLs and broken keywords, as `file:line: severity: message (rule)`. Exit code 1 on
-errors, so it can gate CI and agent loops.
+and values, selectors, absolute URLs and broken keywords, as
+`file:line: severity: message (rule)`. Exit code 1 on errors, so it can gate CI and agent loops.
 
 **Run.** `npx plainwright test`. When an element is missing, the error lists the elements of
 that type the page offers, as in the example below.
