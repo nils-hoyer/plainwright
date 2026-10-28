@@ -103,7 +103,7 @@ async function fresh() {
       { pattern, description: 'Test step.', example, fn: () => {} },
       { source: 'project', location: { file: path.join(root, file), line: 3, column: 1 } },
     );
-  return { library, check, project };
+  return { library, check, project, registry };
 }
 
 describe('lint, with steps and keywords of its own', () => {
@@ -123,6 +123,26 @@ describe('lint, with steps and keywords of its own', () => {
     expect(check('pages.feature').filter((line) => line.includes('step-example'))).toEqual([
       'steps/pages.ts:3: error: "I reload/refresh the page" also matches "I reload the page", the example of the built-in step "I reload the page". Word it differently. (step-example)',
     ]);
+  });
+
+  it('knows the name a project step remembers', async () => {
+    const { check, registry } = await fresh();
+    const step = {
+      pattern: 'I take the number from {string} as {string}',
+      description: 'Test step.',
+      example: 'I take the number from "Order 1" as "order"',
+      fn: () => {},
+    };
+    registry.registerStep(step, { source: 'project' });
+    expect(check('project-remember.feature')).toEqual([
+      'test/unit/fixtures/lint/project-remember.feature:5: error: No value named "order" for {order}. Known values: {env.NAME}, {unique}, {today} and the other dates. Add data/order.json, or remember a value as "order" first. For literal braces, write \\{order}. (unknown-value)',
+    ]);
+    const again = await fresh();
+    again.registry.registerStep(
+      { ...step, remembers: (args) => String(args[1]) },
+      { source: 'project' },
+    );
+    expect(again.check('project-remember.feature')).toEqual([]);
   });
 
   it('counts steps in tag folders like playwright-bdd', async () => {

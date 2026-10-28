@@ -5,11 +5,12 @@ import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/inde
 import {
   parseStackFrame,
   registerStep,
+  rememberedName,
   suggestionFor,
   suggestSteps,
   tagsFromPath,
 } from '../../src/registry';
-import { CATEGORIES, rememberedName } from '../../src/steps/builtin';
+import { CATEGORIES } from '../../src/steps/builtin';
 import { checkRememberName } from '../../src/values';
 
 const builtIn = getSteps().filter((step) => step.source === 'built-in');
