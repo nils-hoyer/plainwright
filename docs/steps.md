@@ -158,6 +158,7 @@ For special cases. `lint` lists where they are used.
 
 | Step                                            | What it does                                                              | Example                                                |
 | ----------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `I wait {number} second(s)`                     | Pauses the test for this many seconds.                                    | `I wait "2" seconds`                                   |
 | `I see the {element} within {number} second(s)` | Checks that the element becomes visible, waiting up to this many seconds. | `I see the "Report ready" heading within "30" seconds` |
 
 ### Cookies and storage
@@ -216,7 +217,6 @@ Steps a release removed, with what to write instead. `lint` says the same where 
 
 | Step                             | Removed in | Instead                                                                                                                                                         |
 | -------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `I wait {number} second(s)`      | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
-| `I wait {number} millisecond(s)` | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds. |
+| `I wait {number} millisecond(s)` | 0.3.0      | Check for what the user waits for instead, such as I see the text "…": every check waits by itself. Where a fixed wait cannot be avoided: I wait "0.5" seconds. |
 | `I wait for the page to load`    | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |
 | `I wait for network idle`        | 0.3.0      | Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.                                      |
