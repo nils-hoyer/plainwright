@@ -33,7 +33,7 @@ export class World {
   readonly exactNames: boolean;
   /** Every dialog shown during the scenario, in order. */
   readonly dialogs: DialogRecord[] = [];
-  /** The file from the last "I download the file with the ..." step. */
+  /** The last file the browser downloaded, in any tab, such as after a click on "Export". */
   download?: Download;
   /** The answer to the last request sent by a step, e.g. I send a "GET" request to "...". */
   response?: ApiResponse;
@@ -44,6 +44,10 @@ export class World {
   #nextDialog?: DialogAction;
   #context: BrowserContext;
   #onDialog = (dialog: Dialog) => this.#handleDialog(dialog);
+  #onDownload = (download: Download) => {
+    this.download = download;
+  };
+  #onPage = (page: Page) => page.on('download', this.#onDownload);
   #afterTest: { title: string; action: () => Promise<void> }[] = [];
 
   constructor(page: Page, options: WorldOptions) {
@@ -54,6 +58,10 @@ export class World {
     // We record every dialog and apply the action from "I accept the next dialog" /
     // "I dismiss the next dialog". Unannounced dialogs are answered the way Playwright does.
     this.#context.on('dialog', this.#onDialog);
+    // Playwright only reports a download to a listener that is there before the click, so every
+    // tab gets one. A click on a link or button then downloads like in the browser.
+    for (const open of this.#context.pages()) this.#onPage(open);
+    this.#context.on('page', this.#onPage);
   }
 
   /** The active browser tab. */
@@ -189,6 +197,8 @@ export class World {
 
   dispose() {
     this.#context.off('dialog', this.#onDialog);
+    this.#context.off('page', this.#onPage);
+    for (const open of this.#context.pages()) open.off('download', this.#onDownload);
   }
 
   async #handleDialog(dialog: Dialog) {

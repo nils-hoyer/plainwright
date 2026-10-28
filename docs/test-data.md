@@ -161,10 +161,24 @@ environment show as `(hidden)`, and so does a value remembered from one, also in
 `lint` reports names that do not exist, with what does: `No value {users.admin.phone}:
 {users.admin} has no "phone". It has "email", "name".`
 
-## Files to upload
+## Files to upload and download
 
-Paths are relative to the project folder: `I upload the file "files/invoice.pdf" with the
-"Upload" button` uses `files/invoice.pdf` in your project.
+A file to upload goes into the project, such as into `data/files/`. Paths are relative to the
+project folder. Plainwright reads only the `.json` files in `data/` as test data, so other files
+can sit next to them.
+
+```gherkin
+* I upload the file "data/files/invoice.pdf" with the "Upload" button
+```
+
+A download needs no step of its own: click the link or button that offers the file, then check
+the file. The checks wait until the download has arrived.
+
+```gherkin
+* I click the "Export" button
+* I see the downloaded file "orders.csv"
+* I see the text "Total" in the downloaded file
+```
 
 ## Data a test creates first
 
