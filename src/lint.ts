@@ -9,13 +9,13 @@ import {
   getSteps,
   getUnusableSteps,
   onlyForTagsMessage,
+  rememberedName,
   StepDefinition,
   StepMatch,
   suggestionFor,
   suggestSteps,
 } from './registry';
 import { checkSessionTag, SETUP_STEPS, SETUP_TAG } from './session';
-import { rememberedName } from './steps/builtin';
 import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
 export type LintSeverity = 'error' | 'warning' | 'info';

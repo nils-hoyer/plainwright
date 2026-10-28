@@ -35,6 +35,7 @@ defineStep({
 | `example`     | A complete step text that matches this step and no other (`lint` checks it)              |
 | `category`    | The heading it is listed under in the step reference                                     |
 | `level`       | `'core'` or `'advanced'`; advanced steps show as info in `lint`                          |
+| `remembers`   | For a step that remembers a value: the name, from the arguments, so `lint` knows it      |
 | `fn`          | The code; gets the fixtures, then one argument per parameter                             |
 
 ## The world fixture

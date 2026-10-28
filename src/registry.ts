@@ -52,6 +52,11 @@ export type StepOptions<F = StepFixtures> = {
   level?: StepLevel;
   /** When set, lint warns wherever the step is used, with this explanation. */
   discouraged?: string;
+  /**
+   * The name the step remembers a value under, from its arguments, such as
+   * `(args) => String(args[1])` for `... as {string}`. Lets lint check later `{name}` values.
+   */
+  remembers?: (args: unknown[]) => string;
   fn: StepFn<F>;
 };
 
@@ -93,6 +98,7 @@ type RegisterMeta = {
 
 const steps: StepDefinition[] = [];
 const expressions = new WeakMap<StepDefinition, CucumberExpression>();
+const remembering = new WeakMap<StepDefinition, (args: unknown[]) => string>();
 /** Steps whose pattern cannot be compiled here, with the reason. */
 const unusable = new Map<StepDefinition, string>();
 
@@ -144,6 +150,7 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
     fn,
   });
   steps.push(step);
+  if (options.remembers) remembering.set(step, options.remembers);
   const providedOptions = {
     ...(meta.arityCheck === false ? { arityCheck: false } : {}),
     ...(tags.length ? { tags: tags.join(' and ') } : {}),
@@ -151,6 +158,11 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (Step as any)(step.pattern, providedOptions, step.fn);
   return step;
+}
+
+/** The name a step remembers a value under, given the step's arguments. */
+export function rememberedName(step: StepDefinition, args: unknown[]): string | undefined {
+  return remembering.get(step)?.(args);
 }
 
 /**

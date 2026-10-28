@@ -1,5 +1,5 @@
 import type { World } from '../world';
-import { registerStep, StepDefinition, StepLevel } from '../registry';
+import { registerStep, StepLevel } from '../registry';
 
 /** Categories of built-in steps, in the order they appear in the docs. */
 export const CATEGORIES = [
@@ -34,20 +34,10 @@ type BuiltInOptions = {
   fn: (fixtures: { world: World }, ...args: any[]) => Promise<unknown> | unknown;
 };
 
-const remembering = new WeakMap<StepDefinition, (args: unknown[]) => string>();
-
 /** Returns a function that registers built-in steps of one category. */
 export function category(name: Category) {
-  return ({ values, remembers, ...options }: BuiltInOptions) => {
-    const step = registerStep({ ...options, category: name }, { source: 'built-in', values });
-    if (remembers) remembering.set(step, remembers);
-    return step;
-  };
-}
-
-/** The name a step remembers a value under, given the step's arguments. */
-export function rememberedName(step: StepDefinition, args: unknown[]): string | undefined {
-  return remembering.get(step)?.(args);
+  return ({ values, ...options }: BuiltInOptions) =>
+    registerStep({ ...options, category: name }, { source: 'built-in', values });
 }
 
 export { escapeRegExp } from '../elements';
