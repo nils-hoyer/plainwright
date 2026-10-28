@@ -23,20 +23,20 @@ The everyday vocabulary. Prefer these steps.
 
 ### Clicking and typing
 
-| Step                                            | What it does                                                                                                        | Example                                                          |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `I click the {element}`                         | Clicks the element once with the left mouse button.                                                                 | `I click the "Log in" button`                                    |
-| `I double click the {element}`                  | Double-clicks the element.                                                                                          | `I double click the "Order 1001" row`                            |
-| `I hover over the {element}`                    | Moves the mouse over the element without clicking.                                                                  | `I hover over the "Help" link`                                   |
-| `I fill {string} in the {element}`              | Replaces the content of the field with the text.                                                                    | `I fill "1234567890" in the "Username" field`                    |
-| `I clear the {element}`                         | Removes all text from the field.                                                                                    | `I clear the "Full Name" field`                                  |
-| `I check the {element}`                         | Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.                            | `I check the "I accept the terms and conditions" checkbox`       |
-| `I uncheck the {element}`                       | Unticks the checkbox. Nothing changes if it is already unticked.                                                    | `I uncheck the "Subscribe to newsletter" checkbox`               |
-| `I select {string} in the {element}`            | Chooses the option with this visible text in the dropdown.                                                          | `I select "Germany" in the "Country" dropdown`                   |
-| `I press {string}`                              | Presses a key or key combination, such as "Enter", "Tab" or "Control+A", on the focused element.                    | `I press "Enter"`                                                |
-| `I press {string} in the {element}`             | Focuses the element and presses a key or key combination there.                                                     | `I press "Enter" in the "Email" field`                           |
-| `I upload the file {string} with the {element}` | Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens. | `I upload the file "files/invoice.pdf" with the "Upload" button` |
-| `I drag the {element} to the {element}`         | Drags the first element with the mouse and drops it onto the second.                                                | `I drag the "Coffee" list item to the "Cart" list`               |
+| Step                                            | What it does                                                                                                        | Example                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `I click the {element}`                         | Clicks the element once with the left mouse button.                                                                 | `I click the "Log in" button`                                         |
+| `I double click the {element}`                  | Double-clicks the element.                                                                                          | `I double click the "Order 1001" row`                                 |
+| `I hover over the {element}`                    | Moves the mouse over the element without clicking.                                                                  | `I hover over the "Help" link`                                        |
+| `I fill {string} in the {element}`              | Replaces the content of the field with the text.                                                                    | `I fill "1234567890" in the "Username" field`                         |
+| `I clear the {element}`                         | Removes all text from the field.                                                                                    | `I clear the "Full Name" field`                                       |
+| `I check the {element}`                         | Ticks the checkbox or selects the radio button. Nothing changes if it is already ticked.                            | `I check the "I accept the terms and conditions" checkbox`            |
+| `I uncheck the {element}`                       | Unticks the checkbox. Nothing changes if it is already unticked.                                                    | `I uncheck the "Subscribe to newsletter" checkbox`                    |
+| `I select {string} in the {element}`            | Chooses the option with this visible text in the dropdown.                                                          | `I select "Germany" in the "Country" dropdown`                        |
+| `I press {string}`                              | Presses a key or key combination, such as "Enter", "Tab" or "Control+A", on the focused element.                    | `I press "Enter"`                                                     |
+| `I press {string} in the {element}`             | Focuses the element and presses a key or key combination there.                                                     | `I press "Enter" in the "Email" field`                                |
+| `I upload the file {string} with the {element}` | Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens. | `I upload the file "data/files/invoice.pdf" with the "Upload" button` |
+| `I drag the {element} to the {element}`         | Drags the first element with the mouse and drops it onto the second.                                                | `I drag the "Coffee" list item to the "Cart" list`                    |
 
 ### Checking what you see
 
@@ -82,14 +82,14 @@ For special cases. `lint` lists where they are used.
 
 ### Clicking and typing
 
-| Step                                             | What it does                                                                                                                                               | Example                                                                              |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                                                                        | `I right click the "Order 1001" row`                                                 |
-| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                                                                                | `I focus on the "Full Name" field`                                                   |
-| `I type {string} in the {element}`               | Types the text key by key after what is already in the field, for fields that react to every key, such as a date with a mask or a search with suggestions. | `I type "21102026" in the "Birthday" field`                                          |
-| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                                                                      | `I select option "3" in the "Country" dropdown`                                      |
-| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens.                                                     | `I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button` |
-| `I tap the {element}`                            | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                                                         | `I tap the "Menu" button`                                                            |
+| Step                                             | What it does                                                                                                                                               | Example                                                                                        |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `I right click the {element}`                    | Clicks the element with the right mouse button, which usually opens a context menu.                                                                        | `I right click the "Order 1001" row`                                                           |
+| `I focus on the {element}`                       | Puts the keyboard focus on the element without clicking it.                                                                                                | `I focus on the "Full Name" field`                                                             |
+| `I type {string} in the {element}`               | Types the text key by key after what is already in the field, for fields that react to every key, such as a date with a mask or a search with suggestions. | `I type "21102026" in the "Birthday" field`                                                    |
+| `I select option {number} in the {element}`      | Chooses the option at this position in the dropdown, counting from 1.                                                                                      | `I select option "3" in the "Country" dropdown`                                                |
+| `I upload the files {string} with the {element}` | Chooses several files, separated by commas, in the file field or in the file dialog the element opens.                                                     | `I upload the files "data/files/invoice.pdf, data/files/receipt.pdf" with the "Upload" button` |
+| `I tap the {element}`                            | Taps the element on a touch screen. Needs a browser with touch enabled (hasTouch).                                                                         | `I tap the "Menu" button`                                                                      |
 
 ### Checking what you see
 
@@ -167,12 +167,10 @@ For special cases. `lint` lists where they are used.
 
 ### Downloads
 
-| Step                                             | What it does                                                              | Example                                                   |
-| ------------------------------------------------ | ------------------------------------------------------------------------- | --------------------------------------------------------- |
-| `I download the file with the {element}`         | Clicks the element and waits until the file it offers has downloaded.     | `I download the file with the "Export" button`            |
-| `I see the downloaded file {string}`             | Checks the file name of the last download.                                | `I see the downloaded file "orders.csv"`                  |
-| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals. | `I see the text "Total" in the downloaded file`           |
-| `I save the downloaded file to {string}`         | Saves the last download at this path, relative to the project folder.     | `I save the downloaded file to "test-results/report.csv"` |
+| Step                                             | What it does                                                                                              | Example                                         |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `I see the downloaded file {string}`             | Checks the file name of the last download, and waits for it after a click on a link or button.            | `I see the downloaded file "orders.csv"`        |
+| `I see the text {string} in the downloaded file` | Checks that the last download contains this text, with the same capitals, and waits for it after a click. | `I see the text "Total" in the downloaded file` |
 
 ### Test data and APIs
 
@@ -219,3 +217,5 @@ Steps a release removed, with what to write instead. `lint` says the same where 
 | `I see the attribute {string} containing {string} on the {element}`     | 0.3.0      | For a link: I see the "…" link leads to "/…". For a menu or an accordion: I see the "…" button is expanded. For a check no step has, write a step in TypeScript (docs/writing-steps.md).                                              |
 | `I see the class {string} on the {element}`                             | 0.3.0      | A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".                                       |
 | `I do not see the class {string} on the {element}`                      | 0.3.0      | A class is how the page is built, not what the user sees. Check the state instead, such as I see the "…" button is disabled, or how it looks: I see the "…" element matches the screenshot "…".                                       |
+| `I download the file with the {element}`                                | 0.3.0      | Click it: I click the "…" button. Every click catches a download, and I see the downloaded file "…" waits for it.                                                                                                                     |
+| `I save the downloaded file to {string}`                                | 0.3.0      | Check the file with I see the text "…" in the downloaded file. A file to upload goes into the project, such as data/files/, for I upload the file "data/files/…" with the "…" button.                                                 |

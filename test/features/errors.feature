@@ -44,13 +44,12 @@ Feature: Helpful error messages
       I see the text "accept cookies" in the "Cookie consent" dialog
       """
 
-  Scenario: A download whose click fails reports only the click
+  Scenario: A download check without a download says to click first
     * I open the "Download" page
-    * I see this step fail with "No \"Missing\" button found on the \"Download\" page.":
+    * I see this step fail with "Nothing was downloaded. Click the link or button that offers the file first":
       """
-      I download the file with the "Missing" button
+      I see the downloaded file "test-download.txt"
       """
-    * I see the "Download Test File" button
 
   Scenario: An upload whose click fails reports only the click
     * I open the "File upload" page

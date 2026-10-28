@@ -180,7 +180,7 @@ step({
   level: 'core',
   description:
     'Chooses this file (path relative to the project folder) in the file field, or in the file dialog the element opens.',
-  example: 'I upload the file "files/invoice.pdf" with the "Upload" button',
+  example: 'I upload the file "data/files/invoice.pdf" with the "Upload" button',
   fn: async ({ world }, file: string, element: ElementRef) => {
     await upload(world, element, [file]);
   },
@@ -191,7 +191,8 @@ step({
   level: 'advanced',
   description:
     'Chooses several files, separated by commas, in the file field or in the file dialog the element opens.',
-  example: 'I upload the files "files/invoice.pdf, files/receipt.pdf" with the "Upload" button',
+  example:
+    'I upload the files "data/files/invoice.pdf, data/files/receipt.pdf" with the "Upload" button',
   fn: async ({ world }, files: string, element: ElementRef) => {
     await upload(
       world,

@@ -7,6 +7,10 @@ Feature: File upload
     * I upload the file "test/test-app/test-file.txt" with the "Choose File" button
     * I see the text "test-file.txt" in the "Chosen file" section
 
+  Scenario: A file next to the test data
+    * I upload the file "test/data/files/invoice.txt" with the "Choose File" button
+    * I see the text "invoice.txt" in the "Chosen file" section
+
   Scenario: Choose several files
     * I upload the files "test/test-app/test-file.txt, test/test-app/test-file.txt" with the "Choose Multiple Files" button
     * I see the text "test-file.txt, test-file.txt" in the "Chosen files" section

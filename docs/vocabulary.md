@@ -25,8 +25,8 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 
 Every step follows one of the patterns in the table. Verbs in use: click, double click, right
 click, hover over, focus on, fill … in, clear, check, uncheck, select … in, press, upload …
-with, drag … to, tap, scroll, switch to, open, go back, reload, accept, dismiss, download, take
-a screenshot.
+with, drag … to, tap, scroll, switch to, open, go back, reload, accept, dismiss, take a
+screenshot.
 
 Element types: button, link, field, checkbox, radio button, dropdown, heading, tab, dialog,
 menu item, image, section, list, list item, row, cell, message, element. See the
@@ -74,7 +74,7 @@ Current core steps:
 - `I select "Germany" in the "Country" dropdown`
 - `I press "Enter"`
 - `I press "Enter" in the "Email" field`
-- `I upload the file "files/invoice.pdf" with the "Upload" button`
+- `I upload the file "data/files/invoice.pdf" with the "Upload" button`
 - `I drag the "Coffee" list item to the "Cart" list`
 - `I see the "Welcome to your Dashboard" heading`
 - `I do not see the "Close" button`

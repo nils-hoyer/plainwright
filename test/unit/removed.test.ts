@@ -53,6 +53,8 @@ const examples = [
     'I do not see the class "hidden" on the "Styled box" element',
     'I do not see the class {string} on the {element}',
   ],
+  ['I download the file with the "Export" button', 'I download the file with the {element}'],
+  ['I save the downloaded file to "report.csv"', 'I save the downloaded file to {string}'],
 ] as const;
 
 describe('removed steps', () => {
