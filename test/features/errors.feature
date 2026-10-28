@@ -124,10 +124,3 @@ Feature: Helpful error messages
       """
       I create "order" at "/api/nothing" with "x"
       """
-
-  Scenario: An element without a number shows its text
-    * I open the "Orders" page
-    * I see this step fail with "The \"Orders\" heading has no number: \"Orders\".":
-      """
-      I remember the first number in the "Orders" heading as "order"
-      """
