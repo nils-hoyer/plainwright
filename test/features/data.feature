@@ -56,16 +56,15 @@ Feature: Test data
     * I send a "DELETE" request to "/api/orders/{order.id}"
     * I see the response status "204"
 
-  Scenario: Numbers from a message and from the address
+  Scenario: A number from a message, with a step of the project, and the address
     * I open the "Orders from the API" page
     * I fill "Cake" in the "Item" field
     * I click the "Create order" button
     * I am on the "Order" page
-    * I remember the first number in the "was created" message as "order"
+    * I remember the text of the "was created" message as "confirmation"
+    * I remember the number in "{confirmation}" as "order"
     * I delete "/api/orders/{order}" after the test
-    * I remember the last number in the url as "number-in-url"
-    * I see the "Order {number-in-url}" heading
-    * I see the text "Order #{order} was created."
+    * I see the "Order {order}" heading
     * I remember the url as "order-page"
     * I open the "Orders from the API" page
     * I open the url "{order-page}"

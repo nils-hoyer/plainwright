@@ -101,30 +101,43 @@ the number next to it.
 ```
 
 Apps often show a new record's number only inside a sentence, such as "Order #10234 was
-created", or only in the address after saving, `/orders/10234`. Two steps take the number out:
+created", or only in the address after saving, `/orders/10234`. Remember the whole text or
+the address, and take the part you need out of it with a [step of your own](writing-steps.md):
 
 ```gherkin
 * I click the "Save" button
-* I am on the "Order" page
-* I remember the first number in the "was created" message as "order"
-* I remember the last number in the url as "order-in-address"
+* I remember the text of the "was created" message as "confirmation"
+* I remember the number in "{confirmation}" as "order"
 * I open the url "/orders"
 * I see the text "Order {order}" in the "Recent orders" list
 ```
 
-A number is digits, with `.` or `,` between digits as the page writes them: `10234`, `12,50`,
-`1.234,56`. It is kept as text, so `00042` stays `00042`. The step waits until the element, or
-the address, has a number. Before taking the number from the address, check that the browser
-shows the new one, with a [page](pages.md) whose address is `/orders/*` (`I am on the "Order"
-page`): the old address may have a number too, such as `/customers/7/orders/new`.
+A value in quotes reaches the step filled in, so the step below gets the text "Order #10234
+was created.". `world.remember()` keeps the number under the name, and `remembers` tells `lint`
+which argument is that name, so later steps may write `{order}`.
 
-| Step                                                                   | What it does                                                                                         |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `I remember "Coffee" as "item"`                                        | keeps a value under a name                                                                           |
-| `I remember the text of the "Order number" field as "x"`               | keeps the text of an element or a field's value                                                      |
-| `I remember the first number in the "Confirmation" message as "order"` | keeps the first number in the text of an element, or in a field's value                              |
-| `I remember the last number in the url as "order"`                     | keeps the last number in the path of the address (`/api/v2/orders/17` gives `17`), else in the query |
-| `I remember the url as "order-page"`                                   | keeps the address, `/orders/10234` on your app, the full address on another website                  |
+```ts
+// steps/numbers.steps.ts
+import { defineStep } from '@nils.hoyer/plainwright';
+
+defineStep({
+  pattern: 'I remember the number in {string} as {string}',
+  description: 'Keeps the first number in the text, such as 10234 in "Order #10234 was created.".',
+  example: 'I remember the number in "Order #10234 was created." as "order"',
+  remembers: (args) => String(args[1]),
+  fn: ({ world }, text: string, name: string) => {
+    const number = text.match(/\d+/)?.[0];
+    if (!number) throw new Error(`There is no number in "${text}".`);
+    world.remember(name, number);
+  },
+});
+```
+
+| Step                                                     | What it does                                                                        |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `I remember "Coffee" as "item"`                          | keeps a value under a name                                                          |
+| `I remember the text of the "Order number" field as "x"` | keeps the text of an element or a field's value                                     |
+| `I remember the url as "order-page"`                     | keeps the address, `/orders/10234` on your app, the full address on another website |
 
 ### Values last for one test
 

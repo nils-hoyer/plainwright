@@ -16,7 +16,7 @@
       const id = location.pathname.split('/').pop();
       if (sessionStorage.getItem('created') === id) {
         sessionStorage.removeItem('created');
-        // A moment later, longer than a second, so the step that takes the number has to wait.
+        // A moment later, longer than a second, so the step that keeps its text has to wait.
         setTimeout(() => {
           const created = document.getElementById('created');
           created.textContent = `Order #${id} was created.`;
