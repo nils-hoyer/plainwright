@@ -10,8 +10,8 @@ export type RemovedStep = {
   instead: string;
 };
 
-const FIXED_WAIT =
-  'Check for what the user waits for instead, such as I see the text "…": every check waits by itself. For a slow page: I see the "…" heading within "30" seconds.';
+const MILLISECONDS =
+  'Check for what the user waits for instead, such as I see the text "…": every check waits by itself. Where a fixed wait cannot be avoided: I wait "0.5" seconds.';
 const PAGE_LOAD =
   'Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.';
 
@@ -21,8 +21,7 @@ const PAGE_LOAD =
  * lists them, and the release notes copy that list.
  */
 export const REMOVED_STEPS: readonly RemovedStep[] = [
-  { pattern: 'I wait {number} second(s)', removedIn: '0.3.0', instead: FIXED_WAIT },
-  { pattern: 'I wait {number} millisecond(s)', removedIn: '0.3.0', instead: FIXED_WAIT },
+  { pattern: 'I wait {number} millisecond(s)', removedIn: '0.3.0', instead: MILLISECONDS },
   { pattern: 'I wait for the page to load', removedIn: '0.3.0', instead: PAGE_LOAD },
   { pattern: 'I wait for network idle', removedIn: '0.3.0', instead: PAGE_LOAD },
 ];
@@ -41,7 +40,7 @@ export function removedStep(text: string): RemovedStep | undefined {
   });
 }
 
-/** `"I wait "2" seconds" was removed in 0.3.0. Check for …`, or undefined for other steps. */
+/** `"I wait "500" milliseconds" was removed in 0.3.0. Check for …`, or undefined for other steps. */
 export function removedMessage(text: string, removed = removedStep(text)): string | undefined {
   return removed && `"${text}" was removed in ${removed.removedIn}. ${removed.instead}`;
 }

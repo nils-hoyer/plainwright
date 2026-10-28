@@ -68,7 +68,7 @@ npx plainwright lint --features "features/**/*.feature"
 | `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                             |
 | `syntax`                 | error    | A feature file Gherkin cannot read.                                                                       |
 | `step-example`           | error    | A step definition whose `example` does not match it, or also matches another step.                        |
-| `discouraged-step`       | warning  | A step of your project marked `discouraged`, with its better alternative.                                 |
+| `discouraged-step`       | warning  | A step with a better alternative, such as fixed waits.                                                    |
 | `unknown-parameter-type` | warning  | A step that keywords and lint cannot check, see [steps in TypeScript](writing-steps.md#parameter-types).  |
 | `advanced-step`          | info     | An advanced step. `--quiet` hides these.                                                                  |
 

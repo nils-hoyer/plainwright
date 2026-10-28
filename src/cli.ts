@@ -20,7 +20,7 @@ Commands:
   test      Run the tests (feature files): bddgen, then playwright test. Other options,
             such as --ui, --headed or a file, go to Playwright.
   lint      Check feature files: unknown, removed or ambiguous steps, selectors, absolute
-            URLs, advanced steps (info) and keyword definitions.
+            URLs, fixed waits, advanced steps (info) and keyword definitions.
   catalog   Write all steps, element types, pages and data values as JSON for AI assistants.
   docs      Write all steps as a Markdown reference.
   inspect   Open a page and list its elements by type and visible name.
@@ -60,7 +60,7 @@ Options:
   lint: `Usage: plainwright lint [options]
 
 Checks feature files without a browser: unknown or ambiguous steps, unknown pages and values,
-selectors, absolute URLs, removed steps, advanced steps (info) and keyword definitions. Prints
+selectors, absolute URLs, removed steps, fixed waits, advanced steps (info) and keyword definitions. Prints
 file:line: severity: message (rule), and exits with 1 when there is an error. Also updates
 the editor's step list, .vscode/plainwright.steps.js, like plainwright test.
 

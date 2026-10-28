@@ -9,5 +9,5 @@ Feature: Broken
     * I fill "<name>" in the "Name" field
     * I fill "<b>new</b> <nme>" in the "Bio" field
 
-  Scenario Outline: I wait for the report "<seconds>" seconds
-    * I wait "<seconds>" seconds
+  Scenario Outline: I wait for the report "<ms>" milliseconds
+    * I wait "<ms>" milliseconds

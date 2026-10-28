@@ -27,20 +27,20 @@ syntax and in how elements are named.
 
 ## Library keywords
 
-| Robot Framework (Browser / SeleniumLibrary)          | Plainwright                                       |
-| ---------------------------------------------------- | ------------------------------------------------- |
-| `Go To    ${URL}/login`                              | `I open the "Login" page`                         |
-| `Input Text    id=username    jane`                  | `I fill "jane" in the "Username" field`           |
-| `Click Button    Log in`                             | `I click the "Log in" button`                     |
-| `Click Link    Forgot password?`                     | `I click the "Forgot password?" link`             |
-| `Select From List By Label    id=country    Germany` | `I select "Germany" in the "Country" dropdown`    |
-| `Select Checkbox    id=terms`                        | `I check the "I accept the terms" checkbox`       |
-| `Page Should Contain    Welcome back!`               | `I see the text "Welcome back!"`                  |
-| `Element Should Be Visible    id=modal`              | `I see the "Welcome back!" dialog`                |
-| `Element Should Be Disabled    id=submit`            | `I see the "Log in" button is disabled`           |
-| `Textfield Value Should Be    id=name    Jane`       | `I see the value "Jane" in the "Name" field`      |
-| `Location Should Contain    /dashboard`              | `I see the url containing "/dashboard"`           |
-| `Sleep    2s`                                        | No such step. Every `I see` step waits by itself. |
+| Robot Framework (Browser / SeleniumLibrary)          | Plainwright                                    |
+| ---------------------------------------------------- | ---------------------------------------------- |
+| `Go To    ${URL}/login`                              | `I open the "Login" page`                      |
+| `Input Text    id=username    jane`                  | `I fill "jane" in the "Username" field`        |
+| `Click Button    Log in`                             | `I click the "Log in" button`                  |
+| `Click Link    Forgot password?`                     | `I click the "Forgot password?" link`          |
+| `Select From List By Label    id=country    Germany` | `I select "Germany" in the "Country" dropdown` |
+| `Select Checkbox    id=terms`                        | `I check the "I accept the terms" checkbox`    |
+| `Page Should Contain    Welcome back!`               | `I see the text "Welcome back!"`               |
+| `Element Should Be Visible    id=modal`              | `I see the "Welcome back!" dialog`             |
+| `Element Should Be Disabled    id=submit`            | `I see the "Log in" button is disabled`        |
+| `Textfield Value Should Be    id=name    Jane`       | `I see the value "Jane" in the "Name" field`   |
+| `Location Should Contain    /dashboard`              | `I see the url containing "/dashboard"`        |
+| `Sleep    2s`                                        | Avoid. Every `I see` step waits automatically. |
 
 ## User keywords
 
