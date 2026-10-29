@@ -6,7 +6,7 @@ import path from 'node:path';
 import * as prettier from 'prettier';
 import {
   renderElementTypes,
-  renderRemovedSteps,
+  renderLeftOutSteps,
   renderStepReference,
   replaceGenerated,
 } from '../src/docs';
@@ -35,7 +35,7 @@ const targets: Target[] = [
         'is in [writing tests](writing-tests.md#how-a-step-is-built).',
       ].join('\n'),
       renderStepReference(builtIn, 2),
-      renderRemovedSteps(2),
+      renderLeftOutSteps(2),
     ].join('\n\n'),
   },
   {

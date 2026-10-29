@@ -18,7 +18,7 @@ import {
   StepFixtures,
   suggestionsFor,
 } from './registry';
-import { removedMessage, removedStep } from './removed';
+import { leftOutMessage, leftOutStep } from './left-out';
 import { levenshtein } from './similar';
 
 export type KeywordStep = {
@@ -158,12 +158,12 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
       const numbers = Object.fromEntries(keyword.params.map((name) => [name, '1']));
       if (!matches.length) matches = findSteps(fillPlaceholders(sub.text, numbers));
       if (!matches.length) {
-        const removed = removedMessage(
+        const leftOut = leftOutMessage(
           sub.text,
-          removedStep(sub.text) ?? removedStep(fillPlaceholders(sub.text, numbers)),
+          leftOutStep(sub.text) ?? leftOutStep(fillPlaceholders(sub.text, numbers)),
         );
-        if (removed) {
-          errors.push(`${subWhere}: ${removed}`);
+        if (leftOut) {
+          errors.push(`${subWhere}: ${leftOut}`);
           continue;
         }
         const suggestion = suggestionsFor(sub.text)[0];

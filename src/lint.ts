@@ -3,7 +3,7 @@ import path from 'node:path';
 import { FeatureStep, featureSteps, parseGherkin, scenarioSteps } from './gherkin';
 import { ElementRef } from './elements';
 import { checkKeywords, fillPlaceholders, getKeywords, keywordOf, sameWording } from './keywords';
-import { removedMessage } from './removed';
+import { leftOutMessage } from './left-out';
 import { appPagesFile, getPageDefinitions, isUrlPattern } from './pages';
 import {
   elementTypeHint,
@@ -93,9 +93,9 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
 
       const matches = find(text);
       if (matches.length === 0) {
-        const removed = removedMessage(text);
-        if (removed) {
-          add('error', 'undefined-step', removed);
+        const leftOut = leftOutMessage(text);
+        if (leftOut) {
+          add('error', 'undefined-step', leftOut);
           continue;
         }
         const suggestion = suggestionsFor(text)[0];

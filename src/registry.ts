@@ -12,7 +12,7 @@ import { DataTable, type BddTestFixtures, type BddWorkerFixtures } from 'playwri
 import { ELEMENT_TYPES, ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
-import { removedMessage } from './removed';
+import { leftOutMessage } from './left-out';
 import { levenshtein } from './similar';
 import {
   HIDDEN,
@@ -278,8 +278,8 @@ export function findStep(text: string): StepMatch {
   const matches = findSteps(text);
   if (matches.length === 1) return matches[0];
   if (matches.length === 0) {
-    const removed = removedMessage(text);
-    if (removed) throw new Error(removed);
+    const leftOut = leftOutMessage(text);
+    if (leftOut) throw new Error(leftOut);
     const missingType = elementTypeHint(text);
     if (missingType) throw new Error(`No step matches "${text}". ${missingType}`);
     const suggestions = suggestionsFor(text);
