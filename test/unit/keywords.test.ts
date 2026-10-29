@@ -106,10 +106,10 @@ describe('defineKeywords', () => {
     );
   });
 
-  it('fails at load time when a keyword is not a Scenario Outline', async () => {
+  it('fails at load time when a keyword with values is not a Scenario Outline', async () => {
     const { define } = await load('not-outline');
     expect(define).toThrow(
-      'test/unit/fixtures/keywords/not-outline/scenario.feature:3: Write keywords as "Scenario Outline:", not "Scenario:".',
+      'test/unit/fixtures/keywords/not-outline/scenario.feature:7: A keyword with values is a "Scenario Outline:", not "Scenario:".',
     );
   });
 

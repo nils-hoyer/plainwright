@@ -9,7 +9,7 @@ Feature: Forms
       | name     |
       | Jane Doe |
 
-  Scenario Outline: I enter a name in bold
+  Scenario: I enter a name in bold
     Angle brackets that are not a parameter of the keyword are text.
 
     * I fill "<b>Jane</b>" in the "Full Name" field
