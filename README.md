@@ -183,6 +183,10 @@ test. How, and everything else about data, is in [test data](docs/test-data.md).
 - [Pages](docs/pages.md): named pages, and names for elements that have none.
 - [Test data](docs/test-data.md): data files, passwords, data created through your app's API.
 - [Keywords](docs/keywords.md): your own steps, made of existing steps.
+- [Organizing a suite](docs/organizing-tests.md): folders, titles, tags, and when to use a
+  keyword, a page or a data file.
+- [Troubleshooting](docs/troubleshooting.md): an element is not found, a test fails now and
+  then, it fails only in CI.
 - [AI authoring](docs/ai-authoring.md): let an assistant write tests.
 
 **Review tests**
@@ -207,6 +211,7 @@ test. How, and everything else about data, is in [test data](docs/test-data.md).
 **Reference**
 
 - [Step reference](docs/steps.md): every step with an example.
+- [Glossary](docs/glossary.md): the words these docs use.
 - [Vocabulary rules](docs/vocabulary.md): how steps are worded.
 - [Versioning](docs/versioning.md): what counts as a breaking change, before and after 1.0.
 

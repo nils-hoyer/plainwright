@@ -183,14 +183,15 @@ element without a name is also hard to use with a screen reader.
 ## Checks
 
 Steps that start with `I see` or `I do not see` are checks. They wait up to 5 seconds for the
-page to get there, so a slow page does not fail the test by itself, and no test needs a fixed
-pause.
+page to get there, so a slow page does not fail the test by itself.
 
-"Contains" means the text can be part of a longer text, with the same spelling and capitals:
-`I see the text "Welcome"` passes on "Welcome back!", but not on "welcome back!". Checks of a
-field value, an address or "exactly the text" compare the whole value. Because capitals count,
-a negative check passes when only the capitals differ: `I do not see the text "error"` passes on
-a page that shows "Error". Write the text exactly as the page shows it.
+`I see the text "Welcome"` passes on "Welcome back!": a text check passes when the page
+contains the text. Checks of a field value, an address or "exactly the text" compare the whole
+value.
+
+Capitals count: `I see the text "Welcome"` fails on "welcome back!". So does a check that
+something is not there: `I do not see the text "error"` passes on a page that shows "Error".
+Write the text exactly as the page shows it.
 
 | Step                                          | Passes when                                      |
 | --------------------------------------------- | ------------------------------------------------ |
@@ -204,15 +205,27 @@ a page that shows "Error". Write the text exactly as the page shows it.
 
 ### Checks against a screenshot
 
-`I see the page matches the screenshot "start.png"` compares the page with a stored screenshot.
-The first run has none yet: it stores one and fails, and the runs after it compare. The file is
-next to the feature file, in a folder named after the test Playwright makes from it, and
-Playwright adds the browser and the operating system to the name:
-`features/start.feature.spec.js-snapshots/start-chromium-darwin.png` on a Mac,
-`start-chromium-linux.png` on Linux. Fonts look different on each system, so a screenshot made
-on a Mac does not count on Linux, where CI usually runs: there the check fails once more and
-stores its own. [Running in CI](setup.md#running-in-ci) says how to make the Linux screenshots.
-After a change to the page that is meant, `npm test -- --update-snapshots` stores new ones.
+```gherkin
+* I open the url "/"
+* I see the page matches the screenshot "start.png"
+```
+
+The step compares the page with a stored screenshot. The first run has none yet: it stores one
+and fails. The runs after it compare.
+
+The screenshot is stored next to the feature file, with the browser and the operating system in
+its name:
+
+```
+features/start.feature.spec.js-snapshots/start-chromium-darwin.png   (a Mac)
+features/start.feature.spec.js-snapshots/start-chromium-linux.png    (Linux)
+```
+
+Fonts look different on each system, so a screenshot made on a Mac does not count on Linux,
+where CI usually runs. [Running in CI](setup.md#running-in-ci) says how to make the Linux
+screenshots.
+
+When the page changed on purpose, `npm test -- --update-snapshots` stores new screenshots.
 
 ## Before you run
 
@@ -234,4 +247,6 @@ Buttons on this page: "Accept Cookies", "Log in".
   through your app's API.
 - [Keywords](keywords.md): your own steps, made of existing steps.
 - [Logging in](logging-in.md): start tests logged in.
+- [Organizing a suite](organizing-tests.md): folders, titles, tags.
+- [Troubleshooting](troubleshooting.md): when a test fails or does not do what you expect.
 - [Vocabulary rules](vocabulary.md): how steps are worded.
