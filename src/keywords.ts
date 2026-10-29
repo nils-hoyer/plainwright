@@ -6,6 +6,7 @@ import { globSync } from 'tinyglobby';
 import { workerChecks } from './fixtures';
 import { parseGherkin } from './gherkin';
 import {
+  elementTypeHint,
   findSteps,
   formatLocation,
   getSteps,
@@ -14,8 +15,7 @@ import {
   runAt,
   StepDefinition,
   StepFixtures,
-  suggestionFor,
-  suggestSteps,
+  suggestionsFor,
 } from './registry';
 import { removedMessage, removedStep } from './removed';
 import { levenshtein } from './similar';
@@ -158,12 +158,11 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
           errors.push(`${subWhere}: ${removed}`);
           continue;
         }
-        const suggestions = suggestSteps(sub.text);
+        const suggestion = suggestionsFor(sub.text)[0];
+        const missingType = elementTypeHint(sub.text);
         errors.push(
           `${subWhere}: No step matches "${sub.text}".` +
-            (suggestions.length
-              ? ` Did you mean "${suggestionFor(suggestions[0], sub.text)}"?`
-              : ''),
+            (missingType ? ` ${missingType}` : suggestion ? ` Did you mean "${suggestion}"?` : ''),
         );
         continue;
       }
