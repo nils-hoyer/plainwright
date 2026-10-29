@@ -330,7 +330,7 @@ const KEYWORD_EXAMPLE = `# Your own sentences, made of existing steps. Every fil
 
 const VSCODE_SETTINGS = `{
   // Suggestions for steps (Cucumber extension) and for the files in pages/.
-  "cucumber.features": ["features/**/*.feature"],
+  "cucumber.features": ["features/**/*.feature", "keywords/**/*.feature"],
   "cucumber.glue": [".vscode/plainwright.steps.js"],
   "json.schemas": [
     {

@@ -1,5 +1,5 @@
 {
-  "cucumber.features": ["features/**/*.feature"],
+  "cucumber.features": ["features/**/*.feature", "keywords/**/*.feature"],
   "cucumber.glue": [".vscode/plainwright.steps.js"],
   // Suggestions and checks for the files in pages/.
   "json.schemas": [

@@ -38,7 +38,7 @@ npm install -g @cucumber/language-server
 vim.lsp.config('cucumber_language_server', {
   settings = {
     cucumber = {
-      features = { 'features/**/*.feature' },
+      features = { 'features/**/*.feature', 'keywords/**/*.feature' },
       glue = { '.vscode/plainwright.steps.js' },
     },
   },
@@ -56,7 +56,7 @@ for language servers.
 ```json
 {
   "cucumber": {
-    "features": ["features/**/*.feature"],
+    "features": ["features/**/*.feature", "keywords/**/*.feature"],
     "glue": [".vscode/plainwright.steps.js"]
   }
 }
