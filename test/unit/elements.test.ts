@@ -144,13 +144,13 @@ describe('locate', () => {
     );
   });
 
-  it('prefers an alias with element type over one with only the name', () => {
-    const aliases = { Settings: '#any', '"Settings" button': '#button' };
+  it('uses an alias for every element type', () => {
+    const aliases = { Settings: '#settings' };
     expect(describeLocator(new ElementRef('Settings', 'button'), { ...exact, aliases })).toBe(
-      'locator("#button")',
+      'locator("#settings")',
     );
     expect(describeLocator(new ElementRef('Settings', 'dialog'), { ...exact, aliases })).toBe(
-      'locator("#any")',
+      'locator("#settings")',
     );
   });
 
@@ -163,7 +163,7 @@ describe('locate', () => {
 
   it('uses aliases for containers too', () => {
     const ref = new ElementRef('Delete', 'button', new ElementRef('Orders', 'section'));
-    const aliases = { Orders: '#orders', '"Delete" button': '.delete' };
+    const aliases = { Orders: '#orders', Delete: '.delete' };
     expect(describeLocator(ref, { ...exact, aliases })).toBe(
       'locator("#orders").locator(".delete")',
     );
@@ -445,7 +445,7 @@ describe('aria snapshot', () => {
       unnamed: {},
       aliases: [
         { name: 'Search', type: 'field', count: 1 },
-        { name: '"Settings" button', type: 'button', count: 0 },
+        { name: 'Settings icon', type: 'button', count: 0 },
       ],
       redirectedFrom: 'http://localhost/dashboard',
     });
@@ -453,7 +453,7 @@ describe('aria snapshot', () => {
       'The page sent the browser from http://localhost/dashboard to http://localhost/login.',
     );
     expect(text).toContain('--storage-state <file>');
-    expect(text).toContain('  the "Search" field\n  the "Settings" button  (finds nothing)');
+    expect(text).toContain('  the "Search" field\n  the "Settings icon" button  (finds nothing)');
   });
 
   it('counts names that several elements have', () => {

@@ -10,6 +10,6 @@ Feature: Aliases for elements without a usable name
     * I see the value "1001" in the "Search" field
 
   Scenario: A button that only shows an icon
-    * I click the "Settings" button
+    * I click the "Settings icon" button
     * I see the "Settings" dialog
     * I see the text "Nothing to configure yet."

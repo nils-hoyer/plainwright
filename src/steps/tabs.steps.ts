@@ -69,7 +69,7 @@ step({
     'Continues inside the embedded frame (iframe) with this title or name, or with this alias.',
   example: 'I switch to the "Greeting" frame',
   fn: async ({ world }, name: string) => {
-    const alias = findAlias(world.currentPage?.elements, { name, label: `"${name}" frame` });
+    const alias = findAlias(world.currentPage?.elements, name);
     const scope = world.scope;
     const frame =
       alias === undefined

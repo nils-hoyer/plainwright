@@ -182,8 +182,7 @@ export function formatInspectResult(result: InspectResult): string {
   if (result.aliases?.length) {
     lines.push('Aliases of this page');
     for (const { name, type, count } of result.aliases) {
-      // A key like `"Settings" button` already says how a step names the element.
-      const written = name.startsWith('"') ? `the ${name}` : `the "${name}" ${type ?? 'element'}`;
+      const written = `the "${name}" ${type ?? 'element'}`;
       const found = count === 0 ? 'finds nothing' : count === 1 ? '' : `finds ${count} elements`;
       lines.push(`  ${written}${found ? `  (${found})` : ''}`);
     }

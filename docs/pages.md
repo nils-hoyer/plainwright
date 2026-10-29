@@ -57,10 +57,9 @@ A step finds an element by what the user sees. Some elements show nothing usable
 button, a field without a label. Give them a name in the page's file under `elements`. Tests use
 the names, and the selector stays in the page file.
 
-`Search` works with any element type: `the "Search" field`. The second key names the type too,
-so only `the "Settings" button` uses the alias, and a "Settings" dialog is still found by its
-title. A selector is CSS, or any Playwright selector such as `text=Total`. For anything more
-specific, `definePage()` in TypeScript also takes a function that returns a Locator (see
+An alias is a name alone and works with any element type: `the "Search" field`. A selector is
+CSS, or any Playwright selector such as `text=Total`. For anything more specific,
+`definePage()` in TypeScript also takes a function that returns a Locator (see
 [steps in TypeScript](writing-steps.md#pages-and-data-in-typescript)).
 
 Use aliases sparingly: an element without a visible name is usually also a problem for people
@@ -74,7 +73,7 @@ no alias: `the "Delete" button in the "Order 1001" row`.
   "url": "/orders",
   "elements": {
     "Search": "[data-testid=search]",
-    "\"Settings\" button": "[data-testid=settings]"
+    "Settings icon": "[data-testid=settings]"
   }
 }
 ```
@@ -82,8 +81,13 @@ no alias: `the "Delete" button in the "Order 1001" row`.
 ```gherkin
 * I open the "Orders" page
 * I fill "1001" in the "Search" field
-* I click the "Settings" button
+* I click the "Settings icon" button
+* I see the "Settings" dialog
 ```
+
+The icon-only button opens a dialog with the title "Settings". Named "Settings", the alias would
+also stand for `the "Settings" dialog`, so the button gets a name of its own, and the dialog is
+still found by its title.
 
 ### The current page
 
