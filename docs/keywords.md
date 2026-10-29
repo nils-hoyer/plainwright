@@ -5,9 +5,10 @@ feature file, so no programming is needed, and reviewers can read it like any te
 
 ## Writing a keyword
 
-A keyword is a `Scenario Outline:` in a file in `keywords/`. The title is the new step, and each
-`"<name>"` in it is a value you fill in when you use it. Any test can then use it like a
-built-in step. The report shows the login steps nested under `I log in as …`, and errors
+In `keywords/`, a scenario is not a test but a new step. Its title is the new step, and each
+`"<name>"` in it is a value you fill in when you use it, which makes it a `Scenario Outline:`.
+A keyword without values, such as `I accept the cookies`, is a plain `Scenario:`. Any test can
+then use it like a built-in step. The report shows the login steps nested under `I log in as …`, and errors
 point to the line in the keyword file.
 
 - The text under the title says what the keyword does. It appears in the

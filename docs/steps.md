@@ -16,7 +16,7 @@ The everyday vocabulary. Prefer these steps.
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | `I open the {string} page`  | Opens the address of the page defined with this name and uses the element names defined for it.                                                                 | `I open the "Login" page`      |
 | `I am on the {string} page` | Uses the element names defined for this page from here on, such as after a click that leads to it. Checks nothing: to check the address, add I see the url "…". | `I am on the "Dashboard" page` |
-| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL.                                                                                                      | `I open the url "/login"`      |
+| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL. The current page stays: to use the element names of another page, add I am on the "…" page.          | `I open the url "/login"`      |
 | `I go back`                 | Goes back to the previous page, like the browser back button.                                                                                                   | `I go back`                    |
 | `I reload the page`         | Reloads the current page.                                                                                                                                       | `I reload the page`            |
 | `I see the url {string}`    | Checks that the address is exactly this URL (relative URLs use the base URL).                                                                                   | `I see the url "/dashboard"`   |
@@ -140,19 +140,17 @@ For special cases. `lint` lists where they are used.
 
 ### Cookies and storage
 
-| Step                                                            | What it does                                                                                                                             | Example                                                      |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `I set the cookie {string} to {string}`                         | Stores a cookie with this name and value for the current website.                                                                        | `I set the cookie "session" to "abc123"`                     |
-| `I delete the cookie {string}`                                  | Removes the cookie with this name.                                                                                                       | `I delete the cookie "session"`                              |
-| `I clear all cookies`                                           | Removes all cookies of the browser session.                                                                                              | `I clear all cookies`                                        |
-| `I see the cookie {string}`                                     | Checks that a cookie with this name exists.                                                                                              | `I see the cookie "cookies_accepted"`                        |
-| `I do not see the cookie {string}`                              | Checks that no cookie with this name exists.                                                                                             | `I do not see the cookie "session"`                          |
-| `I see the cookie {string} with the value {string}`             | Checks that the cookie with this name has exactly this value.                                                                            | `I see the cookie "session" with the value "abc123"`         |
-| `I set the local storage item {string} to {string}`             | Stores a value in the local storage of the current website.                                                                              | `I set the local storage item "theme" to "dark"`             |
-| `I clear the local storage`                                     | Removes all values from the local storage of the current website.                                                                        | `I clear the local storage`                                  |
-| `I see the local storage item {string} with the value {string}` | Checks that the local storage of the current website has this value under this key.                                                      | `I see the local storage item "theme" with the value "dark"` |
-| `I keep the session`                                            | Saves the cookies and storage of the browser, so every scenario after the @setup ones starts with them, except those tagged @logged-out. | `I keep the session`                                         |
-| `I keep the session for {string} scenarios`                     | Saves the cookies and storage of the browser for the scenarios with this tag, which start with them instead of the session kept for all. | `I keep the session for "@admin" scenarios`                  |
+| Step                                                            | What it does                                                                        | Example                                                      |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `I set the cookie {string} to {string}`                         | Stores a cookie with this name and value for the current website.                   | `I set the cookie "session" to "abc123"`                     |
+| `I delete the cookie {string}`                                  | Removes the cookie with this name.                                                  | `I delete the cookie "session"`                              |
+| `I clear all cookies`                                           | Removes all cookies of the browser session.                                         | `I clear all cookies`                                        |
+| `I see the cookie {string}`                                     | Checks that a cookie with this name exists.                                         | `I see the cookie "cookies_accepted"`                        |
+| `I do not see the cookie {string}`                              | Checks that no cookie with this name exists.                                        | `I do not see the cookie "session"`                          |
+| `I see the cookie {string} with the value {string}`             | Checks that the cookie with this name has exactly this value.                       | `I see the cookie "session" with the value "abc123"`         |
+| `I set the local storage item {string} to {string}`             | Stores a value in the local storage of the current website.                         | `I set the local storage item "theme" to "dark"`             |
+| `I clear the local storage`                                     | Removes all values from the local storage of the current website.                   | `I clear the local storage`                                  |
+| `I see the local storage item {string} with the value {string}` | Checks that the local storage of the current website has this value under this key. | `I see the local storage item "theme" with the value "dark"` |
 
 ### Screenshots
 

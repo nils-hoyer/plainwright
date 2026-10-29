@@ -45,8 +45,9 @@ const keywordOfStep = new WeakMap<StepDefinition, KeywordDefinition>();
 const warned = new Set<string>();
 
 /**
- * Loads keywords from .feature files. Each `Scenario Outline:` becomes a step whose text is
- * the title; its steps run in order. Parameters are written `"<name>"` in the title.
+ * Loads keywords from .feature files. Each scenario becomes a step whose text is the title;
+ * its steps run in order. Parameters are written `"<name>"` in the title, which makes the
+ * scenario a `Scenario Outline:`; a keyword without parameters may be a plain `Scenario:`.
  *
  *   defineKeywords('keywords/**\/*.feature');
  *
@@ -233,14 +234,17 @@ function parseKeywordFile(file: string): ParsedKeyword[] {
     const scenario = child.scenario;
     if (!scenario) continue;
     const where = `${rel}:${scenario.location.line}`;
-    if (!dialect.scenarioOutline.includes(scenario.keyword)) {
-      errors.push(`${where}: Write keywords as "Scenario Outline:", not "${scenario.keyword}:".`);
-      continue;
-    }
     const title = scenario.name.trim();
     const parsed = titleToPattern(title);
     if ('error' in parsed) {
       errors.push(`${where}: ${parsed.error}`);
+      continue;
+    }
+    // A keyword without values may be a plain Scenario; one with values needs an outline.
+    if (parsed.params.length && !dialect.scenarioOutline.includes(scenario.keyword)) {
+      errors.push(
+        `${where}: A keyword with values is a "Scenario Outline:", not "${scenario.keyword}:".`,
+      );
       continue;
     }
     if (!scenario.steps.length) {
