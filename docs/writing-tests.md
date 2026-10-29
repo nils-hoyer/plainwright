@@ -215,5 +215,5 @@ Buttons on this page: "Accept Cookies", "Log in".
 - [Test data](test-data.md): data files, passwords, values from earlier steps, data created
   through your app's API.
 - [Keywords](keywords.md): your own steps, made of existing steps.
-- [Logging in once](logging-in.md): start tests logged in.
+- [Logging in](logging-in.md): start tests logged in.
 - [Vocabulary rules](vocabulary.md): how steps are worded.

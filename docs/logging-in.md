@@ -1,124 +1,75 @@
-# Logging in once
+# Logging in
 
-Most scenarios of a real app start logged in. Logging in through the form in every scenario is
-slow and repeats the same steps everywhere. Plainwright can log in once per run, in a scenario
-of its own, keep the browser's session (its cookies and storage), and start every other
-scenario with it. It takes a feature file, one step and one line in the configuration; no code.
+Most scenarios of a real app start logged in. Write the login once, as a
+[keyword](keywords.md), and put it into the `Background:` of every feature that needs it. Each
+scenario then logs in before its own steps, and the reviewer sees at the top of the file who is
+logged in. No code and no configuration.
 
-## 1. A scenario that logs in
+## 1. A keyword that logs in
 
-Scenarios tagged `@setup` run once, before all others. One of them logs in, with the steps or
-the [keyword](keywords.md) your tests already use, and ends with `I keep the session`. Its last
-step before that checks that the app has logged in, such as `I see the url "/dashboard"`, so the
-session is kept once the login is done. Take the password from the environment, a `.env` file or
-your CI secrets, as in [test data](test-data.md).
+The keyword fills the login form and ends with a check of where the login leads, so the next
+step does not start while the app is still logging in.
 
 ```gherkin
-# features/setup.feature
-@setup
-Feature: Log in once
+# keywords/account.feature
+Feature: Account
 
-  Scenario: Log in
-    * I log in as "{users.tester.email}" with password "{env.TEST_PASSWORD}"
-    * I keep the session
+  Scenario Outline: I am logged in as "<email>"
+    Logs in with the test password and waits for the dashboard.
+
+    * I open the url "/login"
+    * I fill "<email>" in the "Email" field
+    * I fill "{env.TEST_PASSWORD}" in the "Password" field
+    * I click the "Log in" button
+    * I see the url "/dashboard"
+
+    Examples:
+      | email            |
+      | jane@example.com |
 ```
 
-## 2. Turn it on
+Take the password from the environment, a `.env` file or your CI secrets, as in
+[test data](test-data.md#passwords-and-other-secrets).
 
-`setup: true` in `playwright.config.ts` runs the `@setup` scenarios in a project of their own,
-named `setup`, and lets the other projects wait for it. Running one feature file or one tag
-(`npm test -- orders`) still runs the setup first.
+## 2. The keyword in the Background
 
-```ts
-import { defineConfig } from '@nils.hoyer/plainwright/config';
-
-export default defineConfig({
-  baseURL: 'http://localhost:3000',
-  setup: true,
-});
-```
-
-## 3. Scenarios that test the login
-
-Every scenario now starts logged in. Scenarios that test the login itself are tagged
-`@logged-out` and start with a fresh browser.
+`Background:` steps run before every scenario of the file.
 
 ```gherkin
-@logged-out
-Feature: Login
+# features/orders.feature
+Feature: Orders
 
-  Scenario: A wrong password shows an error
-    * I open the "Login" page
-    * I fill "jane@example.com" in the "Email" field
-    …
+  Background:
+    * I am logged in as "jane@example.com"
+
+  Scenario: Delete an order
+    * I open the url "/orders"
+    * I click the "Delete" button in the "Order 1001" row
+    * I see the "Order 1001 deleted" message
 ```
 
 ## Several users
 
-Each user gets a setup scenario of their own, and the session is kept for a tag:
-`I keep the session for "@admin" scenarios`. Scenarios tagged `@admin` then start as the admin,
-all others with the session `I keep the session` kept. Without `I keep the session`, only the
-scenarios with such a tag start logged in. Steps that only one user needs go into a folder named
-after the tag, such as `steps/@admin/` (see [steps in TypeScript](writing-steps.md)).
+Write the user into the step: `I am logged in as "{users.admin.email}"` in the features of the
+admin, `I am logged in as "{users.customer.email}"` in the others, with the users in a
+[data file](test-data.md#data-files). A scenario that needs another user than the rest of the
+file logs in at its own start, in a feature without a `Background`, or in a feature of its own.
 
-```gherkin
-@setup
-Feature: Log in once
+## Scenarios that test the login itself
 
-  Scenario: Customer
-    * I log in as "{users.customer.email}" with password "{env.CUSTOMER_PASSWORD}"
-    * I keep the session
+They go into a feature without the login in its `Background`, such as `features/login.feature`,
+and start with a fresh browser like every scenario.
 
-  Scenario: Admin
-    * I log in as "{users.admin.email}" with password "{env.ADMIN_PASSWORD}"
-    * I keep the session for "@admin" scenarios
-```
+## When logging in every test is too slow
 
-## Other browsers and phones
+Logging in through the form takes a second or two per scenario. For a large suite, a developer
+can log in once per run with Playwright's own setup project and give every scenario the saved
+session: see [authentication](https://playwright.dev/docs/auth) in Playwright's docs. The feature
+files stay the same, without the login in the `Background`. The session file holds a logged-in
+session, so it must never be committed: `init` adds `playwright/.auth/` to `.gitignore`.
 
-The setup runs once, in the browser of the first project, and every project starts with its
-sessions. The `projects` from [other browsers and phones](setup.md#other-browsers-and-phones)
-work unchanged with `setup: true`.
-
-## Where the sessions are
-
-`I keep the session` writes `playwright/.auth/session.json`, and `I keep the session for
-"@admin" scenarios` writes `playwright/.auth/@admin.json`. They hold a logged-in session, so they
-must never be committed: `init` adds the folder to `.gitignore`. Every run logs in again. To run
-the tests with the sessions of the last run, without the setup, add `--no-deps`:
-`npm test -- --no-deps`.
-
-A file stays until it is deleted, also after its setup scenario is gone. When you rename the tag
-of a session or remove a setup scenario, delete the folder `playwright/.auth`, so no scenario
-starts with an old session.
-
-## Inspecting pages behind the login
-
-`inspect` takes a session too, so it lists the elements a logged-in user sees. Run the setup
-once, then name the session file:
+`inspect` takes such a session too, so it lists the elements a logged-in user sees:
 
 ```bash
-npm test -- --project setup
-npx plainwright inspect "Dashboard" --storage-state playwright/.auth/session.json
+npx plainwright inspect "Dashboard" --storage-state playwright/.auth/user.json
 ```
-
-## With your own Playwright configuration
-
-Without `defineConfig()`, add the two projects yourself. The steps and `@logged-out` work the
-same, since they come with Plainwright's steps.
-
-```ts
-projects: [
-  { name: 'setup', grep: /@setup/, use: { ...devices['Desktop Chrome'] } },
-  {
-    name: 'chromium',
-    use: { ...devices['Desktop Chrome'] },
-    dependencies: ['setup'],
-    grepInvert: /@setup/,
-  },
-],
-```
-
-A setup file in TypeScript, as [Playwright's docs](https://playwright.dev/docs/auth) show it,
-keeps working: a scenario starts with the `storageState` of its project unless
-`I keep the session` kept one for it.

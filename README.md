@@ -193,7 +193,7 @@ test. How, and everything else about data, is in [test data](docs/test-data.md).
 
 - [Setup](docs/setup.md): what `init` wrote, the configuration, other environments, other
   browsers and phones, CI.
-- [Logging in once](docs/logging-in.md): start tests logged in.
+- [Logging in](docs/logging-in.md): start tests logged in.
 - [Reports for CI](docs/reports-for-ci.md): JUnit and Cucumber reports for Jenkins, GitLab, Azure
   DevOps and Jira.
 - [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.

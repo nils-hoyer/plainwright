@@ -62,7 +62,6 @@ npx plainwright lint --features "features/**/*.feature"
 | `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which cannot be opened.            |
 | `unknown-value`          | error    | A `{value}` that no data file, earlier step or built-in value provides; a warning for `{env.NAME}` unset. |
 | `remember-name`          | error    | A name to remember a value under that has spaces or other characters a `{value}` cannot have.             |
-| `setup-step`             | error    | `I keep the session` outside a `@setup` scenario, or for no tag, see [logging in once](logging-in.md).    |
 | `selector`               | error    | An element name that looks like CSS, XPath or a test ID.                                                  |
 | `absolute-url`           | error    | `I open the url "https://…"`: use a page name or a relative address.                                      |
 | `keyword`                | error    | A broken keyword; a warning for `<…>` that looks like a misspelled parameter.                             |
@@ -89,12 +88,12 @@ must be one from `pages/`; an address starts with `/` or `http`.
 npx plainwright inspect "Login"
 ```
 
-| Option                   | Meaning                                                        |
-| ------------------------ | -------------------------------------------------------------- |
-| `<page name or URL>`     | A page from `pages/`, or an address.                           |
-| `--base-url <url>`       | Where addresses start. Default: `baseURL` from the config.     |
-| `--storage-state <file>` | Open the page logged in, see [logging in once](logging-in.md). |
-| `--json`                 | Print JSON instead of a list.                                  |
+| Option                   | Meaning                                                    |
+| ------------------------ | ---------------------------------------------------------- |
+| `<page name or URL>`     | A page from `pages/`, or an address.                       |
+| `--base-url <url>`       | Where addresses start. Default: `baseURL` from the config. |
+| `--storage-state <file>` | Open the page logged in, see [logging in](logging-in.md).  |
+| `--json`                 | Print JSON instead of a list.                              |
 
 ### catalog: all steps as JSON
 

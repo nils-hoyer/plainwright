@@ -1,6 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { checkSessionTag, sessionFile, SETUP_TAG } from '../session';
-import type { World } from '../world';
+import { expect } from '@playwright/test';
 import { category } from './builtin';
 
 const step = category('Cookies and storage');
@@ -114,52 +112,6 @@ step({
       .toBe(value);
   },
 });
-
-// Logging in once (docs/logging-in.md): a scenario tagged @setup logs in and keeps the session.
-
-step({
-  pattern: 'I keep the session',
-  level: 'advanced',
-  description:
-    'Saves the cookies and storage of the browser, so every scenario after the @setup ones starts with them, except those tagged @logged-out.',
-  example: 'I keep the session',
-  fn: async ({ world }) => {
-    await keepSession(world);
-  },
-});
-
-step({
-  pattern: 'I keep the session for {string} scenarios',
-  level: 'advanced',
-  description:
-    'Saves the cookies and storage of the browser for the scenarios with this tag, which start with them instead of the session kept for all.',
-  example: 'I keep the session for "@admin" scenarios',
-  fn: async ({ world }, tag: string) => {
-    const problem = checkSessionTag(tag);
-    if (problem) throw new Error(`[plainwright] ${problem}`);
-    await keepSession(world, tag);
-  },
-});
-
-async function keepSession(world: World, tag?: string) {
-  const { tags, project, config } = test.info();
-  if (!tags.includes(SETUP_TAG)) {
-    throw new Error(
-      `[plainwright] A session is kept in a scenario tagged ${SETUP_TAG}, which runs before the ` +
-        `others when the configuration has setup: true. See docs/logging-in.md.`,
-    );
-  }
-  // Otherwise the other scenarios run at the same time and may start before it is kept.
-  if (!config.projects.some((other) => other.dependencies.includes(project.name))) {
-    throw new Error(
-      `[plainwright] No project waits for the project "${project.name}", so other scenarios ` +
-        `may start before the session is kept. Add setup: true to the configuration. See ` +
-        `docs/logging-in.md.`,
-    );
-  }
-  // IndexedDB too: some sign-in libraries, such as Firebase, keep the login there.
-  await world.page.context().storageState({ path: sessionFile(tag), indexedDB: true });
-}
 
 async function cookieNames(context: import('@playwright/test').BrowserContext) {
   return (await context.cookies()).map((cookie) => cookie.name);

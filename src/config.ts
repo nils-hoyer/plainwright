@@ -13,7 +13,6 @@ import {
 import { aiFixPromptTemplate } from './ai';
 import { checkOptions, type KeywordsOptions } from './fixtures';
 import { steps as builtInSteps } from './index';
-import { SETUP_TAG } from './session';
 
 export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
   /** The address of your app. `"/login"` in a test means `<baseURL>/login`. */
@@ -24,11 +23,6 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
   steps?: string | string[];
   /** More playwright-bdd options, see https://vitalets.github.io/playwright-bdd/#/configuration/options. */
   bdd?: Omit<BDDInputConfig, 'features' | 'steps'>;
-  /**
-   * Runs the scenarios tagged `@setup` once, before all others, in a project named `setup`.
-   * One that ends with `I keep the session` logs in for the other scenarios. Default: `false`.
-   */
-  setup?: boolean;
 };
 
 /**
@@ -46,7 +40,7 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
 export function defineConfig(
   config: PlainwrightConfig = {},
 ): PlaywrightTestConfig<KeywordsOptions> {
-  const { baseURL, features, steps, bdd, use, reporter, setup, projects, ...playwright } = config;
+  const { baseURL, features, steps, bdd, use, reporter, projects, ...playwright } = config;
   for (const options of [use, ...(projects ?? []).map((project) => project.use)]) {
     checkOptions(options);
   }
@@ -66,11 +60,7 @@ export function defineConfig(
     // the generated tests, a folder that is not committed.
     snapshotDir: bdd?.featuresRoot ?? '.',
     ...playwright,
-    projects: withSetup(
-      setup,
-      projects ?? [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-      playwright.grepInvert,
-    ),
+    projects: projects ?? [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     use: {
       // A click or fill that finds nothing fails after 10 s and lists what the page offers.
       actionTimeout: 10_000,
@@ -103,38 +93,4 @@ function withCucumberFix(reporter: string | ReporterDescription[]): string | Rep
   return reporter.map((entry) =>
     entry[0] === BDD_CUCUMBER_REPORTER ? [CUCUMBER_REPORTER, entry[1]] : entry,
   );
-}
-
-/**
- * With `setup: true`, a project that runs the `@setup` scenarios, in the browser of the first
- * project, and every project after it without them. A project's `grepInvert` replaces the one of
- * the configuration, so that one is kept where a project has none.
- */
-function withSetup<T>(
-  setup: boolean | undefined,
-  projects: PlaywrightTestProject<T>[],
-  grepInvert: PlaywrightTestConfig['grepInvert'],
-) {
-  if (!setup) return projects;
-  if (projects.some((project) => project.name === 'setup')) {
-    throw new Error(
-      '[plainwright] setup: true adds a project named "setup", and the configuration has one ' +
-        'already. Rename yours, or remove setup: true and run your own.',
-    );
-  }
-  // The tag itself, not tags that start with it such as @setup-data. Playwright matches against
-  // the title and the tags, separated by spaces.
-  const tag = new RegExp(`(?<!\\S)${SETUP_TAG}(?!\\S)`);
-  // Playwright refuses dependencies for a project that runs after others (`teardown`).
-  const teardowns = new Set(projects.flatMap((project) => project.teardown ?? []));
-  return [
-    { name: 'setup', grep: tag, use: projects[0]?.use },
-    ...projects.map((project) => ({
-      ...project,
-      ...(project.name && teardowns.has(project.name)
-        ? {}
-        : { dependencies: [...(project.dependencies ?? []), 'setup'] }),
-      grepInvert: [...[project.grepInvert ?? grepInvert ?? []].flat(), tag],
-    })),
-  ];
 }

@@ -14,8 +14,7 @@ Feature: Dashboard
     * I see the "Coming Soon" button is disabled
     * I see the "Transfer Money" button is enabled
 
-  @logged-out
-  Scenario: Nobody is signed in without the saved session
+  Scenario: Nobody is signed in without logging in
     * I see the text "Not signed in"
 
   Scenario: Things that are not on the page

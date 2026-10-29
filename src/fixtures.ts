@@ -1,6 +1,5 @@
 import type { TestType } from '@playwright/test';
 import { createBdd, test as bddTest } from 'playwright-bdd';
-import { keptSession } from './session';
 import { World } from './world';
 
 /** Plainwright's options under `use`. There are none since `exactNames` was removed in 0.3.0. */
@@ -29,10 +28,6 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
       },
       { scope: 'worker', auto: true, box: true },
     ],
-    // A scenario starts with the session that a @setup scenario kept (src/session.ts).
-    storageState: async ({ storageState }, use, testInfo) => {
-      await use(keptSession(testInfo.tags) ?? storageState);
-    },
     world: async ({ page, baseURL }, use) => {
       const world = new World(page, { baseURL });
       await use(world);
