@@ -40,3 +40,9 @@ Feature: Pages and navigation
     And I am on the "Orders" page
     Then I fill "1001" in the "Search" field
     And I see the value "1001" in the "Search" field
+
+  Scenario: Opening an address keeps the current page
+    Given I am on the "Orders" page
+    When I open the url "/orders.html"
+    Then I fill "1001" in the "Search" field
+    And I see the value "1001" in the "Search" field

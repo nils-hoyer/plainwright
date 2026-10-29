@@ -88,9 +88,8 @@ export class World {
     return this.#currentPage;
   }
 
-  /** Stops using the aliases of the current page definition. */
-  clearPage() {
-    this.#currentPage = undefined;
+  /** Leaves the active frame: elements are looked up in the tab again. */
+  leaveFrame() {
     this.#frame = null;
   }
 
