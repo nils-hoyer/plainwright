@@ -90,6 +90,30 @@ describe('page files', () => {
     );
   });
 
+  it('have aliases without the element type', async () => {
+    const { dir, library } = await folder({
+      'pages/orders.json':
+        '{ "name": "Orders", "elements": { "\\"Settings\\" button": "#settings" } }',
+    });
+    const spy = vi.spyOn(process, 'cwd').mockReturnValue(dir);
+    try {
+      expect(() => library.definePages('pages', { cwd: dir })).toThrow(
+        `${path.join('pages', 'orders.json')}: The alias "\\"Settings\\" button" names its type. ` +
+          'An alias is a name alone and covers every element type: "Settings". ' +
+          'If another element on the page is also called "Settings", give the alias a name of its own, ' +
+          'such as "Settings icon": I click the "Settings icon" button.',
+      );
+    } finally {
+      spy.mockRestore();
+    }
+    expect(() => library.definePage('Login', { elements: { '"Help" link': 'a.help' } })).toThrow(
+      'The page "Login": The alias "\\"Help\\" link" names its type.',
+    );
+    expect(library.definePage('Quotes', { elements: { '"Quoted" name': 'q' } }).elements).toEqual({
+      '"Quoted" name': 'q',
+    });
+  });
+
   it('name both files when two pages have the same name', async () => {
     const { dir, library } = await folder({
       'pages/login.json': '{ "name": "Login", "url": "/login" }',

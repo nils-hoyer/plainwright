@@ -20,7 +20,7 @@
     },
     "elements": {
       "type": "object",
-      "description": "Names for elements without a usable visible name (aliases). The key is the name used in feature files, or name and type as written in the step (\"\\\"Settings\\\" button\"); the value is a selector.",
+      "description": "Names for elements without a usable visible name (aliases). The key is the name used in feature files, for every element type; the value is a selector.",
       "additionalProperties": { "type": "string" }
     }
   },

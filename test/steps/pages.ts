@@ -11,9 +11,8 @@ definePage('Orders', {
   elements: {
     // A text field without label or placeholder.
     Search: '[data-testid="input-search"]',
-    // An icon-only button. The key includes the type, so the "Settings" dialog is still
-    // found by its title.
-    '"Settings" button': '[data-testid="btn-settings"]',
+    // An icon-only button. Its own name, so the "Settings" dialog is still found by its title.
+    'Settings icon': '[data-testid="btn-settings"]',
     // Both rows have a "Delete" button. No alias needed: the "Delete" button in the "Order 1001" row.
   },
 });

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'tinyglobby';
-import type { ElementAlias } from './elements';
+import { ELEMENT_TYPES, type ElementAlias } from './elements';
 
 export type PageOptions = {
   /**
@@ -11,8 +11,7 @@ export type PageOptions = {
   url?: string | RegExp;
   /**
    * Aliases for elements without a usable visible name. The key is the name used in feature
-   * files (`'Search'`), or name and type as written in the step (`'"Settings" button'`) when
-   * the same name means different elements. Value: a selector string, or a function that
+   * files (`'Search'`), for every element type. Value: a selector string, or a function that
    * returns a Locator.
    */
   elements?: Record<string, ElementAlias>;
@@ -52,6 +51,18 @@ export function definePage(
       `[plainwright] The page "${name}" is defined twice` +
         (files.length ? ` (${files.join(', ')}).` : '.') +
         ' Page names must be different.',
+    );
+  }
+  const typed = Object.keys(options.elements ?? {})
+    .map((key) => ({ key, match: TYPED_KEY.exec(key) }))
+    .find(({ match }) => match && (ELEMENT_TYPES as readonly string[]).includes(match[2]));
+  if (typed?.match) {
+    const [, alias, type] = typed.match;
+    throw new Error(
+      `[plainwright] ${source ? `${source}:` : `The page "${name}":`} The alias ${JSON.stringify(typed.key)} names its type. ` +
+        `An alias is a name alone and covers every element type: "${alias}". ` +
+        `If another element on the page is also called "${alias}", give the alias a name of its own, ` +
+        `such as "${alias} icon": I click the "${alias} icon" ${type}.`,
     );
   }
   if (source) sources.set(name, source);
@@ -145,6 +156,9 @@ function definePageFile(file: string): PageDefinition {
     rel,
   );
 }
+
+/** An alias key with name and type as a step writes them, such as `"Settings" button`. */
+const TYPED_KEY = /^"(.+)" (.+)$/;
 
 const PAGE_KEYS = ['$schema', 'name', 'url', 'elements'];
 const PAGE_KEYS_TEXT = '"name", "url" and "elements"';

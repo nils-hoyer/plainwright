@@ -321,21 +321,21 @@ export type LocateOptions = {
 /**
  * Builds the Locator for an element reference, inside its container if it names one.
  * Order: alias on the current page → lookup by role, label or text.
- * Alias keys are the name as written in the step (`'"Settings" button'`), or just the name
- * (`'Settings'`) to cover every element type. Containers are looked up the same way.
+ * An alias key is the name alone (`'Settings'`) and covers every element type. Containers are
+ * looked up the same way.
  */
 export function locate(scope: Scope, ref: ElementRef, options: LocateOptions): Locator {
   const within = ref.container ? locate(scope, ref.container, options) : scope;
-  const alias = findAlias(options.aliases, ref);
+  const alias = findAlias(options.aliases, ref.name);
   if (alias !== undefined) return typeof alias === 'string' ? within.locator(alias) : alias(within);
   return locateByType(within, ref, options.exact);
 }
 
 export function findAlias(
   aliases: Readonly<Record<string, ElementAlias>> | undefined,
-  ref: Pick<ElementRef, 'name' | 'label'>,
+  name: string,
 ): ElementAlias | undefined {
-  return ownEntry(aliases, ref.label) ?? ownEntry(aliases, ref.name);
+  return ownEntry(aliases, name);
 }
 
 /** `record[key]`, but never a member of `Object.prototype` such as `constructor`. */
