@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { dialects } from '@cucumber/gherkin';
 import { test as playwrightTest } from '@playwright/test';
+import { DataTable } from 'playwright-bdd';
 import { globSync } from 'tinyglobby';
 import { workerChecks } from './fixtures';
 import { parseGherkin } from './gherkin';
@@ -20,7 +21,14 @@ import {
 import { removedMessage, removedStep } from './removed';
 import { levenshtein } from './similar';
 
-export type KeywordStep = { keyword: string; text: string; line: number; column: number };
+export type KeywordStep = {
+  keyword: string;
+  text: string;
+  line: number;
+  column: number;
+  /** The cells of the data table below the step, if it has one; `<name>` is filled in. */
+  table?: string[][];
+};
 
 export type KeywordDefinition = {
   /** The Scenario Outline title, e.g. `I log in as "<username>" with password "<password>"`. */
@@ -131,7 +139,7 @@ export function checkKeywords(): { errors: string[]; warnings: string[] } {
 
     for (const sub of keyword.steps) {
       const subWhere = `${relative(keyword.file)}:${sub.line}`;
-      for (const name of angleBrackets(sub.text)) {
+      for (const name of [sub.text, ...(sub.table?.flat() ?? [])].flatMap(angleBrackets)) {
         if (keyword.params.includes(name)) {
           used.add(name);
           continue;
@@ -251,9 +259,9 @@ function parseKeywordFile(file: string): ParsedKeyword[] {
       continue;
     }
     for (const step of scenario.steps) {
-      if (step.dataTable || step.docString) {
+      if (step.docString) {
         errors.push(
-          `${rel}:${step.location.line}: Data tables and doc strings are not supported in keywords yet.`,
+          `${rel}:${step.location.line}: Doc strings are not supported in keywords yet. A data table is.`,
         );
       }
     }
@@ -269,6 +277,9 @@ function parseKeywordFile(file: string): ParsedKeyword[] {
         text: step.text,
         line: step.location.line,
         column: step.location.column ?? 1,
+        ...(step.dataTable
+          ? { table: step.dataTable.rows.map((row) => row.cells.map((cell) => cell.value)) }
+          : {}),
       })),
       ...docsFor(scenario, title),
       category: feature.name.trim() || 'Keywords',
@@ -361,7 +372,16 @@ async function runKeyword(
                 : `No step matches "${text}".`),
           );
         }
-        await runAt(location, () => matches[0].step.fn.call({}, fixtures, ...matches[0].args));
+        const table = sub.table
+          ? [
+              new DataTable(
+                sub.table.map((row) => row.map((cell) => fillPlaceholders(cell, values))),
+              ),
+            ]
+          : [];
+        await runAt(location, () =>
+          matches[0].step.fn.call({}, fixtures, ...matches[0].args, ...table),
+        );
       },
       { location },
     );

@@ -53,6 +53,18 @@ as `(hidden)`.
 
 > I fill **"{users.admin.email}"** in the **"Email" field**
 
+### Tables below a step
+
+A step that ends with a colon takes a table: the lines starting with `|` below it. Each cell is
+data, like a value in quotes, and may hold a value from somewhere else. `I fill the fields:` fills
+the field named in the first column with the text in the second:
+
+```gherkin
+* I fill the fields:
+  | Email    | jane@example.com |
+  | Password | {env.PASSWORD}   |
+```
+
 ## Element types
 
 The word after the name says what kind of element is meant. The test looks for an element of

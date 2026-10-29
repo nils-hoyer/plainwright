@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import { DataTable } from 'playwright-bdd';
 import { describeMissingText, type ElementRef } from '../elements';
 import { addHint, type World } from '../world';
 import { category, escapeRegExp } from './builtin';
@@ -188,6 +189,54 @@ step({
     );
   },
 });
+
+step({
+  pattern: 'I see the items in the {element} in this order:',
+  level: 'advanced',
+  description:
+    'Checks that the list items or table rows of the element contain the texts of the table in this order, one per row; other items may be between them.',
+  example: 'I see the items in the "Products" list in this order:',
+  fn: async ({ world }, element: ElementRef, table: unknown) => {
+    if (!(table instanceof DataTable)) {
+      throw new Error(
+        '[plainwright] I see the items in the … in this order: needs a table below it, one text per row: | Coffee |',
+      );
+    }
+    const expected = table.raw().map((cells) => cells.join(' ').trim());
+    await world.withElement(element, async (el) => {
+      const items = el.getByRole('listitem').or(el.getByRole('row')).filter({ visible: true });
+      let texts: string[] = [];
+      await expect
+        .poll(
+          async () => {
+            texts = (await items.allInnerTexts()).map((t) => t.replace(/\s+/g, ' ').trim());
+            return inOrder(texts, expected);
+          },
+          {
+            message: `Expected the items in the ${element.label} in this order: ${expected.map((t) => `"${t}"`).join(', ')}`,
+          },
+        )
+        .toEqual(expected)
+        .catch((error: Error) => {
+          error.message += `\nThe items: ${texts.map((t) => `"${t}"`).join(', ') || 'none'}.`;
+          throw error;
+        });
+    });
+  },
+});
+
+/** The texts of `expected` that the items contain in this order, each in an item after the last. */
+function inOrder(items: string[], expected: string[]): string[] {
+  const found: string[] = [];
+  let from = 0;
+  for (const text of expected) {
+    const at = items.findIndex((item, i) => i >= from && item.includes(text));
+    if (at === -1) break;
+    found.push(text);
+    from = at + 1;
+  }
+  return found;
+}
 
 step({
   pattern: 'I see the {element} is focused',

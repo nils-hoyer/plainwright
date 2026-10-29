@@ -1,5 +1,6 @@
 import path from 'node:path';
-import type { ElementRef } from '../elements';
+import { DataTable } from 'playwright-bdd';
+import { ElementRef } from '../elements';
 import type { World } from '../world';
 import { category } from './builtin';
 
@@ -63,6 +64,23 @@ step({
   example: 'I fill "1234567890" in the "Username" field',
   fn: async ({ world }, text: string, element: ElementRef) => {
     await world.withElement(element, (el) => el.fill(text));
+  },
+});
+
+step({
+  pattern: 'I fill the fields:',
+  level: 'core',
+  description:
+    'Replaces the content of each field in the table with its text: the label of the field in the first column, the text in the second.',
+  example: 'I fill the fields:',
+  fn: async ({ world }, table: unknown) => {
+    for (const [name, text] of tableRows(
+      table,
+      'I fill the fields:',
+      '| Email | jane@example.com |',
+    )) {
+      await world.withElement(new ElementRef(name, 'field'), (el) => el.fill(text));
+    }
   },
 });
 
@@ -238,5 +256,20 @@ async function upload(world: World, element: ElementRef, files: string[]) {
     fileChooser.catch(() => {});
     await el.click();
     await (await fileChooser).setFiles(paths);
+  });
+}
+
+/** The rows of the table below a step, each with two cells, or an error that shows how to write one. */
+function tableRows(table: unknown, step: string, row: string): [string, string][] {
+  if (!(table instanceof DataTable)) {
+    throw new Error(`[plainwright] ${step} needs a table below it, one row per field: ${row}`);
+  }
+  return table.raw().map((cells, i) => {
+    if (cells.length !== 2) {
+      throw new Error(
+        `[plainwright] Row ${i + 1} of the table has ${cells.length} cells. Write two: the field and its text, ${row}`,
+      );
+    }
+    return [cells[0], cells[1]];
   });
 }

@@ -82,7 +82,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       continue;
     }
     const remembered = rememberedInOrder(scenarios, (step) => rememberedNames(find, step.text));
-    for (const { text, line, tags } of steps) {
+    for (const { text, line, tags, table } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
       const add = (severity: LintSeverity, rule: LintMessage['rule'], message: string) => {
         const key = `${file}:${line}:${rule}:${message}`;
@@ -162,7 +162,8 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         }
       }
       const order = remembered.of({ text, line, tags });
-      for (const reference of new Set(valueTexts(args).flatMap(referencesIn))) {
+      const values = [...valueTexts(args), ...(table?.flat() ?? [])];
+      for (const reference of new Set(values.flatMap(referencesIn))) {
         const problem = checkReference(reference, order.before);
         if (problem) add('error', 'unknown-value', order.explain(reference) ?? problem);
         // CI often sets secrets only for the test run, so this is a warning.

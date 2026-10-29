@@ -139,3 +139,19 @@ Feature: Helpful error messages
       """
       I see the "Shipping" button leads to "/shipping"
       """
+
+  Scenario: Items in another order show the items there are
+    * I open the "Assertions" page
+    * I see this step fail with "The items: \"Apple\", \"Banana\", \"Cherry\".":
+      """
+      I see the items in the "Fruits" list in this order:
+      | Cherry |
+      | Apple  |
+      """
+
+  Scenario: A step that needs a table says how to write it
+    * I open the "Forms" page
+    * I see this step fail with "I fill the fields: needs a table below it, one row per field":
+      """
+      I fill the fields:
+      """

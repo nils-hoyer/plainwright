@@ -8,7 +8,7 @@ import type {
   PlaywrightWorkerOptions,
 } from '@playwright/test';
 import { test } from '@playwright/test';
-import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
+import { DataTable, type BddTestFixtures, type BddWorkerFixtures } from 'playwright-bdd';
 import { ELEMENT_TYPES, ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
@@ -239,6 +239,10 @@ function resolveArg(arg: unknown, mode: 'text' | 'raw', used: ResolvedReference[
     return mode === 'raw' ? resolveRaw(arg, used) : resolveText(arg, used);
   if (arg instanceof NumberReference) return arg.resolve(used);
   if (arg instanceof ElementRef) return resolveElement(arg, used);
+  // Cells of a data table are text, like values in quotes.
+  if (arg instanceof DataTable) {
+    return new DataTable(arg.raw().map((row) => row.map((cell) => resolveText(cell, used))));
+  }
   return arg;
 }
 
