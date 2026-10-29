@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { globSync } from 'tinyglobby';
-import { ELEMENT_TYPES, type ElementAlias } from './elements';
+import { ELEMENT_TYPES, escapeRegExp, type ElementAlias } from './elements';
 
 export type PageOptions = {
   /**
    * Address of the page: absolute, or relative to `baseURL`. An address with `*` (any text
-   * without `/`) or `**` (any text), or a RegExp, can only be checked, not opened.
+   * without `/`) or `**` (any text), or a RegExp, cannot be opened. A missing element says when
+   * the browser shows another address than the current page's.
    */
   url?: string | RegExp;
   /**
@@ -163,7 +164,22 @@ const TYPED_KEY = /^"(.+)" (.+)$/;
 const PAGE_KEYS = ['$schema', 'name', 'url', 'elements'];
 const PAGE_KEYS_TEXT = '"name", "url" and "elements"';
 
-/** Whether the address has `*`, so it can only be checked, not opened. */
+/**
+ * Matches an address with any query string or hash. In a page's address, `*` stands for any
+ * text without `/`, `**` for any text. `resolve` makes a relative address absolute.
+ */
+export function addressPattern(url: string | RegExp, resolve: (path: string) => string): RegExp {
+  if (url instanceof RegExp) return url;
+  const resolved = resolve(url);
+  const start = /^[a-z]+:\/\//i.test(resolved) ? '^' : '';
+  const pattern = resolved
+    .split(/(\*\*|\*)/)
+    .map((part) => (part === '**' ? '.*' : part === '*' ? '[^/?#]*' : escapeRegExp(part)))
+    .join('');
+  return new RegExp(`${start}${pattern}(?:[?#].*)?$`);
+}
+
+/** Whether the address has `*`, so it cannot be opened. */
 export function isUrlPattern(url: string | RegExp | undefined): boolean {
   return url instanceof RegExp || (typeof url === 'string' && url.includes('*'));
 }

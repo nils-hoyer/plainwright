@@ -70,7 +70,7 @@ describe('init in an empty folder', () => {
     // catalog is for AI assistants, which call npx; test and lint update the editor's step list.
     expect(Object.keys(pkg.scripts)).toEqual(['test', 'report', 'lint', 'inspect']);
     // Without the app, the first test checks the address.
-    expect(read(dir, 'features/example.feature')).toContain('* I am on the "Start" page');
+    expect(read(dir, 'features/example.feature')).toContain('* I see the url "/start"');
     expect(read(dir, 'AGENTS.md')).toMatch(/^# Writing browser tests with Plainwright/);
   });
 

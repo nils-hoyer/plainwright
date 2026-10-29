@@ -13,14 +13,14 @@ Feature: Dialogs nobody announced
     * I open the "Editor" page
     * I fill "Draft" in the "Notes" field
     * I click the "Dashboard" link
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard.html"
 
   Scenario: A page with unsaved changes can be left by going back
     * I open the "Dashboard" page
     * I open the "Editor" page
     * I fill "Draft" in the "Notes" field
     * I go back
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard.html"
 
   Scenario: A project step answers a dialog itself
     * I open the "Interactions" page

@@ -158,13 +158,12 @@ describe('lint, with steps and keywords of its own', () => {
     ]);
   });
 
-  it('reports pages that cannot be opened or checked, and environment variables not set', async () => {
+  it('reports pages that cannot be opened, and environment variables not set', async () => {
     const { library, check } = await fresh();
     library.definePage('Order', { url: '/orders/*' });
     library.definePage('Draft');
     expect(check('pages.feature')).toEqual([
-      'test/unit/fixtures/lint/pages.feature:4: error: The page "Order" has the address pattern /orders/*, which can only be checked (I am on the "Order" page). Open it with I open the url "/...". (page-address)',
-      'test/unit/fixtures/lint/pages.feature:6: error: The page "Draft" has no address to check. Add its "url". (page-address)',
+      'test/unit/fixtures/lint/pages.feature:4: error: The page "Order" has the address pattern /orders/*, which cannot be opened. Open the address with I open the url "/...", then I am on the "Order" page. (page-address)',
       'test/unit/fixtures/lint/pages.feature:7: warning: The environment variable PLAINWRIGHT_LINT_UNSET is not set. Set it, or add it to the .env file, before the tests run. (unknown-value)',
     ]);
   });

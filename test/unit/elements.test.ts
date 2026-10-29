@@ -237,6 +237,18 @@ describe('aria snapshot', () => {
     );
   });
 
+  it('says to switch pages when the browser does not show the current page', () => {
+    const message = describeMissing(new ElementRef('Search', 'field'), snapshot, {
+      page: 'Dashboard',
+      address: '/orders/1001',
+      elsewhere: {},
+    });
+    expect(message).toContain(
+      'It is not the address of the "Dashboard" page, so the element names defined for it may not fit. When a click led to another page, add I am on the "…" page before this step.',
+    );
+    expect(message).not.toContain('add an alias');
+  });
+
   it('points to the pages folder when no page is open', () => {
     expect(describeMissing(new ElementRef('Sign up', 'button'), snapshot)).toContain(
       `add an alias in the page's file in pages/, "elements": { "Sign up": "<selector>" }, and open the page by name`,

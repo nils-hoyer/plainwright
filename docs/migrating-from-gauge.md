@@ -65,7 +65,7 @@ Feature: Login
     * I fill "<user>" in the "Username" field
     * I fill "secret" in the "Password" field
     * I click the "Log in" button
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard"
 ```
 
 ## Test data and secrets
