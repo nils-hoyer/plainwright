@@ -53,6 +53,22 @@ step({
   },
 });
 
+step({
+  pattern: 'I remember the number in {string} as {string}',
+  level: 'advanced',
+  description:
+    'Keeps the number in the text, such as 10234 in "Order #10234 was created.", as written; in an address the last number of its path.',
+  example: 'I remember the number in "{confirmation}" as "order"',
+  remembers: (args) => String(args[1]),
+  fn: ({ world }, value: string, name: string) => {
+    const number = numberIn(value);
+    if (number === undefined) {
+      throw new Error(`[plainwright] There is no number in "${value}".`);
+    }
+    world.remember(name, number);
+  },
+});
+
 // Test data through the app's API. Requests use the browser's cookies and the base URL.
 
 step({
@@ -141,6 +157,20 @@ step({
     ).toBe(value);
   },
 });
+
+/**
+ * Digits, with `.` or `,` between digits, kept as written: `10234`, `00042`, `1.234,56`. No
+ * minus sign, so `Order-123` gives `123`. In an address the last number of the path, or else of
+ * the query; in a text the first.
+ */
+export function numberIn(value: string): string | undefined {
+  const numbers = (part: string) => part.match(/\d+(?:[.,]\d+)*/g) ?? [];
+  if (/^(\/|https?:\/\/)/.test(value)) {
+    const [path, query = ''] = value.replace(/^https?:\/\/[^/]+/, '').split(/[?#]/);
+    return numbers(path).at(-1) ?? numbers(query).at(-1);
+  }
+  return numbers(value)[0];
+}
 
 function text(value: unknown): string {
   return typeof value === 'string' ? value : JSON.stringify(value);

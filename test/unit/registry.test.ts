@@ -1,5 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { numberIn } from '../../src/steps/data.steps';
 import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/index';
 import {
   parseStackFrame,
@@ -220,5 +221,17 @@ describe('suggestions', () => {
       'I click the "Delete" button in the "Order 1001" row',
     );
     expect(elementTypeHint('I click the "Save" button')).toBeUndefined();
+  });
+});
+
+describe('the number in a text', () => {
+  it('is the first number of a text and the last of an address, as written', () => {
+    expect(numberIn('Order #10234 was created.')).toBe('10234');
+    expect(numberIn('Total: 1.234,56 EUR for 3 items')).toBe('1.234,56');
+    expect(numberIn('Order-00042')).toBe('00042');
+    expect(numberIn('/customers/7/orders/10234')).toBe('10234');
+    expect(numberIn('https://shop.example.com/v2/orders/10234?page=3')).toBe('10234');
+    expect(numberIn('/order.html?id=1001')).toBe('1001');
+    expect(numberIn('No order yet')).toBeUndefined();
   });
 });

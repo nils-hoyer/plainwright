@@ -101,8 +101,8 @@ the number next to it.
 ```
 
 Apps often show a new record's number only inside a sentence, such as "Order #10234 was
-created", or only in the address after saving, `/orders/10234`. Remember the whole text or
-the address, and take the part you need out of it with a [step of your own](writing-steps.md):
+created", or only in the address after saving, `/orders/10234`. Remember the whole text or the
+address, then take the number out of it:
 
 ```gherkin
 * I click the "Save" button
@@ -112,32 +112,15 @@ the address, and take the part you need out of it with a [step of your own](writ
 * I see the text "Order {order}" in the "Recent orders" list
 ```
 
-A value in quotes reaches the step filled in, so the step below gets the text "Order #10234
-was created.". `world.remember()` keeps the number under the name, and `remembers` tells `lint`
-which argument is that name, so later steps may write `{order}`.
-
-```ts
-// steps/numbers.steps.ts
-import { defineStep } from '@nils.hoyer/plainwright';
-
-defineStep({
-  pattern: 'I remember the number in {string} as {string}',
-  description: 'Keeps the first number in the text, such as 10234 in "Order #10234 was created.".',
-  example: 'I remember the number in "Order #10234 was created." as "order"',
-  remembers: (args) => String(args[1]),
-  fn: ({ world }, text: string, name: string) => {
-    const number = text.match(/\d+/)?.[0];
-    if (!number) throw new Error(`There is no number in "${text}".`);
-    world.remember(name, number);
-  },
-});
-```
+`I remember the number in` keeps the first number of a text, and the last number of an address:
+`10234` from `/orders/10234`. It keeps the number as written, `00042` or `1.234,56`.
 
 | Step                                                     | What it does                                                                        |
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `I remember "Coffee" as "item"`                          | keeps a value under a name                                                          |
 | `I remember the text of the "Order number" field as "x"` | keeps the text of an element or a field's value                                     |
 | `I remember the url as "order-page"`                     | keeps the address, `/orders/10234` on your app, the full address on another website |
+| `I remember the number in "{order-page}" as "order"`     | keeps the number in a text or an address, `10234`                                   |
 
 ### Values last for one test
 
