@@ -106,13 +106,6 @@ button` checks the count.
 
 ### The current page
 
-An alias applies while its page is the current page. `I open the "…" page` and
-`I am on the "…" page` set the current page; `I open the url "…"` keeps it. You decide when the
-next steps are on another page: after a click or an `I open the url` that leads there, add
-`I am on the "…" page` so that its aliases apply. It checks nothing and does not wait for the address. To wait for the new
-page, check something on it first, such as its heading or `I see the url "…"`. Elements found by
-their visible name work on any page.
-
 ```gherkin
 * I open the "Orders" page
 * I click the "Order 1001" link
@@ -121,10 +114,21 @@ their visible name work on any page.
 * I click the "Print" button
 ```
 
+An alias applies while its page is the current page. `I open the "…" page` and
+`I am on the "…" page` set the current page; nothing else changes it, also not
+`I open the url "…"`. Elements found by their visible name work on any page.
+
+You decide when the next steps are on another page. After a click or an `I open the url` that
+leads there, add `I am on the "…" page`, so that its aliases apply.
+
+`I am on` checks nothing and does not wait. To wait for the new page, check something on it
+first, such as its heading or `I see the url "…"`, as above.
+
 Several pages can share one address, such as the steps of a wizard or the views of an app that
-does everything at `/`: `I am on the "Step 2" page` switches between them. When an element is
-missing and the browser does not show the current page's address, the error says so and names
-the `I am on` step to add.
+does everything at `/`: `I am on the "Step 2" page` switches between them.
+
+When an element is missing and the browser does not show the current page's address, the error
+says so and names the `I am on` step to add.
 
 ## Suggestions in VS Code
 

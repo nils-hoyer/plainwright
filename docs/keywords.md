@@ -80,11 +80,5 @@ double quotes, one verb per action.
 
 ## Keywords in another folder
 
-Keywords outside `keywords/` need one line in a step file:
-
-```ts
-// steps/keywords.ts
-import { defineKeywords } from '@nils.hoyer/plainwright';
-
-defineKeywords('other/folder/**/*.feature');
-```
+Keywords outside `keywords/` need one line in a step file, which a developer adds: see
+[pages and data in TypeScript](writing-steps.md#pages-and-data-in-typescript).
