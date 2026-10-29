@@ -38,6 +38,30 @@ defineStep({
 | `remembers`   | For a step that remembers a value: the name, from the arguments, so `lint` knows it      |
 | `fn`          | The code; gets the fixtures, then one argument per parameter                             |
 
+A step that remembers a value keeps it with `world.remember()`, and `remembers` tells `lint` the
+name, so later steps may write `{initials}`:
+
+```ts
+// steps/names.steps.ts
+import { defineStep } from '@nils.hoyer/plainwright';
+
+defineStep({
+  pattern: 'I remember the initials of {string} as {string}',
+  description: 'Keeps the first letter of every word, such as "JD" for "Jane Doe".',
+  example: 'I remember the initials of "Jane Doe" as "initials"',
+  remembers: (args) => String(args[1]),
+  fn: ({ world }, name: string, as: string) => {
+    world.remember(
+      as,
+      name
+        .split(/\s+/)
+        .map((word) => word[0])
+        .join(''),
+    );
+  },
+});
+```
+
 ## The world fixture
 
 `world` is what built-in steps use, and what makes your step behave like them. The example

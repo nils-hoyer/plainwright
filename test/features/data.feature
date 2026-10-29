@@ -56,7 +56,7 @@ Feature: Test data
     * I send a "DELETE" request to "/api/orders/{order.id}"
     * I see the response status "204"
 
-  Scenario: A number from a message, with a step of the project, and the address
+  Scenario: A number from a message and from the address
     * I open the "Orders from the API" page
     * I fill "Cake" in the "Item" field
     * I click the "Create order" button
@@ -70,6 +70,8 @@ Feature: Test data
     * I open the url "{order-page}"
     * I see the "Order {order}" heading
     * I see the text "Item: Cake"
+    * I remember the number in "{order-page}" as "order-from-the-url"
+    * I see the "Order {order-from-the-url}" heading
 
   @german
   Scenario: Dates as the browser writes them
