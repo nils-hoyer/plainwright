@@ -38,10 +38,11 @@ step({
 step({
   pattern: 'I open the url {string}',
   level: 'core',
-  description: 'Opens a web address, absolute or relative to the base URL.',
+  description:
+    'Opens a web address, absolute or relative to the base URL. The current page stays: to use the element names of another page, add I am on the "…" page.',
   example: 'I open the url "/login"',
   fn: async ({ world }, url: string) => {
-    world.clearPage();
+    world.leaveFrame();
     await world.page.goto(url);
   },
 });

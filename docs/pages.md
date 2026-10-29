@@ -107,9 +107,9 @@ button` checks the count.
 ### The current page
 
 An alias applies while its page is the current page. `I open the "…" page` and
-`I am on the "…" page` set the current page; `I open the url "…"` clears it. You decide when the
-next steps are on another page: after a click that leads there, add `I am on the "…" page` so
-that its aliases apply. It checks nothing and does not wait for the address. To wait for the new
+`I am on the "…" page` set the current page; `I open the url "…"` keeps it. You decide when the
+next steps are on another page: after a click or an `I open the url` that leads there, add
+`I am on the "…" page` so that its aliases apply. It checks nothing and does not wait for the address. To wait for the new
 page, check something on it first, such as its heading or `I see the url "…"`. Elements found by
 their visible name work on any page.
 
