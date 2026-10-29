@@ -150,7 +150,7 @@ describe('docs', () => {
     const markdown = renderStepReference(getSteps().filter((s) => s.source === 'built-in'));
     expect(markdown.indexOf('### Core steps')).toBeLessThan(markdown.indexOf('### Advanced steps'));
     expect(markdown).toContain(
-      '| `I click the {element}` | Clicks the element once with the left mouse button. | `I click the "Log in" button` |',
+      '| `I click the "Log in" button` | Clicks the element once with the left mouse button. |',
     );
     expect(markdown.indexOf('#### Pages and navigation')).toBeLessThan(
       markdown.indexOf('#### Clicking and typing'),

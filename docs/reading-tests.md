@@ -20,10 +20,10 @@ Feature: Login
     * I open the "Login" page
 
   Scenario: A wrong password shows an error
-    * I fill "1234567890" in the "Username" field
-    * I fill "wrongpassword" in the "Password" field
+    * I fill "jane@example.com" in the "Email" field
+    * I fill "wrong" in the "Password" field
     * I click the "Log in" button
-    * I see the text "Username and password are incorrect."
+    * I see the text "Email or password is incorrect."
 ```
 
 ## How a step is built
@@ -32,10 +32,10 @@ Everything in double quotes is **data**: text to type, a name on the screen, an 
 The rest of the sentence is **fixed** and means the same everywhere. In the step below:
 
 - `I fill … in …` is the action.
-- `"wrongpassword"` is the text typed.
+- `"wrong"` is the text typed.
 - `the "Password" field` is the element: its visible name, then its type.
 
-> I fill **"wrongpassword"** in the **"Password" field**
+> I fill **"wrong"** in the **"Password" field**
 
 ### Values from somewhere else
 
@@ -62,7 +62,7 @@ the field named in the first column with the text in the second:
 ```gherkin
 * I fill the fields:
   | Email    | jane@example.com |
-  | Password | {env.PASSWORD}   |
+  | Password | {env.TEST_PASSWORD} |
 ```
 
 ## Element types
@@ -140,7 +140,7 @@ Page names keep web addresses out of the tests.
 ## Keywords
 
 Some steps are **keywords**: a team-defined step made of other steps, for example
-`I log in as "1234567890" with password "secret"`. Keywords are written in the same language in
+`I am logged in as "jane@example.com"`. Keywords are written in the same language in
 `keywords/*.feature`, so you can read them too. In the report, a keyword shows its steps
 nested underneath.
 

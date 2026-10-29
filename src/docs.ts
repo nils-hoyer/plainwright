@@ -28,7 +28,9 @@ export function renderStepReference(
 
 /** Markdown table of the steps Plainwright leaves out, with what to write instead. */
 export function renderLeftOutSteps(headingLevel = 2): string {
-  const rows = LEFT_OUT_STEPS.map(({ pattern, instead }) => `| \`${pattern}\` | ${instead} |`);
+  const rows = LEFT_OUT_STEPS.map(
+    ({ pattern, instead }) => `| \`${withPlaceholders(pattern)}\` | ${instead} |`,
+  );
   return [
     `${'#'.repeat(headingLevel)} Steps Plainwright leaves out`,
     'Steps that other tools have and Plainwright leaves out on purpose, with what to write instead. `lint` says the same where one is used.',
@@ -63,12 +65,15 @@ export function replaceGenerated(document: string, name: string, content: string
   return `${document.slice(0, from + start.length)}\n\n${content}\n\n${document.slice(to)}`;
 }
 
+/** `I click at x {number} y {number}` → `I click at x "…" y "…"`, as a step is written. */
+export function withPlaceholders(pattern: string): string {
+  return pattern.replace(/\{(string|number)\}/g, '"…"').replace(/\{element\}/g, '"…" element');
+}
+
+// Each step by its example: the sentence as a test writes it, with values to change in quotes.
 function table(steps: StepDefinition[]): string {
-  const rows = steps.map(
-    (step) =>
-      `| \`${cell(step.pattern)}\` | ${cell(step.description)} | \`${cell(step.example)}\` |`,
-  );
-  return ['| Step | What it does | Example |', '| --- | --- | --- |', ...rows].join('\n');
+  const rows = steps.map((step) => `| \`${cell(step.example)}\` | ${cell(step.description)} |`);
+  return ['| Step | What it does |', '| --- | --- |', ...rows].join('\n');
 }
 
 function orderedCategories(steps: StepDefinition[]): string[] {

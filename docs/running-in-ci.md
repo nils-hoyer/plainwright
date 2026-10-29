@@ -1,11 +1,67 @@
-# Reports for CI
+# Running in CI
 
-This page is for whoever sets up the test runs in CI. A run writes two reports by itself: the
-list in the terminal and the HTML report in `playwright-report/`, which shows every step and
-replays failed tests. CI servers and test management tools read other formats: JUnit XML or
-Cucumber JSON.
+This page is for whoever sets up the test runs in CI. The tests run like any Playwright tests:
+below are a workflow for GitHub Actions, screenshots for Linux, and the reports that CI servers
+and test management tools read.
 
-## Which format for which tool
+## A workflow for GitHub Actions
+
+Secrets come from the repository's secrets, as environment variables; there is no `.env` file
+in CI. If your app must run for the tests, start it with `webServer` in the configuration (see
+[the configuration](setup.md#the-configuration)). The report does not open by itself in CI:
+download the `playwright-report` artifact of the run and open its `index.html`.
+
+```yaml
+# .github/workflows/tests.yml
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run lint
+      - run: npm test
+        env:
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+```
+
+To run the tests in [other browsers](setup.md#other-browsers-and-phones), install them in the
+same step: `npx playwright install --with-deps chromium firefox webkit`.
+
+## Screenshots on Linux
+
+Screenshots to compare against, from `I see the page matches the screenshot "…"`, are stored
+per operating system (see [writing tests](writing-tests.md#checks-against-a-screenshot)). CI on
+Linux needs its own: make them in Playwright's Linux image and commit them. Use the image of
+the Playwright version in your project (`npx playwright --version`). The tests run inside the
+image, so an app on your computer is at `host.docker.internal` there instead of `localhost`;
+an app that `webServer` starts runs inside the image too.
+
+```bash
+docker run --rm -v "$PWD":/work -v /work/node_modules -w /work \
+  mcr.microsoft.com/playwright:v1.64.0-noble \
+  sh -c "npm ci && npx plainwright test --update-snapshots"
+```
+
+## Reports for CI servers
+
+A run writes two reports by itself: the list in the terminal and the HTML report in
+`playwright-report/`, which shows every step and replays failed tests. CI servers and test
+management tools read other formats: JUnit XML or Cucumber JSON.
+
+### Which format for which tool
 
 | Tool                                                              | Reads         | Reporter                   |
 | ----------------------------------------------------------------- | ------------- | -------------------------- |
@@ -20,7 +76,7 @@ Cucumber's formats, with every step of a scenario and its tags. It is playwright
 [Cucumber reporter](https://vitalets.github.io/playwright-bdd/#/reporters/cucumber), and takes
 the same options.
 
-## Adding a report
+### Adding a report
 
 A `reporter` in `playwright.config.ts` replaces the two reports Plainwright sets, so list them
 again next to the new ones. `noCopyPrompt` keeps the report's "Fix with AI" prompt, which asks to
@@ -54,13 +110,13 @@ place when you use playwright-bdd's. In your own configuration, list only Plainw
 several Cucumber reports, the first one collects the results for all of them, so one of
 playwright-bdd's before it marks the steps skipped in every report.
 
-## Handing the report to CI
+### Handing the report to CI
 
 Each CI server reads the file from a setting of its own. Keep the report also when tests failed,
 since that is when it matters.
 
 **GitHub Actions** has no page for test results of its own; upload the files with the HTML
-report, as in the workflow in [setup](setup.md#running-in-ci):
+report, as in the [workflow above](#a-workflow-for-github-actions):
 
 ```yaml
 - uses: actions/upload-artifact@v7

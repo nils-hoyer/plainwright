@@ -3,6 +3,32 @@
 This page is for people who write tests. It explains how a test is built, how a step names an
 element, and what checks do. Which steps exist is in the [step reference](steps.md).
 
+## Writing a test, step by step
+
+1. **Pick one thing to show.** Do it by hand in the browser once. The scenario's title says
+   what it shows, such as `A wrong password shows an error`.
+2. **Find the names.** With your app running, `npm run inspect -- "/login"` lists the buttons,
+   fields and links of a page by the names steps use, such as `the "Log in" button`. Copy them
+   as printed.
+3. **Write the steps** in a `.feature` file in `features/`, with the
+   [core steps](steps.md#core-steps). End with a check of what the user sees, such as
+   `I see the text "…"`. VS Code suggests steps while you type, see
+   [editor support](ide-support.md).
+4. **Lint.** `npm run lint` checks every feature file without opening a browser: steps that do
+   not exist (with the closest one that does), steps Plainwright leaves out (with what to write
+   instead), unknown pages and values, selectors in quotes and fixed waits.
+5. **Run.** `npm test` runs all tests, `npm test -- login` the files whose path contains
+   "login", and `npm test -- --headed` shows the browser while it runs.
+6. **Read the result.** When a step fails, the error says what the page offers instead:
+
+   ```
+   No "Sign in" button found on the "Login" page.
+   Buttons on this page: "Accept Cookies", "Log in".
+   ```
+
+   `npm run report` opens the report, with every step and a replay of each failed test. More in
+   [troubleshooting](troubleshooting.md).
+
 ## A test is a list of steps
 
 A test is a `.feature` file in `features/`. Addresses such as `"/login"` are relative to the
@@ -183,7 +209,9 @@ element without a name is also hard to use with a screen reader.
 ## Checks
 
 Steps that start with `I see` or `I do not see` are checks. They wait up to 5 seconds for the
-page to get there, so a slow page does not fail the test by itself.
+page to get there, so a slow page does not fail the test by itself. Steps that act, such as a
+click or a fill, wait up to 10 seconds for their element. Both times can be changed, see
+[options](setup.md#options).
 
 `I see the text "Welcome"` passes on "Welcome back!": a text check passes when the page
 contains the text. Checks of a field value, an address or "exactly the text" compare the whole
@@ -222,23 +250,10 @@ features/start.feature.spec.js-snapshots/start-chromium-linux.png    (Linux)
 ```
 
 Fonts look different on each system, so a screenshot made on a Mac does not count on Linux,
-where CI usually runs. [Running in CI](setup.md#running-in-ci) says how to make the Linux
+where CI usually runs. [Running in CI](running-in-ci.md#screenshots-on-linux) says how to make the Linux
 screenshots.
 
 When the page changed on purpose, `npm test -- --update-snapshots` stores new screenshots.
-
-## Before you run
-
-`npm run lint` checks every feature file without opening a browser: steps that do not exist
-(with the closest one that does), steps Plainwright leaves out (with what to write instead), unknown pages and
-values, selectors in quotes and fixed waits. VS Code marks steps that do not exist while you type, see
-[editor support](ide-support.md). `npm test` runs the tests, and `npm run report` opens the
-report. When an element is missing, the error lists what the page offers:
-
-```
-No "Sign in" button found on the "Login" page.
-Buttons on this page: "Accept Cookies", "Log in".
-```
 
 ## More
 

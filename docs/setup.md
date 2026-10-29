@@ -111,7 +111,7 @@ themselves from the project folder. More in [pages](pages.md), [test data](test-
 ## Options
 
 Set them under `use` in `playwright.config.ts`. Checks (`I see …`) wait up to 5 seconds,
-Playwright's `expect.timeout`.
+Playwright's `expect.timeout`; `expect: { timeout: 10_000 }` next to `use` changes it.
 
 | Option          | Default                                            | Meaning                                                                                                                |
 | --------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -172,7 +172,7 @@ Feature: Menu on a phone
 ```
 
 `init` installs only Chromium. Install the other browsers once, and add them to the install step
-of the [CI workflow](#running-in-ci): `npx playwright install --with-deps chromium firefox webkit`.
+of the [CI workflow](running-in-ci.md#a-workflow-for-github-actions): `npx playwright install --with-deps chromium firefox webkit`.
 An iPhone runs in WebKit, an Android phone such as `devices['Pixel 7']` in Chromium. Screenshots
 to compare against are stored per project, such as `start-firefox-linux.png` next to
 `start-chromium-linux.png`, so the first run of a new project stores its own (see
@@ -225,51 +225,8 @@ export default defineConfig({
 
 ## Running in CI
 
-The tests run like any Playwright tests; below is a GitHub Actions workflow. Secrets come from
-the repository's secrets, as environment variables; there is no `.env` file in CI. The report
-does not open by itself in CI: download the `playwright-report` artifact of the run and open its
-`index.html`. If your app must run for the tests, start it with `webServer` in the
-configuration (see [above](#the-configuration)). For JUnit or Cucumber reports, which CI servers
-and test management tools read, see [reports for CI](reports-for-ci.md).
-
-Screenshots to compare against, from `I see the page matches the screenshot "…"`, are stored
-per operating system (see [writing tests](writing-tests.md#checks-against-a-screenshot)). CI on
-Linux needs its own: make them in Playwright's Linux image and commit them. Use the image of
-the Playwright version in your project (`npx playwright --version`). The tests run inside the
-image, so an app on your computer is at `host.docker.internal` there instead of `localhost`;
-an app that `webServer` starts runs inside the image too.
-
-```bash
-docker run --rm -v "$PWD":/work -v /work/node_modules -w /work \
-  mcr.microsoft.com/playwright:v1.64.0-noble \
-  sh -c "npm ci && npx plainwright test --update-snapshots"
-```
-
-```yaml
-# .github/workflows/tests.yml
-name: Tests
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: lts/*
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run lint
-      - run: npm test
-        env:
-          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-      - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-```
+The tests run like any Playwright tests. A workflow for GitHub Actions, secrets, screenshots for
+Linux and reports for CI servers are in [running in CI](running-in-ci.md).
 
 ## With your own Playwright configuration
 

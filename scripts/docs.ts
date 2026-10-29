@@ -30,9 +30,10 @@ const targets: Target[] = [
       '<!-- Generated from the step registry by npm run docs. Do not edit. -->',
       '# Step reference',
       [
-        'Every built-in step, with what it does and an example. Your own steps and keywords are',
-        'listed by `npx plainwright docs --steps "steps/**/*.ts"`. How to write elements',
-        'is in [writing tests](writing-tests.md#how-a-step-is-built).',
+        'Every built-in step, as a test writes it. Change the values in quotes to yours.',
+        '`the "Log in" button` stands for any element: its name, then one of the',
+        '[element types](writing-tests.md#elements), such as `the "Email" field`. Your own steps',
+        'and keywords are listed by `npx plainwright docs`.',
       ].join('\n'),
       renderStepReference(builtIn, 2),
       renderLeftOutSteps(2),
