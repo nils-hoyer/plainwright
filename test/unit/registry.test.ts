@@ -1,6 +1,5 @@
 import path from 'node:path';
-import { test } from '@playwright/test';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { defineStep, findStep, findSteps, getSteps, steps } from '../../src/index';
 import {
   parseStackFrame,
@@ -8,7 +7,6 @@ import {
   rememberedName,
   suggestionFor,
   suggestSteps,
-  tagsFromPath,
 } from '../../src/registry';
 import { CATEGORIES } from '../../src/steps/builtin';
 import { checkRememberName } from '../../src/values';
@@ -153,90 +151,28 @@ describe('parseStackFrame', () => {
   });
 });
 
-describe('tagsFromPath', () => {
-  const cwd = '/home/jane/app';
-
-  it('collects tags from folder and file names', () => {
-    expect(tagsFromPath('/home/jane/app/steps/@admin/@beta-users.steps.ts', cwd)).toEqual([
-      '@admin',
-      '@beta-users',
-    ]);
-    expect(tagsFromPath('/home/jane/app/steps/users.steps.ts', cwd)).toEqual([]);
-  });
-
-  it('ignores folders above the project and in node_modules', () => {
-    expect(tagsFromPath('/home/@jane/app/steps/a.ts', '/home/@jane/app')).toEqual([]);
-    expect(tagsFromPath('/home/jane/app/node_modules/@scope/lib/steps.ts', cwd)).toEqual([]);
-  });
-});
-
-describe('steps in tagged folders', () => {
-  const define = (folder: string) =>
+describe('steps in a folder named after a tag', () => {
+  // Tag folders are not a concept: a step file in steps/@admin/ loads like any other.
+  const define = () =>
     registerStep(
       {
-        pattern: 'I open the tagged start page',
+        pattern: 'I open the start page of a folder',
         description: 'Test step.',
-        example: 'I open the tagged start page',
+        example: 'I open the start page of a folder',
         fn: () => {},
       },
       {
         source: 'project',
-        location: {
-          file: path.join(process.cwd(), `steps/${folder}/start.ts`),
-          line: 1,
-          column: 1,
-        },
+        location: { file: path.join(process.cwd(), 'steps/@admin/start.ts'), line: 1, column: 1 },
       },
     );
 
-  it('apply only to scenarios with the tags of their folder', () => {
-    const admin = define('@admin');
-    const guest = define('@guest');
-    const found = (tags?: string[]) =>
-      findSteps('I open the tagged start page', tags).map((match) => match.step);
-    expect(admin.tags).toEqual(['@admin']);
-    expect(found(['@admin'])).toEqual([admin]);
-    expect(found(['@guest', '@smoke'])).toEqual([guest]);
-    expect(found([])).toEqual([]);
-    expect(found()).toEqual([admin, guest]);
-  });
-
-  it('may share their wording with steps for other tags only', () => {
-    expect(() => define('@admin')).toThrow(/defined twice/);
-  });
-
-  const project = (pattern: string, folder: string, fn: () => unknown = () => {}) =>
-    registerStep(
-      { pattern, description: 'Test step.', example: pattern, fn },
-      {
-        source: 'project',
-        location: { file: path.join(process.cwd(), `steps/${folder}start.ts`), line: 1, column: 1 },
-      },
-    );
-
-  it('win over steps without tags, as in playwright-bdd', () => {
-    const plain = project('I open the overridden start page', '');
-    const admin = project('I open the overridden start page', '@admin/');
-    const found = (tags: string[]) =>
-      findSteps('I open the overridden start page', tags).map((match) => match.step);
-    expect(found(['@admin'])).toEqual([admin]);
-    expect(found(['@guest'])).toEqual([plain]);
-    expect(found([])).toEqual([plain]);
-  });
-
-  it('fail in a scenario without the tags of their folder', async () => {
-    const step = project('I open the guarded start page', '@admin/', () => 'opened');
-    const info = vi.spyOn(test, 'info');
-    try {
-      info.mockReturnValue({ tags: ['@admin', '@smoke'] } as never);
-      await expect(step.fn({})).resolves.toBe('opened');
-      info.mockReturnValue({ tags: [] } as never);
-      await expect(step.fn({})).rejects.toThrow(
-        '"I open the guarded start page" only applies to scenarios tagged @admin, the folder of its step file.',
-      );
-    } finally {
-      info.mockRestore();
-    }
+  it('apply to every scenario, and the same wording twice fails', () => {
+    const step = define();
+    expect(findSteps('I open the start page of a folder').map((match) => match.step)).toEqual([
+      step,
+    ]);
+    expect(() => define()).toThrow(/defined twice/);
   });
 });
 

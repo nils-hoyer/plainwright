@@ -9,14 +9,12 @@ import {
   findSteps,
   getSteps,
   getUnusableSteps,
-  onlyForTagsMessage,
   rememberedName,
   StepDefinition,
   StepMatch,
   suggestionFor,
   suggestSteps,
 } from './registry';
-import { checkSessionTag, SETUP_STEPS, SETUP_TAG } from './session';
 import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
 export type LintSeverity = 'error' | 'warning' | 'info';
@@ -39,8 +37,7 @@ export type LintMessage = {
     | 'unknown-page'
     | 'page-address'
     | 'unknown-value'
-    | 'remember-name'
-    | 'setup-step';
+    | 'remember-name';
   message: string;
 };
 
@@ -71,8 +68,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       .filter((keyword) => sameWording(keyword).length)
       .map((keyword) => keyword.step),
   );
-  const find = (text: string, tags?: readonly string[]) =>
-    withoutColliding(findSteps(text, tags), colliding);
+  const find = (text: string) => withoutColliding(findSteps(text), colliding);
   for (const absolute of files) {
     const file = path.relative(cwd, absolute) || absolute;
     let steps: FeatureStep[];
@@ -85,9 +81,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
       messages.push(...fromLocatedErrors(String((error as Error).message), 'syntax', file));
       continue;
     }
-    const remembered = rememberedInOrder(scenarios, (step) =>
-      rememberedNames(find, step.text, step.tags),
-    );
+    const remembered = rememberedInOrder(scenarios, (step) => rememberedNames(find, step.text));
     for (const { text, line, tags } of steps) {
       // A step in a Scenario Outline runs once per example; report each problem once.
       const add = (severity: LintSeverity, rule: LintMessage['rule'], message: string) => {
@@ -97,14 +91,8 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         messages.push({ file, line, severity, rule, message });
       };
 
-      const matches = find(text, tags);
+      const matches = find(text);
       if (matches.length === 0) {
-        const elsewhere = findSteps(text);
-        if (elsewhere.length) {
-          const needed = [...new Set(elsewhere.map(({ step }) => step.tags.join(' and ')))];
-          add('error', 'undefined-step', onlyForTagsMessage(text, needed.join(' or ')));
-          continue;
-        }
         const removed = removedMessage(text);
         if (removed) {
           add('error', 'undefined-step', removed);
@@ -120,17 +108,11 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         );
         continue;
       }
-      // playwright-bdd applies the tags of step folders only to scenarios that have tags, so in
-      // a scenario without any, it also counts the steps of tag folders.
-      const counted = tags.length ? matches : find(text);
-      if (counted.length > 1) {
+      if (matches.length > 1) {
         add(
           'error',
           'ambiguous-step',
-          `"${text}" matches ${counted.length} steps: ${counted.map((m) => named(m.step, cwd)).join(', ')}.` +
-            (counted.length > matches.length
-              ? ' In a scenario without tags, the steps in tag folders count too.'
-              : ''),
+          `"${text}" matches ${matches.length} steps: ${matches.map((m) => named(m.step, cwd)).join(', ')}.`,
         );
         continue;
       }
@@ -197,17 +179,6 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
         const problem = checkRememberName(name);
         if (problem) add('error', 'remember-name', problem);
       }
-      if (SETUP_STEPS.includes(step.pattern) && !tags.includes(SETUP_TAG)) {
-        add(
-          'error',
-          'setup-step',
-          `"${text}" only works in a scenario tagged ${SETUP_TAG}, which runs before the others when the configuration has setup: true.`,
-        );
-      }
-      if (step.pattern === SETUP_STEPS[1] && !referencesIn(String(args[0])).length) {
-        const problem = checkSessionTag(String(args[0]));
-        if (problem) add('error', 'setup-step', problem);
-      }
       if (step.discouraged) add('warning', 'discouraged-step', step.discouraged);
       if (step.level === 'advanced') {
         add('info', 'advanced-step', `"${step.pattern}" is an advanced step.`);
@@ -234,7 +205,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
 
   for (const step of getSteps()) {
     if (unusable.some((entry) => entry.step === step) || colliding.has(step)) continue;
-    const matches = find(step.example, step.tags);
+    const matches = find(step.example);
     if (matches.length === 1 && matches[0].step === step) continue;
     const others = matches.map((m) => m.step).filter((other) => other !== step);
     // A built-in step has no file to point to: the cause is a step in the project.
@@ -242,7 +213,7 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
     if (!step.location && causes.length && others.length < matches.length) {
       for (const other of causes) {
         // Reported with the example of the other step already.
-        if (find(other.example, other.tags).some((m) => m.step === step)) continue;
+        if (find(other.example).some((m) => m.step === step)) continue;
         messages.push({
           ...stepLocation(other, cwd),
           severity: 'error',
@@ -280,7 +251,7 @@ export function summarize(messages: LintMessage[]): string {
   return `${plural(count('error'), 'error')}, ${plural(count('warning'), 'warning')}, ${count('info')} info`;
 }
 
-/** `"I open the start page" (steps/@admin/start.ts:3)` */
+/** `"I open the start page" (steps/start.steps.ts:3)` */
 function named(step: StepDefinition, cwd: string) {
   const { file, line } = stepLocation(step, cwd);
   return `"${step.pattern}"${file ? ` (${file}:${line})` : ''}`;
@@ -300,13 +271,8 @@ function withoutColliding(matches: StepMatch[], colliding: ReadonlySet<StepDefin
 }
 
 /** The names a step remembers values under, including the steps of a keyword it calls. */
-function rememberedNames(
-  find: (text: string, tags?: readonly string[]) => StepMatch[],
-  text: string,
-  tags?: readonly string[],
-  depth = 0,
-): string[] {
-  const matches = find(text, tags);
+function rememberedNames(find: (text: string) => StepMatch[], text: string, depth = 0): string[] {
+  const matches = find(text);
   if (matches.length !== 1 || depth > 20) return [];
   const { step, args } = matches[0];
   const name = rememberedName(step, args);
@@ -315,7 +281,7 @@ function rememberedNames(
   if (!keyword) return [];
   const values = Object.fromEntries(keyword.params.map((param, i) => [param, String(args[i])]));
   return keyword.steps.flatMap((sub) =>
-    rememberedNames(find, fillPlaceholders(sub.text, values), undefined, depth + 1),
+    rememberedNames(find, fillPlaceholders(sub.text, values), depth + 1),
   );
 }
 

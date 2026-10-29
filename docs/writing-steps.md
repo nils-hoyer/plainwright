@@ -174,12 +174,3 @@ definePage('Orders', {
 definePages('e2e/pages'); // page files in another folder
 defineData('fixtures/data'); // data files somewhere else
 ```
-
-## Steps for some features only
-
-As in playwright-bdd, a step file in a folder named after a tag (`steps/@admin/users.steps.ts`)
-only applies to scenarios with that tag; in a scenario without it, the step fails. Two folders
-may define the same wording for different tags, and a step for the scenario's tag wins over
-one without tags. A scenario without any tags is the exception: playwright-bdd then counts the
-steps of every folder, so a wording that a tag folder also defines matches several steps there.
-`lint` reports both, and `catalog` lists the tags.
