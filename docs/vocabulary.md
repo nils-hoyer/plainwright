@@ -55,7 +55,7 @@ step that takes an element accepts this, so no step needs its own "in the row" v
 
 ## Core and advanced
 
-**Core** steps are the everyday vocabulary (about 36). A reviewer must understand all of them
+**Core** steps are the everyday vocabulary (about 35). A reviewer must understand all of them
 after reading the [reviewer guide](reading-tests.md).
 
 **Advanced** steps cover special cases: fixed waits, typing key by key, touch, frames, tabs,
@@ -73,7 +73,6 @@ Current core steps:
 - `I reload the page`
 - `I see the url "/dashboard"`
 - `I click the "Log in" button`
-- `I double click the "Order 1001" row`
 - `I hover over the "Help" link`
 - `I fill "1234567890" in the "Username" field`
 - `I fill the fields:`
