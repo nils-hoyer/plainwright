@@ -34,9 +34,9 @@ wording, and the release notes link to it.
 
 ## Removing steps
 
-A removed step stays in the list of [removed steps](steps.md#removed-steps) with what to write
-instead, and `lint`, keywords and test runs give that instead of "unknown step" wherever it is
-still used. The release notes list the same.
+A removed step joins the [steps Plainwright leaves out](steps.md#steps-plainwright-leaves-out),
+with what to write instead, and `lint`, keywords and test runs give that instead of "unknown
+step" wherever it is still used. The release notes list the same.
 
 ## Release notes
 

@@ -56,7 +56,7 @@ npx plainwright lint --features "features/**/*.feature"
 
 | Rule                     | Severity | Reports                                                                                                   |
 | ------------------------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| `undefined-step`         | error    | A step that matches no step, with the closest existing one, or a removed step, with what replaces it.     |
+| `undefined-step`         | error    | A step that matches no step, with the closest existing one, or a left-out step, with what to write.       |
 | `ambiguous-step`         | error    | A step that matches several steps.                                                                        |
 | `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                             |
 | `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which cannot be opened.            |

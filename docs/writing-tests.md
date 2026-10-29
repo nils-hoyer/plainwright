@@ -217,7 +217,7 @@ After a change to the page that is meant, `npm test -- --update-snapshots` store
 ## Before you run
 
 `npm run lint` checks every feature file without opening a browser: steps that do not exist
-(with the closest one that does), removed steps (with what replaces them), unknown pages and
+(with the closest one that does), steps Plainwright leaves out (with what to write instead), unknown pages and
 values, selectors in quotes and fixed waits. VS Code marks steps that do not exist while you type, see
 [editor support](ide-support.md). `npm test` runs the tests, and `npm run report` opens the
 report. When an element is missing, the error lists what the page offers:

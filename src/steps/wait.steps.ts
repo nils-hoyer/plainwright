@@ -5,8 +5,8 @@ import { category } from './builtin';
 const step = category('Waiting');
 
 // Every "I see" step already waits, up to the expect timeout. A fixed wait makes tests slow and
-// still flaky; it stays as a fallback, and lint warns about it. Other waits were removed in 0.3.0
-// (src/removed.ts).
+// still flaky; it stays as a fallback, and lint warns about it. Plainwright leaves out other
+// waits (src/left-out.ts).
 const FIXED_WAIT =
   'Fixed waits slow tests down and still break on slow days. Check for what the user waits for instead, e.g. I see the text "...".';
 

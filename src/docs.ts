@@ -1,6 +1,6 @@
 import { ELEMENT_TYPES, LOOKUP_DESCRIPTION } from './elements';
 import { getSteps, StepDefinition } from './registry';
-import { REMOVED_STEPS } from './removed';
+import { LEFT_OUT_STEPS } from './left-out';
 import { CATEGORIES } from './steps/builtin';
 
 /** Markdown tables of steps, core steps first, grouped by category. */
@@ -26,15 +26,13 @@ export function renderStepReference(
   return sections.join('\n\n');
 }
 
-/** Markdown table of the steps a release removed, with what to write instead. */
-export function renderRemovedSteps(headingLevel = 2): string {
-  const rows = REMOVED_STEPS.map(
-    ({ pattern, removedIn, instead }) => `| \`${pattern}\` | ${removedIn} | ${instead} |`,
-  );
+/** Markdown table of the steps Plainwright leaves out, with what to write instead. */
+export function renderLeftOutSteps(headingLevel = 2): string {
+  const rows = LEFT_OUT_STEPS.map(({ pattern, instead }) => `| \`${pattern}\` | ${instead} |`);
   return [
-    `${'#'.repeat(headingLevel)} Removed steps`,
-    'Steps a release removed, with what to write instead. `lint` says the same where one is still used.',
-    ['| Step | Removed in | Instead |', '| --- | --- | --- |', ...rows].join('\n'),
+    `${'#'.repeat(headingLevel)} Steps Plainwright leaves out`,
+    'Steps that other tools have and Plainwright leaves out on purpose, with what to write instead. `lint` says the same where one is used.',
+    ['| Step | Instead |', '| --- | --- |', ...rows].join('\n'),
   ].join('\n\n');
 }
 

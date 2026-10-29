@@ -1,9 +1,9 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { renderRemovedSteps } from '../../src/docs';
+import { renderLeftOutSteps } from '../../src/docs';
 import { defineStep, findStep, findSteps } from '../../src/index';
 import { lintFeatures } from '../../src/lint';
-import { REMOVED_STEPS, removedMessage, removedStep } from '../../src/removed';
+import { LEFT_OUT_STEPS, leftOutMessage, leftOutStep } from '../../src/left-out';
 
 const examples = [
   ['I wait "500" milliseconds', 'I wait {number} millisecond(s)'],
@@ -56,17 +56,16 @@ const examples = [
   ['I download the file with the "Export" button', 'I download the file with the {element}'],
   ['I save the downloaded file to "report.csv"', 'I save the downloaded file to {string}'],
   ['I run the command "npm run db:seed"', 'I run the command {string}'],
-  ['I use the page object "Orders"', 'I use the page object {string}'],
 ] as const;
 
-describe('removed steps', () => {
-  it.each(examples)('"%s" is the removed step "%s"', (text, pattern) => {
-    expect(removedStep(text)?.pattern).toBe(pattern);
+describe('steps Plainwright leaves out', () => {
+  it.each(examples)('"%s" is the left-out step "%s"', (text, pattern) => {
+    expect(leftOutStep(text)?.pattern).toBe(pattern);
   });
 
   it('each have an example here', () => {
     const tested = new Set(examples.map(([, pattern]) => pattern));
-    for (const { pattern } of REMOVED_STEPS) expect(tested).toContain(pattern);
+    for (const { pattern } of LEFT_OUT_STEPS) expect(tested).toContain(pattern);
   });
 
   it.each([
@@ -76,9 +75,9 @@ describe('removed steps', () => {
     'I reload the page',
     'I type "Hello" in the "Name" field',
     'I tap the "Menu" button',
-  ])('"%s" is no removed step', (text) => {
-    expect(removedStep(text)).toBeUndefined();
-    expect(removedMessage(text)).toBeUndefined();
+  ])('"%s" is no left-out step', (text) => {
+    expect(leftOutStep(text)).toBeUndefined();
+    expect(leftOutMessage(text)).toBeUndefined();
   });
 
   it('match no step that exists', () => {
@@ -87,18 +86,19 @@ describe('removed steps', () => {
 
   it('name what replaces them in findStep()', () => {
     expect(() => findStep('I wait for the page to load')).toThrow(
-      '"I wait for the page to load" was removed in 0.3.0. Opening a page and clicking already wait for it.',
+      'Plainwright has no step "I wait for the page to load". Opening a page and clicking already wait for it.',
     );
   });
 
   it('are listed in the step reference', () => {
-    const table = renderRemovedSteps();
-    for (const { pattern } of REMOVED_STEPS) expect(table).toContain(`| \`${pattern}\` | 0.3.0 |`);
+    const table = renderLeftOutSteps();
+    expect(table).toContain('## Steps Plainwright leaves out');
+    for (const { pattern } of LEFT_OUT_STEPS) expect(table).toContain(`| \`${pattern}\` |`);
   });
 
   // Last: the step it defines stays registered for the rest of this file.
-  it('give way to a project step with the old wording', () => {
-    const feature = path.join(__dirname, 'fixtures/lint/removed.feature');
+  it('give way to a project step with their wording', () => {
+    const feature = path.join(__dirname, 'fixtures/lint/left-out.feature');
     expect(lintFeatures([feature]).map((message) => message.rule)).toEqual(['undefined-step']);
     const step = defineStep({
       pattern: 'I wait {number} millisecond(s)',

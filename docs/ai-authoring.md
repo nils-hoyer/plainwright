@@ -62,7 +62,7 @@ name, checks with `I see`, no selectors and no fixed waits. An element without a
 alias in its [page file](pages.md), not a selector in the test.
 
 **Lint.** `npx plainwright lint --features "features/**/*.feature"` reports unknown steps with
-the closest existing step, removed steps with what replaces them, ambiguous steps, unknown pages
+the closest existing step, steps Plainwright leaves out with what to write instead, ambiguous steps, unknown pages
 and values, selectors, absolute URLs, fixed waits and broken keywords, as
 `file:line: severity: message (rule)`. Exit code 1 on errors, so it can gate CI and agent loops.
 
