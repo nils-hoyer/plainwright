@@ -50,8 +50,8 @@ const SELECTOR =
 const ABSOLUTE_URL = /^[a-z][a-z0-9+.-]*:\/\//i;
 const OPEN_URL = 'I open the url {string}';
 const OPEN_PAGE = 'I open the {string} page';
-const CHECK_PAGE = 'I am on the {string} page';
-const PAGE_STEPS = [OPEN_PAGE, CHECK_PAGE, 'I use the page object {string}'];
+const ON_PAGE = 'I am on the {string} page';
+const PAGE_STEPS = [OPEN_PAGE, ON_PAGE];
 
 /**
  * Checks feature files against the registered steps. Also checks loaded keywords and that
@@ -173,14 +173,8 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
             'error',
             'page-address',
             page.url
-              ? `The page "${name}" has the address pattern ${page.url}, which can only be checked (I am on the "${name}" page). Open it with I open the url "/...".`
+              ? `The page "${name}" has the address pattern ${page.url}, which cannot be opened. Open the address with I open the url "/...", then I am on the "${name}" page.`
               : `The page "${name}" has no address to open. Add its "url".`,
-          );
-        } else if (step.pattern === CHECK_PAGE && !page.url) {
-          add(
-            'error',
-            'page-address',
-            `The page "${name}" has no address to check. Add its "url".`,
           );
         }
       }

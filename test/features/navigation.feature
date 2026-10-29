@@ -4,26 +4,22 @@ Feature: Pages and navigation
 
   Scenario: Open a page by its name
     Given I open the "Login" page
-    Then I am on the "Login" page
+    Then I see the url "/login.html"
     And I see the page title "Login"
 
   Scenario: Go back and forward
     Given I open the "Dashboard" page
     When I click the "Forms Demo" link
-    Then I am on the "Forms" page
+    Then I see the url "/forms.html"
     When I go back
-    Then I am on the "Dashboard" page
+    Then I see the url "/dashboard.html"
     When I go forward
-    Then I am on the "Forms" page
-
-  Scenario: Check a page whose address has a wildcard
-    Given I open the url "/account/settings.html"
-    Then I am on the "Account pages" page
+    Then I see the url "/forms.html"
 
   Scenario: Reload the page
     Given I open the "Forms" page
     When I reload the page
-    Then I am on the "Forms" page
+    Then I see the url "/forms.html"
 
   Scenario: Open an address and check it
     When I open the url "/dashboard.html"
@@ -34,6 +30,13 @@ Feature: Pages and navigation
 
   Scenario: Use the element names of a page without opening it
     Given I open the url "/orders.html"
-    And I use the page object "Orders"
+    And I am on the "Orders" page
     When I fill "1001" in the "Search" field
     Then I see the value "1001" in the "Search" field
+
+  Scenario: Use the element names of a page that a click leads to
+    Given I open the "Dashboard" page
+    When I click the "Orders" link
+    And I am on the "Orders" page
+    Then I fill "1001" in the "Search" field
+    And I see the value "1001" in the "Search" field

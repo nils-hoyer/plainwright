@@ -15,7 +15,7 @@
     },
     "url": {
       "type": "string",
-      "description": "Address of the page, relative to baseURL (\"/login\") or absolute. * stands for any text without /, ** for any text; such a page can only be checked (I am on the \"...\" page), not opened.",
+      "description": "Address of the page, relative to baseURL (\"/login\") or absolute. * stands for any text without /, ** for any text; such a page cannot be opened. Without url, a page is only switched to with I am on the \"...\" page.",
       "examples": ["/login", "/orders/*"]
     },
     "elements": {

@@ -1,6 +1,6 @@
 Feature: Pages
 
-  Scenario: Pages that cannot be opened or checked
+  Scenario: Pages that cannot be opened
     * I open the "Order" page
     * I am on the "Order" page
     * I am on the "Draft" page

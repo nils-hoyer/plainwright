@@ -71,6 +71,14 @@ Feature: Helpful error messages
       """
     * I see the "Log in" button
 
+  Scenario: A missing element after a click to another page says to switch pages
+    * I open the "Dashboard" page
+    * I click the "Orders" link
+    * I see this step fail with "It is not the address of the \"Dashboard\" page, so the element names defined for it may not fit. When a click led to another page, add I am on the \"Orders\" page before this step.":
+      """
+      I fill "1001" in the "Search" field
+      """
+
   Scenario: A missing element inside another one lists what that one offers
     * I open the "Orders" page
     * I see this step fail with "No \"Remove\" button found in the \"Order 1001\" row.":
@@ -106,8 +114,8 @@ Feature: Helpful error messages
       I fill "\{users.member.email}" in the "Username" field
       """
 
-  Scenario: A page address with a wildcard can only be checked
-    * I see this step fail with "can only be checked":
+  Scenario: A page address with a wildcard cannot be opened
+    * I see this step fail with "cannot be opened":
       """
       I open the "Account pages" page
       """

@@ -359,7 +359,7 @@ async function firstCheck(baseURL: string, startPath: string): Promise<string | 
 function exampleFeature(named: boolean, startPath: string, check?: string) {
   const address = startPath.replace(/(["\\])/g, '\\$1');
   const open = named ? 'I open the "Start" page' : `I open the url "${address}"`;
-  check ??= named ? 'I am on the "Start" page' : `I see the url "${address}"`;
+  check ??= `I see the url "${address}"`;
   return `Feature: Start page
 
   The first test, written by plainwright init. Change it, or add more .feature files here.

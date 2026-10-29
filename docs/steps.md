@@ -12,14 +12,14 @@ The everyday vocabulary. Prefer these steps.
 
 ### Pages and navigation
 
-| Step                        | What it does                                                                                      | Example                        |
-| --------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `I open the {string} page`  | Opens the address of the page defined with this name and uses the element names defined for it.   | `I open the "Login" page`      |
-| `I am on the {string} page` | Checks that the browser shows the address of this page and uses the element names defined for it. | `I am on the "Dashboard" page` |
-| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL.                                        | `I open the url "/login"`      |
-| `I go back`                 | Goes back to the previous page, like the browser back button.                                     | `I go back`                    |
-| `I reload the page`         | Reloads the current page.                                                                         | `I reload the page`            |
-| `I see the url {string}`    | Checks that the address is exactly this URL (relative URLs use the base URL).                     | `I see the url "/dashboard"`   |
+| Step                        | What it does                                                                                                                                                    | Example                        |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `I open the {string} page`  | Opens the address of the page defined with this name and uses the element names defined for it.                                                                 | `I open the "Login" page`      |
+| `I am on the {string} page` | Uses the element names defined for this page from here on, such as after a click that leads to it. Checks nothing: to check the address, add I see the url "…". | `I am on the "Dashboard" page` |
+| `I open the url {string}`   | Opens a web address, absolute or relative to the base URL.                                                                                                      | `I open the url "/login"`      |
+| `I go back`                 | Goes back to the previous page, like the browser back button.                                                                                                   | `I go back`                    |
+| `I reload the page`         | Reloads the current page.                                                                                                                                       | `I reload the page`            |
+| `I see the url {string}`    | Checks that the address is exactly this URL (relative URLs use the base URL).                                                                                   | `I see the url "/dashboard"`   |
 
 ### Clicking and typing
 
@@ -71,14 +71,13 @@ For special cases. `lint` lists where they are used.
 
 ### Pages and navigation
 
-| Step                                       | What it does                                                                             | Example                                   |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `I use the page object {string}`           | Uses the element names defined for this page without opening it or checking the address. | `I use the page object "Login"`           |
-| `I go forward`                             | Goes forward to the next page, like the browser forward button.                          | `I go forward`                            |
-| `I see the url containing {string}`        | Checks that the address contains this text.                                              | `I see the url containing "dashboard"`    |
-| `I do not see the url containing {string}` | Checks that the address does not contain this text.                                      | `I do not see the url containing "login"` |
-| `I see the page title {string}`            | Checks that the title of the browser tab is exactly this text.                           | `I see the page title "Login"`            |
-| `I see the page title containing {string}` | Checks that the title of the browser tab contains this text.                             | `I see the page title containing "Log"`   |
+| Step                                       | What it does                                                    | Example                                   |
+| ------------------------------------------ | --------------------------------------------------------------- | ----------------------------------------- |
+| `I go forward`                             | Goes forward to the next page, like the browser forward button. | `I go forward`                            |
+| `I see the url containing {string}`        | Checks that the address contains this text.                     | `I see the url containing "dashboard"`    |
+| `I do not see the url containing {string}` | Checks that the address does not contain this text.             | `I do not see the url containing "login"` |
+| `I see the page title {string}`            | Checks that the title of the browser tab is exactly this text.  | `I see the page title "Login"`            |
+| `I see the page title containing {string}` | Checks that the title of the browser tab contains this text.    | `I see the page title containing "Log"`   |
 
 ### Clicking and typing
 
@@ -219,3 +218,4 @@ Steps a release removed, with what to write instead. `lint` says the same where 
 | `I download the file with the {element}`                                | 0.3.0      | Click it: I click the "…" button. Every click catches a download, and I see the downloaded file "…" waits for it.                                                                                                                                                              |
 | `I save the downloaded file to {string}`                                | 0.3.0      | Check the file with I see the text "…" in the downloaded file. A file to upload goes into the project, such as data/files/, for I upload the file "data/files/…" with the "…" button.                                                                                          |
 | `I run the command {string}`                                            | 0.3.0      | A reviewer cannot judge a shell command, and it depends on the shell. Fill the database once per run with globalSetup or the webServer command in playwright.config.ts (docs/setup.md), and create the data one test needs through the app: I create "…" at "/api/…" with "…". |
+| `I use the page object {string}`                                        | 0.3.0      | I am on the "…" page uses the element names of a page from then on, without opening it or checking its address.                                                                                                                                                                |

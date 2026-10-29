@@ -33,6 +33,8 @@ const SAVE_DOWNLOAD =
   'Check the file with I see the text "…" in the downloaded file. A file to upload goes into the project, such as data/files/, for I upload the file "data/files/…" with the "…" button.';
 const COMMAND =
   'A reviewer cannot judge a shell command, and it depends on the shell. Fill the database once per run with globalSetup or the webServer command in playwright.config.ts (docs/setup.md), and create the data one test needs through the app: I create "…" at "/api/…" with "…".';
+const PAGE_OBJECT =
+  'I am on the "…" page uses the element names of a page from then on, without opening it or checking its address.';
 const PAGE_LOAD =
   'Opening a page and clicking already wait for it. Check for what the user waits for instead, such as I see the "…" heading.';
 
@@ -110,6 +112,7 @@ export const REMOVED_STEPS: readonly RemovedStep[] = [
   { pattern: 'I download the file with the {element}', removedIn: '0.3.0', instead: DOWNLOAD },
   { pattern: 'I save the downloaded file to {string}', removedIn: '0.3.0', instead: SAVE_DOWNLOAD },
   { pattern: 'I run the command {string}', removedIn: '0.3.0', instead: COMMAND },
+  { pattern: 'I use the page object {string}', removedIn: '0.3.0', instead: PAGE_OBJECT },
 ];
 
 const expressions = new Map<RemovedStep, CucumberExpression>();

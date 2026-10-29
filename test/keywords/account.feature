@@ -17,7 +17,7 @@ Feature: Account
 
     * I log in as "<username>" with password "password123"
     * I click the "Close" button
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard.html"
 
     Examples:
       | username   |

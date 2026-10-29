@@ -11,5 +11,5 @@ Feature: Log in once
   Scenario: Log in as the admin for the @admin scenarios
     * I log in as "0987654321" with password "admin123"
     * I click the "Close" button
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard.html"
     * I keep the session for "@admin" scenarios

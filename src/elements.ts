@@ -358,6 +358,11 @@ export type MissingContext = {
   pageFile?: string;
   /** The address the browser shows, e.g. `/dashboard`. */
   address?: string;
+  /**
+   * Set when the browser does not show the address of the current page, such as after a click
+   * that led to another page: the page whose address it shows, if there is one.
+   */
+  elsewhere?: { page?: string };
 };
 
 /**
@@ -368,7 +373,7 @@ export type MissingContext = {
 export function describeMissing(
   ref: ElementRef,
   snapshot: string,
-  { page: pageName, pageFile, address }: MissingContext = {},
+  { page: pageName, pageFile, address, elsewhere }: MissingContext = {},
 ): string {
   const where = ref.container
     ? ` in the ${ref.container}`
@@ -389,6 +394,13 @@ export function describeMissing(
   }
   // A wrong page, or one that sent the browser elsewhere, shows in the address.
   if (address) lines.push(`The address in the browser is ${address}.`);
+  if (elsewhere) {
+    lines.push(
+      `It is not the address of the "${pageName}" page, so the element names defined for it may not fit. ` +
+        `When a click led to another page, add I am on the "${elsewhere.page ?? '…'}" page before this step.`,
+    );
+    return lines.join('\n');
+  }
   // A typo is more likely than an element without a name.
   const meant = closest(ref.name, names);
   if (meant) {

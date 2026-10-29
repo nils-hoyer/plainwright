@@ -59,7 +59,7 @@ npx plainwright lint --features "features/**/*.feature"
 | `undefined-step`         | error    | A step that matches no step, with the closest existing one, or a removed step, with what replaces it.     |
 | `ambiguous-step`         | error    | A step that matches several steps.                                                                        |
 | `unknown-page`           | error    | A page name that no file in `pages/` (or TypeScript) defines.                                             |
-| `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which can only be checked.         |
+| `page-address`           | error    | `I open the "…" page` for a page without an address or with `*` in it, which cannot be opened.            |
 | `unknown-value`          | error    | A `{value}` that no data file, earlier step or built-in value provides; a warning for `{env.NAME}` unset. |
 | `remember-name`          | error    | A name to remember a value under that has spaces or other characters a `{value}` cannot have.             |
 | `setup-step`             | error    | `I keep the session` outside a `@setup` scenario, or for no tag, see [logging in once](logging-in.md).    |

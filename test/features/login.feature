@@ -39,7 +39,7 @@ Feature: Login
     * I click the "Log in" button
     * I see the "Welcome back!" dialog
     * I click the "Close" button
-    * I am on the "Dashboard" page
+    * I see the url "/dashboard.html"
     * I see the "Welcome to your Dashboard" heading
 
   Scenario: There is help for a forgotten password

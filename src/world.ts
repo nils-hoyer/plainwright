@@ -8,7 +8,14 @@ import type {
 } from '@playwright/test';
 import { test } from '@playwright/test';
 import { describeMissing, ElementRef, locate, Scope } from './elements';
-import { getPageDefinition, getPageSource, PageDefinition } from './pages';
+import {
+  addressPattern,
+  getPageDefinition,
+  getPageDefinitions,
+  getPageSource,
+  isUrlPattern,
+  PageDefinition,
+} from './pages';
 import { remember } from './values';
 
 export type WorldOptions = {
@@ -236,8 +243,24 @@ export class World {
         page,
         pageFile: page && getPageSource(page),
         address: this.address(),
+        elsewhere: this.#elsewhere(),
       }),
     );
+  }
+
+  /**
+   * When the browser does not show the address of the current page: the page whose address it
+   * shows, exactly before one with `*`. See MissingContext.
+   */
+  #elsewhere(): { page?: string } | undefined {
+    const shows = (page: PageDefinition) =>
+      page.url !== undefined &&
+      addressPattern(page.url, (path) => this.url(path)).test(this.#page.url());
+    if (!this.#currentPage || this.#currentPage.url === undefined || shows(this.#currentPage)) {
+      return undefined;
+    }
+    const pages = getPageDefinitions().filter(shows);
+    return { page: (pages.find((page) => !isUrlPattern(page.url)) ?? pages[0])?.name };
   }
 }
 

@@ -115,12 +115,14 @@ page that shows "Error". Write the text exactly as the page shows it.
 | `I see the text "Savings" in the "…" section` | that element contains the text                   |
 | `I see the value "Jane" in the "Name" field`  | the field contains exactly this value            |
 | `I see the "Log in" button is disabled`       | the button is shown but cannot be used           |
-| `I am on the "Dashboard" page`                | the browser shows the address of that page       |
+| `I am on the "Dashboard" page`                | the next steps use the names of that page        |
 
 ## Pages
 
 `I open the url "/login"` opens this address of the app. `I open the "Login" page` opens the
-address the team defined for the page "Login", and `I am on the "Dashboard" page` checks it.
+address the team defined for the page "Login". After a click that leads to another page,
+`I am on the "Dashboard" page` says which page the next steps are on, so that they use the names
+the team defined for it. It checks nothing: `I see the url "/dashboard"` checks the address.
 Page names keep web addresses out of the tests.
 
 ## Keywords

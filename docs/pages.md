@@ -30,19 +30,20 @@ pages/
 * I fill "jane@example.com" in the "Email" field
 * I click the "Log in" button
 * I am on the "Dashboard" page
+* I see the url "/dashboard"
 ```
 
-| Step                            | What it does                                                     |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `I open the "Login" page`       | opens the address of the page and makes it the current page      |
-| `I am on the "Dashboard" page`  | checks the address of the page and makes it the current page     |
-| `I use the page object "Login"` | makes it the current page without opening or checking (advanced) |
+| Step                           | What it does                                                          |
+| ------------------------------ | --------------------------------------------------------------------- |
+| `I open the "Login" page`      | opens the address of the page and makes it the current page           |
+| `I am on the "Dashboard" page` | makes it the current page, without opening it or checking its address |
 
 ### Addresses with wildcards
 
 In an address, `*` stands for any text without `/` and `**` for any text. Such a page, like
-`"url": "/orders/*"`, can only be checked with `I am on the "Order" page`, not opened. `lint`
-reports an `I open the "Order" page` for it.
+`"url": "/orders/*"`, cannot be opened: open the address with `I open the url "/orders/1001"`,
+then `I am on the "Order" page`. `lint` reports an `I open the "Order" page` for it. A page needs
+no `url` at all when it is only switched to, such as a step of a wizard.
 
 ### Where page files live
 
@@ -106,16 +107,24 @@ button` checks the count.
 ### The current page
 
 An alias applies while its page is the current page. `I open the "…" page` and
-`I am on the "…" page` set the current page; `I open the url "…"` clears it. When a click leads
-to another page, add `I am on the "…" page` so that its aliases apply. Elements found by their
-visible name work on any page.
+`I am on the "…" page` set the current page; `I open the url "…"` clears it. You decide when the
+next steps are on another page: after a click that leads there, add `I am on the "…" page` so
+that its aliases apply. It checks nothing and does not wait for the address. To wait for the new
+page, check something on it first, such as its heading or `I see the url "…"`. Elements found by
+their visible name work on any page.
 
 ```gherkin
 * I open the "Orders" page
 * I click the "Order 1001" link
+* I see the "Order 1001" heading
 * I am on the "Order" page
 * I click the "Print" button
 ```
+
+Several pages can share one address, such as the steps of a wizard or the views of an app that
+does everything at `/`: `I am on the "Step 2" page` switches between them. When an element is
+missing and the browser does not show the current page's address, the error says so and names
+the `I am on` step to add.
 
 ## Suggestions in VS Code
 
