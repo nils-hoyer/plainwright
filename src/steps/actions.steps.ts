@@ -18,7 +18,7 @@ step({
 
 step({
   pattern: 'I double click the {element}',
-  level: 'core',
+  level: 'advanced',
   description: 'Double-clicks the element.',
   example: 'I double click the "Order 1001" row',
   fn: async ({ world }, element: ElementRef) => {

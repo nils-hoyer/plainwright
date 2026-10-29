@@ -13,7 +13,7 @@
   <a href="https://github.com/sponsors/nils-hoyer"><img src="https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub" alt="Sponsor"></a>
 </p>
 
-Plainwright is built on [Playwright](https://playwright.dev/) and comes with 36 everyday steps
+Plainwright is built on [Playwright](https://playwright.dev/) and comes with 35 everyday steps
 for what you do in a browser, and more for special cases. You put these sentences together into
 tests, or let an AI assistant do it, and anyone on the team can check what a test does, without
 programming.
