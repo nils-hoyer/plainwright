@@ -28,7 +28,7 @@ step({
   pattern: 'I am on the {string} page',
   level: 'core',
   description:
-    'Uses the element names defined for this page from here on, such as after a click that leads to it. Checks nothing: to check the address, add I see the url "…".',
+    'Uses the element names defined for this page from here on, such as after a click that leads to it. Checks nothing: to check the address, add `I see the url "…"`.',
   example: 'I am on the "Dashboard" page',
   fn: ({ world }, name: string) => {
     world.usePage(name);
@@ -39,7 +39,7 @@ step({
   pattern: 'I open the url {string}',
   level: 'core',
   description:
-    'Opens a web address, absolute or relative to the base URL. The current page stays: to use the element names of another page, add I am on the "…" page.',
+    'Opens a web address, absolute or relative to the base URL. The current page stays: to use the element names of another page, add `I am on the "…" page`.',
   example: 'I open the url "/login"',
   fn: async ({ world }, url: string) => {
     world.leaveFrame();

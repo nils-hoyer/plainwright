@@ -20,7 +20,8 @@ the list:
   names and types steps use.
 - **The element has no visible name**, such as an icon-only button: give it an
   [alias](pages.md#elements-without-a-name-aliases).
-- **The page is not there yet.** Steps wait up to 10 seconds for an element. If the page shows
+- **The page is not there yet.** A click or a fill waits up to 10 seconds for its element, a
+  check up to 5 seconds. If the page shows
   something else, open the trace of the test in the
   [report](reading-tests.md#opening-the-report): it shows the page at every step.
 
@@ -76,7 +77,7 @@ creates its own name, such as `"Order {unique}"`, and create it in the test, not
 - **The address**: CI runs the app at another address. Set it with an environment variable,
   see [other environments](setup.md#other-environments).
 - **Secrets**: there is no `.env` file in CI. Set the variables as secrets of the CI system, see
-  [running in CI](setup.md#running-in-ci).
+  [running in CI](running-in-ci.md#a-workflow-for-github-actions).
 - **Screenshots**: a screenshot made on a Mac does not count on Linux, where CI usually runs.
   See [checks against a screenshot](writing-tests.md#checks-against-a-screenshot).
 - **Speed**: CI machines are slower, so a step that starts too early fails more often there.
