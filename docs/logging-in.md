@@ -60,6 +60,55 @@ file logs in at its own start, in a feature without a `Background`, or in a feat
 They go into a feature without the login in its `Background`, such as `features/login.feature`,
 and start with a fresh browser like every scenario.
 
+## Email codes and two-factor login
+
+Some apps send a code by email or ask for one from an authenticator app after the password. In
+order of preference:
+
+1. **A test account without the second step.** Ask the developers for one in the test
+   environment. It is the simplest way and the most common one.
+2. **A code by email.** The test environment sends its emails to a test mailbox with an API,
+   such as [Mailpit](https://mailpit.axllent.org/) on your machine or in CI, or a service such as
+   Mailosaur. The keyword reads the newest email and takes the code out of its text:
+
+   ```gherkin
+   # keywords/account.feature
+   Scenario Outline: I am logged in with an email code as "<email>"
+     * I open the url "/login"
+     * I fill the fields:
+       | Email    | <email>             |
+       | Password | {env.TEST_PASSWORD} |
+     * I click the "Log in" button
+     * I see the text "We sent you a code"
+     * I send a "GET" request to "http://localhost:8025/api/v1/message/latest"
+     * I remember the number in "{response.Text}" as "code"
+     * I fill "{code}" in the "Code" field
+     * I click the "Confirm" button
+     * I see the url "/dashboard"
+
+     Examples:
+       | email            |
+       | jane@example.com |
+   ```
+
+   `/api/v1/message/latest` is Mailpit's newest message, and `Text` its text. `I remember the
+number in` takes the first number of the text, so put the code before any other number in the
+   email of the test environment, or take it out with a step of your own. Another mailbox has
+   its own address and field names in its API docs. When several tests log in at the same time,
+   give each its own address, such as `test-{unique}@example.com`, and search the mailbox for
+   it.
+
+3. **A code from an authenticator app.** The app makes the code from a secret that the account
+   shows once, as a QR code, when two-factor login is turned on. Keep that secret in
+   `{env.TOTP_SECRET}`; a developer writes a step that makes the code from it, see
+   [codes from an authenticator app](writing-steps.md#codes-from-an-authenticator-app). The code
+   counts as a secret and shows as `(hidden)` in the report.
+
+   ```gherkin
+   * I remember the authenticator code for "{env.TOTP_SECRET}" as "code"
+   * I fill "{code}" in the "Code" field
+   ```
+
 ## When logging in every test is too slow
 
 Logging in through the form takes a second or two per scenario. For a large suite, a developer

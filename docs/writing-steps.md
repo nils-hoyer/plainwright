@@ -125,6 +125,29 @@ defineStep({
 });
 ```
 
+## Codes from an authenticator app
+
+For [two-factor login](logging-in.md#email-codes-and-two-factor-login) with an authenticator app,
+a step makes the current code from the account's secret, with a library such as
+[otpauth](https://www.npmjs.com/package/otpauth) (`npm install --save-dev otpauth`). The secret
+comes from the environment, so the code shows as `(hidden)` in the report.
+
+```ts
+// steps/login.steps.ts
+import { TOTP } from 'otpauth';
+import { defineStep } from '@nils.hoyer/plainwright';
+
+defineStep({
+  pattern: 'I remember the authenticator code for {string} as {string}',
+  description: 'Keeps the current code of an authenticator app for the secret.',
+  example: 'I remember the authenticator code for "{env.TOTP_SECRET}" as "code"',
+  remembers: (args) => String(args[1]),
+  fn: ({ world }, secret: string, name: string) => {
+    world.remember(name, new TOTP({ secret }).generate());
+  },
+});
+```
+
 ## Parameter types
 
 Use `defineParameterType()` from this package, not from playwright-bdd, so keywords and `lint`
@@ -181,12 +204,13 @@ defineStep<Fixtures>({
 
 ## Pages and data in TypeScript
 
-[Pages](pages.md) and [test data](test-data.md) are JSON files. In TypeScript the same is
+[Pages](pages.md), [test data](test-data.md) and [keywords](keywords.md) are files that load by
+themselves from `pages/`, `data/` and `keywords/`. Pages and data are JSON. In TypeScript the same is
 possible, plus what JSON cannot say:
 
 ```ts
 // steps/pages.ts
-import { definePage, definePages, defineData } from '@nils.hoyer/plainwright';
+import { definePage, definePages, defineData, defineKeywords } from '@nils.hoyer/plainwright';
 
 definePage('Order', { url: /\/orders\/\d+$/ }); // a RegExp is possible here
 definePage('Orders', {
@@ -197,4 +221,5 @@ definePage('Orders', {
 
 definePages('e2e/pages'); // page files in another folder
 defineData('fixtures/data'); // data files somewhere else
+defineKeywords('other/folder/**/*.feature'); // keyword files somewhere else
 ```
