@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { renderLeftOutSteps } from '../../src/docs';
+import { renderLeftOutSteps, withPlaceholders } from '../../src/docs';
 import { defineStep, findStep, findSteps } from '../../src/index';
 import { lintFeatures } from '../../src/lint';
 import { LEFT_OUT_STEPS, leftOutMessage, leftOutStep } from '../../src/left-out';
@@ -29,6 +29,14 @@ const examples = [
   ['I tap at x "300" y "200"', 'I tap at x {number} y {number}'],
   ['I scroll down by "500" pixels', 'I scroll down by {number} pixels'],
   ['I scroll up by "200" pixels', 'I scroll up by {number} pixels'],
+  // Positions and pixels as other tools write them, without quotes.
+  ['I click at x 200 y 150', 'I click at x {number} y {number}'],
+  ['I right click at x 200 y "150"', 'I right click at x {number} y {number}'],
+  ['I move the mouse to x 200 y 150', 'I move the mouse to x {number} y {number}'],
+  ['I scroll the mouse wheel by x 0 y -100', 'I scroll the mouse wheel by x {number} y {number}'],
+  ['I tap at x 300 y 200', 'I tap at x {number} y {number}'],
+  ['I scroll down by 500 pixels', 'I scroll down by {number} pixels'],
+  ['I scroll up by 2.5 pixels', 'I scroll up by {number} pixels'],
   [
     'I see the attribute "disabled" on the "Coming Soon" button',
     'I see the attribute {string} on the {element}',
@@ -72,6 +80,7 @@ describe('steps Plainwright leaves out', () => {
     'I wait "2" seconds',
     'I wait "2" minutes',
     'I wait 500 milliseconds',
+    'I click at x 10 y 20px',
     'I reload the page',
     'I type "Hello" in the "Name" field',
     'I tap the "Menu" button',
@@ -93,7 +102,9 @@ describe('steps Plainwright leaves out', () => {
   it('are listed in the step reference', () => {
     const table = renderLeftOutSteps();
     expect(table).toContain('## Steps Plainwright leaves out');
-    for (const { pattern } of LEFT_OUT_STEPS) expect(table).toContain(`| \`${pattern}\` |`);
+    for (const { pattern } of LEFT_OUT_STEPS) {
+      expect(table).toContain(`| \`${withPlaceholders(pattern)}\` |`);
+    }
   });
 
   // Last: the step it defines stays registered for the rest of this file.
