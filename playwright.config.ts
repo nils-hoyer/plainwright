@@ -24,8 +24,6 @@ export default defineConfig({
     env: { PORT: String(port) },
     reuseExistingServer: !process.env.CI,
   },
-  // The @setup scenarios in test/features/setup.feature log in once (docs/logging-in.md).
-  setup: true,
   projects: [
     {
       name: 'chromium',

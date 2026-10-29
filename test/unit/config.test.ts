@@ -44,76 +44,6 @@ describe('defineConfig', () => {
     ]);
   });
 
-  it('runs the @setup scenarios first with setup: true, in the browser of the first project', () => {
-    const chrome = { defaultBrowserType: 'chromium' };
-    expect(defineConfig({ bdd: { outputDir: '.gen-5' }, setup: true }).projects).toEqual([
-      { name: 'setup', grep: /(?<!\S)@setup(?!\S)/, use: expect.objectContaining(chrome) },
-      {
-        name: 'chromium',
-        use: expect.objectContaining(chrome),
-        dependencies: ['setup'],
-        grepInvert: [/(?<!\S)@setup(?!\S)/],
-      },
-    ]);
-    const { projects } = defineConfig({
-      bdd: { outputDir: '.gen-6' },
-      setup: true,
-      projects: [
-        { name: 'firefox', use: { browserName: 'firefox' }, grepInvert: /@mobile/ },
-        { name: 'phone', grep: /@mobile/, dependencies: ['seed'] },
-      ],
-    });
-    expect(
-      projects?.map(({ name, use, grep, grepInvert, dependencies }) => ({
-        name,
-        use,
-        grep,
-        grepInvert,
-        dependencies,
-      })),
-    ).toEqual([
-      { name: 'setup', use: { browserName: 'firefox' }, grep: /(?<!\S)@setup(?!\S)/ },
-      {
-        name: 'firefox',
-        use: { browserName: 'firefox' },
-        grepInvert: [/@mobile/, /(?<!\S)@setup(?!\S)/],
-        dependencies: ['setup'],
-      },
-      {
-        name: 'phone',
-        grep: /@mobile/,
-        grepInvert: [/(?<!\S)@setup(?!\S)/],
-        dependencies: ['seed', 'setup'],
-      },
-    ]);
-    // The tag, not tags that start with it or text that contains it.
-    const grep = projects![0].grep as RegExp;
-    expect(grep.test('Log in once Log in @setup')).toBe(true);
-    expect(grep.test('Seed @setup-data')).toBe(false);
-    expect(grep.test('Log in as admin@setup.com')).toBe(false);
-  });
-
-  it('keeps the grepInvert of the configuration, and adds no dependency to a teardown', () => {
-    const { projects } = defineConfig({
-      bdd: { outputDir: '.gen-8' },
-      setup: true,
-      grepInvert: /@wip/,
-      projects: [
-        { name: 'chromium', teardown: 'cleanup' },
-        { name: 'cleanup', grep: /@cleanup/ },
-        { name: 'firefox', grepInvert: /@slow/ },
-      ],
-    });
-    expect(
-      projects?.map(({ name, grepInvert, dependencies }) => ({ name, grepInvert, dependencies })),
-    ).toEqual([
-      { name: 'setup', grepInvert: undefined, dependencies: undefined },
-      { name: 'chromium', grepInvert: [/@wip/, /(?<!\S)@setup(?!\S)/], dependencies: ['setup'] },
-      { name: 'cleanup', grepInvert: [/@wip/, /(?<!\S)@setup(?!\S)/], dependencies: undefined },
-      { name: 'firefox', grepInvert: [/@slow/, /(?<!\S)@setup(?!\S)/], dependencies: ['setup'] },
-    ]);
-  });
-
   it('says that exactNames is gone, in use and in a project', () => {
     expect(() =>
       defineConfig({ bdd: { outputDir: '.gen-8' }, use: { exactNames: false } as never }),
@@ -124,11 +54,5 @@ describe('defineConfig', () => {
         projects: [{ name: 'chromium', use: { exactNames: true } as never }],
       }),
     ).toThrow('For a name with a part that changes, such as "Cart (3)", add an alias');
-  });
-
-  it('refuses setup: true next to a project named setup', () => {
-    expect(() =>
-      defineConfig({ bdd: { outputDir: '.gen-7' }, setup: true, projects: [{ name: 'setup' }] }),
-    ).toThrow('setup: true adds a project named "setup"');
   });
 });

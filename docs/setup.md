@@ -98,7 +98,6 @@ export default defineConfig({
 | `features` | `features/**/*.feature` | Where the tests are.                                                                              |
 | `steps`    | `steps/**/*.{ts,js}`    | Your steps in TypeScript or JavaScript.                                                           |
 | `bdd`      | none                    | More [playwright-bdd options](https://vitalets.github.io/playwright-bdd/#/configuration/options). |
-| `setup`    | `false`                 | Runs the scenarios tagged `@setup` once, before all others, see [logging in once](logging-in.md). |
 
 ### How the tests run
 
@@ -183,9 +182,6 @@ to compare against are stored per project, such as `start-firefox-linux.png` nex
 npx playwright install firefox webkit
 npm test -- --project firefox
 ```
-
-With [`setup: true`](logging-in.md), the scenarios that log in run once, in the browser of the
-first project, and every project starts with the session they kept.
 
 A window size of your own goes into `use`, for example
 `use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } }` for a project that
@@ -308,5 +304,5 @@ export default defineConfig({
 
 ## Logging in
 
-If most tests start logged in, log in once per run and reuse the session: see
-[logging in once](logging-in.md).
+If most tests start logged in, put a login keyword into the `Background:` of the features: see
+[logging in](logging-in.md).
