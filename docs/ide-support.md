@@ -10,7 +10,8 @@ and other editors, see [other editors](other-editors.md).
 suggests it. You get:
 
 - suggestions for every step: built-in steps, your keywords and your steps in TypeScript;
-- a warning on a step that does not exist;
+- a warning on a step that does not exist, in tests in `features/` and in keywords in
+  `keywords/`;
 - suggestions and checks in the files in `pages/` (see [pages](pages.md#suggestions-in-vs-code)).
 
 After adding keywords or steps in TypeScript, the editor knows them after the next `npm test`
@@ -36,7 +37,7 @@ npx plainwright stubs --out .vscode/plainwright.steps.js
 ```jsonc
 // .vscode/settings.json
 {
-  "cucumber.features": ["features/**/*.feature"],
+  "cucumber.features": ["features/**/*.feature", "keywords/**/*.feature"],
   "cucumber.glue": [".vscode/plainwright.steps.js"],
 }
 ```
