@@ -55,3 +55,15 @@ Feature: Forms
   Scenario: Focus a field
     * I focus on the "Full Name" field
     * I see the "Full Name" field is focused
+
+  Scenario: Fill several fields with a table
+    * I fill the fields:
+      | Full Name | Jane Doe                            |
+      | Email     | {users.member.username}@example.com |
+    * I see the value "Jane Doe" in the "Full Name" field
+    * I see the value "1234567890@example.com" in the "Email" field
+
+  Scenario: A keyword with a table
+    * I enter the contact "Joe Doe" with the email "joe@example.com"
+    * I see the value "Joe Doe" in the "Full Name" field
+    * I see the value "joe@example.com" in the "Email" field

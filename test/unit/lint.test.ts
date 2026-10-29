@@ -33,6 +33,15 @@ describe('lint', () => {
     ]);
   });
 
+  it('checks the values in the cells of a data table', () => {
+    const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/table.feature')], root)
+      .filter((message) => message.severity === 'error')
+      .map(formatLintMessage);
+    expect(errors).toEqual([
+      'test/unit/fixtures/lint/table.feature:4: error: No value named "nobody" for {nobody}. Known values: {env.NAME}, {unique}, {today} and the other dates. Add data/nobody.json, or remember a value as "nobody" first. For literal braces, write \\{nobody}. (unknown-value)',
+    ]);
+  });
+
   it('summarizes the counts', () => {
     expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
   });

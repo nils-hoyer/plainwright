@@ -66,6 +66,24 @@ Scenario Outline: A wrong login shows an error
     | jane@example     | secret   | Enter a valid email address.    |
 ```
 
+### Tables below a step
+
+A step that ends with a colon takes a table below it. Each cell is data, like a value in quotes,
+so `{users.admin.email}` works there too. `I fill the fields:` fills a form in one step, with the
+label of each field in the first column; `I see the items in the … in this order:` checks the
+order of a list, such as after sorting, with one text per row. Other items may be between
+them.
+
+```gherkin
+* I fill the fields:
+  | Email   | {users.admin.email} |
+  | Country | Germany             |
+* I click the "Price" button
+* I see the items in the "Products" list in this order:
+  | Coffee |
+  | Tea    |
+```
+
 ### Tags
 
 A word with `@` above a feature or scenario is a tag. `--grep` runs only the tests with a tag.

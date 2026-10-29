@@ -75,7 +75,8 @@ double quotes, one verb per action.
   to keywords and lint.
 - Steps that use your own [fixtures](writing-steps.md#fixtures) cannot be used inside keywords,
   which only pass `page` and `world`. All built-in steps work.
-- Data tables in keywords are not supported yet.
+- A step in a keyword may have a table, with the keyword's `<name>` values in its cells. Doc
+  strings (`"""`) are not supported yet.
 
 ## Keywords in another folder
 

@@ -9,6 +9,8 @@ keywords. Step text is public API: renaming a step is a breaking change (see
 1. **Every value is in double quotes.** Anything in quotes is data; the rest of the sentence is
    fixed. Numbers too: `I see "3" items in the "Cart" list`. Inside the quotes, `{name.path}` is
    a value from a data file, the environment or an earlier step, and `\{` is a literal brace.
+   A step that ends with a colon takes its values in a table below it instead, one cell each:
+   `I fill the fields:`.
 2. **Elements are named by what the user sees**, followed by an element type:
    `the "Log in" button`, `the "Email" field`. CSS, XPath and test IDs stay out of feature files.
    An element without a visible name gets an alias in its page's file in `pages/`.
@@ -53,7 +55,7 @@ step that takes an element accepts this, so no step needs its own "in the row" v
 
 ## Core and advanced
 
-**Core** steps are the everyday vocabulary (about 35). A reviewer must understand all of them
+**Core** steps are the everyday vocabulary (about 36). A reviewer must understand all of them
 after reading the [reviewer guide](reading-tests.md).
 
 **Advanced** steps cover special cases: fixed waits, typing key by key, touch, frames, tabs,
@@ -74,6 +76,7 @@ Current core steps:
 - `I double click the "Order 1001" row`
 - `I hover over the "Help" link`
 - `I fill "1234567890" in the "Username" field`
+- `I fill the fields:`
 - `I clear the "Full Name" field`
 - `I check the "I accept the terms and conditions" checkbox`
 - `I uncheck the "Subscribe to newsletter" checkbox`

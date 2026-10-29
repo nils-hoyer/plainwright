@@ -30,6 +30,11 @@ Feature: Advanced checks
   Scenario: Count list items
     * I see "3" items in the "Fruits" list
 
+  Scenario: Items in an order, with other items between them
+    * I see the items in the "Fruits" list in this order:
+      | Apple  |
+      | Cherry |
+
   Scenario: Description and error message for screen readers
     * I see the "Name input" field with the description "This is a hint for the input below."
     * I see the "Required field" field with the error message "This field is required."

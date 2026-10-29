@@ -96,6 +96,8 @@ export type FeatureStep = {
   column: number;
   /** Tags of the scenario the step runs in, including inherited ones. */
   tags: string[];
+  /** The cells of the data table below the step, with outline placeholders filled in. */
+  table?: string[][];
 };
 
 /**
@@ -106,7 +108,7 @@ export function featureSteps(document: GherkinDocument, file: string): FeatureSt
   const seen = new Set<string>();
   const result: FeatureStep[] = [];
   for (const step of scenarioSteps(document, file).flat()) {
-    const key = `${step.line}\u0000${step.text}\u0000${step.tags.join(' ')}`;
+    const key = `${step.line}\u0000${step.text}\u0000${step.tags.join(' ')}\u0000${JSON.stringify(step.table ?? [])}`;
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(step);
@@ -137,7 +139,8 @@ export function scenarioSteps(document: GherkinDocument, file: string): FeatureS
     const tags = pickle.tags.map((tag) => tag.name);
     return pickle.steps.flatMap((step) => {
       const location = locations.get(step.astNodeIds[0]);
-      return location ? [{ text: step.text, ...location, tags }] : [];
+      const table = step.argument?.dataTable?.rows.map((row) => row.cells.map((c) => c.value));
+      return location ? [{ text: step.text, ...location, tags, ...(table ? { table } : {}) }] : [];
     });
   });
 }
