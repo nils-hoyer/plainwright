@@ -33,16 +33,6 @@ describe('lint', () => {
     ]);
   });
 
-  it('reports a session kept outside a @setup scenario or for something that is not a tag', () => {
-    const errors = lintFeatures([path.join(__dirname, 'fixtures/lint/setup.feature')], root)
-      .filter((message) => message.severity === 'error')
-      .map(formatLintMessage);
-    expect(errors).toEqual([
-      `test/unit/fixtures/lint/setup.feature:7: error: "admin" is not a tag. Write the tag the scenarios have, with @, such as "@admin". (setup-step)`,
-      `test/unit/fixtures/lint/setup.feature:10: error: "I keep the session" only works in a scenario tagged @setup, which runs before the others when the configuration has setup: true. (setup-step)`,
-    ]);
-  });
-
   it('summarizes the counts', () => {
     expect(summarize(messages)).toBe('5 errors, 1 warning, 2 info');
   });
@@ -52,25 +42,6 @@ describe('lint', () => {
       (message) => message.severity === 'error',
     );
     expect(errors).toEqual([]);
-  });
-
-  it('says when a step only applies to scenarios with other tags', () => {
-    registerStep(
-      {
-        pattern: 'I open the start page for tagged lint',
-        description: 'Test step.',
-        example: 'I open the start page for tagged lint',
-        fn: () => {},
-      },
-      {
-        source: 'project',
-        location: { file: path.join(root, 'steps/@admin/start.ts'), line: 1, column: 1 },
-      },
-    );
-    const [message] = lintFeatures([path.join(__dirname, 'fixtures/lint/tags.feature')], root);
-    expect(formatLintMessage(message)).toBe(
-      'test/unit/fixtures/lint/tags.feature:4: error: "I open the start page for tagged lint" only applies to scenarios tagged @admin, the folder of its step file. (undefined-step)',
-    );
   });
 
   it('reports syntax errors with the line', () => {
@@ -143,19 +114,6 @@ describe('lint, with steps and keywords of its own', () => {
       { source: 'project' },
     );
     expect(again.check('project-remember.feature')).toEqual([]);
-  });
-
-  it('counts steps in tag folders like playwright-bdd', async () => {
-    const { check, project } = await fresh();
-    project('I open the start page for both', 'I open the start page for both', 'steps/start.ts');
-    project(
-      'I open the start page for both',
-      'I open the start page for both',
-      'steps/@admin/start.ts',
-    );
-    expect(check('tag-folders.feature')).toEqual([
-      'test/unit/fixtures/lint/tag-folders.feature:8: error: "I open the start page for both" matches 2 steps: "I open the start page for both" (steps/start.ts:3), "I open the start page for both" (steps/@admin/start.ts:3). In a scenario without tags, the steps in tag folders count too. (ambiguous-step)',
-    ]);
   });
 
   it('reports pages that cannot be opened, and environment variables not set', async () => {

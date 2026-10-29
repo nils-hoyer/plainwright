@@ -70,11 +70,6 @@ export type StepDefinition = {
   readonly source: StepSource;
   readonly discouraged?: string;
   readonly location?: StepLocation;
-  /**
-   * Tags from the folder and file names of a project step file, e.g. `['@admin']` for
-   * `steps/@admin/users.ts`. The step only applies to scenarios with all of these tags.
-   */
-  readonly tags: readonly string[];
   /** Parameter types in order of appearance, e.g. `['string', 'element']`. */
   readonly parameters: string[];
   /** Fixture names the step function destructures, e.g. `['world']`. */
@@ -128,14 +123,10 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   if (typeof options.fn !== 'function') {
     throw new Error(`[plainwright] defineStep("${options.pattern}") needs a function "fn".`);
   }
-  // playwright-bdd locates every step in this file, so it cannot see the folder tags of a
-  // project step file. We pass them on.
-  const tags = meta.source === 'project' && meta.location ? tagsFromPath(meta.location.file) : [];
-  if (steps.some((step) => step.pattern === options.pattern && sameTags(step.tags, tags))) {
+  if (steps.some((step) => step.pattern === options.pattern)) {
     throw new Error(`[plainwright] The step "${options.pattern}" is defined twice.`);
   }
-  let fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
-  if (tags.length) fn = onlyForTags(fn, options.pattern, tags);
+  const fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
   const step: StepDefinition = Object.freeze({
     pattern: options.pattern,
     description: options.description,
@@ -145,17 +136,13 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
     source: meta.source,
     discouraged: options.discouraged,
     location: meta.location,
-    tags: Object.freeze(tags),
     parameters: parameterNames(options.pattern),
     fixtures: fixtureNames(options.fn),
     fn,
   });
   steps.push(step);
   if (options.remembers) remembering.set(step, options.remembers);
-  const providedOptions = {
-    ...(meta.arityCheck === false ? { arityCheck: false } : {}),
-    ...(tags.length ? { tags: tags.join(' and ') } : {}),
-  };
+  const providedOptions = meta.arityCheck === false ? { arityCheck: false } : {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (Step as any)(step.pattern, providedOptions, step.fn);
   return step;
@@ -188,31 +175,6 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
     const remembered = takeRemembered({ secret: used.some((u) => u.shown === HIDDEN) });
     if (remembered.length) await showValues('remembered ', remembered);
     return result;
-  };
-  wrapped.toString = () => fn.toString();
-  Object.defineProperty(wrapped, 'length', { value: fn.length });
-  return wrapped;
-}
-
-/**
- * playwright-bdd only applies the tags of a step folder when the scenario has tags, so a step
- * from `steps/@admin/` would also run in a scenario without any. It fails there instead, with
- * the message lint gives.
- */
-function onlyForTags<F>(fn: StepFn<F>, pattern: string, tags: string[]): StepFn<F> {
-  const wrapped = async function (this: unknown, fixtures: F, ...args: unknown[]) {
-    let scenarioTags: readonly string[] | undefined;
-    try {
-      scenarioTags = test.info().tags;
-    } catch {
-      // Outside a test, e.g. in unit tests.
-    }
-    if (scenarioTags && !tags.every((tag) => scenarioTags.includes(tag))) {
-      const error = new Error(`[plainwright] ${onlyForTagsMessage(pattern, tags.join(' and '))}`);
-      hideOwnFrames(error);
-      throw error;
-    }
-    return fn.call(this, fixtures, ...args);
   };
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
@@ -297,27 +259,14 @@ export function getSteps(): readonly StepDefinition[] {
   return steps;
 }
 
-/**
- * All steps whose pattern matches the step text (without the Given/When/Then keyword).
- * With `tags` (of a scenario), steps from tagged folders only count when the tags fit, and
- * then win over steps without tags, as in playwright-bdd.
- */
-export function findSteps(text: string, tags?: readonly string[]): StepMatch[] {
+/** All steps whose pattern matches the step text (without the Given/When/Then keyword). */
+export function findSteps(text: string): StepMatch[] {
   const matches: StepMatch[] = [];
   for (const step of steps) {
     const result = expressionOf(step)?.match(text);
     if (result) matches.push({ step, args: result.map((arg) => arg.getValue(null)) });
   }
-  if (!tags) return matches;
-  const tagged = matches.filter(
-    ({ step }) => step.tags.length && step.tags.every((tag) => tags.includes(tag)),
-  );
-  return tagged.length ? tagged : matches.filter(({ step }) => !step.tags.length);
-}
-
-/** `"I open the start page" only applies to scenarios tagged @admin, …`, for lint and runs. */
-export function onlyForTagsMessage(text: string, tags: string) {
-  return `"${text}" only applies to scenarios tagged ${tags}, the folder of its step file.`;
+  return matches;
 }
 
 /** The single step matching the text. Throws a readable error when none or several match. */
@@ -448,19 +397,6 @@ export function parseStackFrame(frame: string): StepLocation | undefined {
     }
   }
   return { file, line: Number(match[2]), column: Number(match[3]) };
-}
-
-/** Tags in folder and file names, like playwright-bdd: `steps/@admin/@beta.users.ts` → `['@admin', '@beta']`. */
-export function tagsFromPath(file: string, cwd = process.cwd()): string[] {
-  const relative = path.isAbsolute(file) ? path.relative(cwd, file) : file;
-  const parts = relative.split(/[\\/]/);
-  if (parts.includes('node_modules')) return [];
-  parts[parts.length - 1] = parts[parts.length - 1].split('.')[0];
-  return [...new Set(parts.flatMap((part) => part.match(/@[^@\s]+/g) ?? []))];
-}
-
-function sameTags(a: readonly string[], b: readonly string[]) {
-  return a.length === b.length && a.every((tag) => b.includes(tag));
 }
 
 function normalizeForSuggestion(text: string) {
