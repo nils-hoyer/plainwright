@@ -2,7 +2,7 @@ import type { TestType } from '@playwright/test';
 import { createBdd, test as bddTest } from 'playwright-bdd';
 import { World } from './world';
 
-/** Plainwright's options under `use`. There are none since `exactNames` was removed in 0.3.0. */
+/** Plainwright's options under `use`. It has none yet. */
 export type KeywordsOptions = Record<never, never>;
 
 export type KeywordsFixtures = {
@@ -20,9 +20,7 @@ export const test = bddTest.extend<KeywordsOptions & KeywordsFixtures, { plainwr
   {
     // Boxed, so it does not show up as a step in the report.
     plainwrightChecks: [
-      async ({}, use, workerInfo) => {
-        // Before the browser starts. defineConfig() checks earlier; this covers an own configuration.
-        checkOptions(workerInfo.project.use);
+      async ({}, use) => {
         for (const check of workerChecks) check();
         await use();
       },
@@ -59,16 +57,4 @@ export function useTest<T extends TestType<any, any>>(projectTest: T): T {
   // to every feature and makes that one the most extended.
   createBdd(projectTest).BeforeAll({ name: 'use project fixtures' }, () => {});
   return projectTest;
-}
-
-/** Options that Plainwright no longer has: fail with what replaces them. */
-export function checkOptions(use: object | undefined) {
-  if (use && 'exactNames' in use) {
-    throw new Error(
-      '[plainwright] exactNames was removed in 0.3.0: element names always match exactly, with ' +
-        'the same capitals, so a step means the same in every project. Remove it from use in ' +
-        'playwright.config.ts. For a name with a part that changes, such as "Cart (3)", add an ' +
-        'alias: see docs/pages.md.',
-    );
-  }
 }

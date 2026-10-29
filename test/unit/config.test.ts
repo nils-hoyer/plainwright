@@ -43,16 +43,4 @@ describe('defineConfig', () => {
       [plainwrightReporter, { $type: 'html', outputFile: 'reports/cucumber.html' }],
     ]);
   });
-
-  it('says that exactNames is gone, in use and in a project', () => {
-    expect(() =>
-      defineConfig({ bdd: { outputDir: '.gen-8' }, use: { exactNames: false } as never }),
-    ).toThrow('exactNames was removed in 0.3.0');
-    expect(() =>
-      defineConfig({
-        bdd: { outputDir: '.gen-9' },
-        projects: [{ name: 'chromium', use: { exactNames: true } as never }],
-      }),
-    ).toThrow('For a name with a part that changes, such as "Cart (3)", add an alias');
-  });
 });
