@@ -87,7 +87,7 @@ type RegisterMeta = {
   /**
    * How `{references}` in quoted values reach the step: filled into the text (default), as the
    * value itself when the quotes hold exactly one reference (`raw`), or not at all (`none`, for
-   * keywords, whose steps fill them in).
+   * keywords, whose steps fill them in; the report still shows them).
    */
   values?: 'text' | 'raw' | 'none';
 };
@@ -126,7 +126,10 @@ export function registerStep<F>(options: StepOptions<F>, meta: RegisterMeta): St
   if (steps.some((step) => step.pattern === options.pattern)) {
     throw new Error(`[plainwright] The step "${options.pattern}" is defined twice.`);
   }
-  const fn = meta.values === 'none' ? options.fn : withValues(options.fn, meta.values ?? 'text');
+  const fn =
+    meta.values === 'none'
+      ? withValueLine(options.fn)
+      : withValues(options.fn, meta.values ?? 'text');
   const step: StepDefinition = Object.freeze({
     pattern: options.pattern,
     description: options.description,
@@ -175,6 +178,26 @@ function withValues<F>(fn: StepFn<F>, mode: 'text' | 'raw'): StepFn<F> {
     const remembered = takeRemembered({ secret: used.some((u) => u.shown === HIDDEN) });
     if (remembered.length) await showValues('remembered ', remembered);
     return result;
+  };
+  wrapped.toString = () => fn.toString();
+  Object.defineProperty(wrapped, 'length', { value: fn.length });
+  return wrapped;
+}
+
+/**
+ * Lists the `{references}` in the step's values in the report, as `withValues` does, but passes
+ * the values on as written: the steps of a keyword fill them in themselves.
+ */
+function withValueLine<F>(fn: StepFn<F>): StepFn<F> {
+  const wrapped = async function (this: unknown, fixtures: F, ...args: unknown[]) {
+    const used: ResolvedReference[] = [];
+    try {
+      for (const arg of args) resolveArg(arg, 'text', used);
+    } catch {
+      // A value that is missing fails in the step of the keyword that uses it, with its line.
+    }
+    if (used.length) await showValues('', used);
+    return fn.call(this, fixtures, ...args);
   };
   wrapped.toString = () => fn.toString();
   Object.defineProperty(wrapped, 'length', { value: fn.length });
