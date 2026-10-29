@@ -6,14 +6,14 @@ import { checkKeywords, fillPlaceholders, getKeywords, keywordOf, sameWording } 
 import { removedMessage } from './removed';
 import { appPagesFile, getPageDefinitions, isUrlPattern } from './pages';
 import {
+  elementTypeHint,
   findSteps,
   getSteps,
   getUnusableSteps,
   rememberedName,
   StepDefinition,
   StepMatch,
-  suggestionFor,
-  suggestSteps,
+  suggestionsFor,
 } from './registry';
 import { checkReference, checkRememberName, NumberReference, referencesIn } from './values';
 
@@ -98,12 +98,13 @@ export function lintFeatures(files: string[], cwd = process.cwd()): LintMessage[
           add('error', 'undefined-step', removed);
           continue;
         }
-        const suggestion = suggestSteps(text)[0];
+        const suggestion = suggestionsFor(text)[0];
+        const missingType = elementTypeHint(text);
         add(
           'error',
           'undefined-step',
           `Unknown step "${text}".` +
-            (suggestion ? ` Did you mean "${suggestionFor(suggestion, text)}"?` : '') +
+            (missingType ? ` ${missingType}` : suggestion ? ` Did you mean "${suggestion}"?` : '') +
             skippedHint,
         );
         continue;

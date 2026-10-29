@@ -9,7 +9,7 @@ import type {
 } from '@playwright/test';
 import { test } from '@playwright/test';
 import type { BddTestFixtures, BddWorkerFixtures } from 'playwright-bdd';
-import { ElementRef } from './elements';
+import { ELEMENT_TYPES, ElementRef } from './elements';
 import { KeywordsFixtures, KeywordsOptions, Step } from './fixtures';
 import { parameterTypes } from './params';
 import { removedMessage } from './removed';
@@ -276,11 +276,13 @@ export function findStep(text: string): StepMatch {
   if (matches.length === 0) {
     const removed = removedMessage(text);
     if (removed) throw new Error(removed);
-    const suggestions = suggestSteps(text);
+    const missingType = elementTypeHint(text);
+    if (missingType) throw new Error(`No step matches "${text}". ${missingType}`);
+    const suggestions = suggestionsFor(text);
     throw new Error(
       `No step matches "${text}".` +
         (suggestions.length
-          ? `\nDid you mean:\n${suggestions.map((s) => `  - ${suggestionFor(s, text)}`).join('\n')}`
+          ? `\nDid you mean:\n${suggestions.map((s) => `  - ${s}`).join('\n')}`
           : ''),
     );
   }
@@ -306,7 +308,55 @@ export function suggestionFor(step: StepDefinition, text: string): string {
   return findSteps(filled).some((match) => match.step === step) ? filled : step.example;
 }
 
-/** Steps whose example is closest to the given text. */
+/**
+ * How to write `text` with the closest steps, with its own values where they fit. Wordings of
+ * other tools are read as Plainwright's first: `I should see the text "Saved"` →
+ * `I see the text "Saved"`, and bare numbers as values: `I see 2 items` → `I see "2" items`.
+ */
+export function suggestionsFor(text: string, limit = 3): string[] {
+  const reworded = quoteNumbers(plainwrightWording(text));
+  if (reworded !== text && findSteps(reworded).length === 1) return [reworded];
+  return suggestSteps(reworded, limit).map((step) => suggestionFor(step, reworded));
+}
+
+/** Wordings that people from Cucumber, Cypress or Selenium write, and Plainwright's for them. */
+const OTHER_WORDINGS: [RegExp, string][] = [
+  [/^I should not see\b/i, 'I do not see'],
+  [/^I should see\b/i, 'I see'],
+  [/^I click on\b/i, 'I click'],
+  [/^I enter\b/i, 'I fill'],
+];
+
+function plainwrightWording(text: string) {
+  for (const [wording, replacement] of OTHER_WORDINGS) {
+    if (wording.test(text)) return text.replace(wording, replacement);
+  }
+  return text;
+}
+
+/** Numbers outside quotes, quoted like every value: `I wait 2 seconds` → `I wait "2" seconds`. */
+function quoteNumbers(text: string) {
+  return text
+    .split(/("(?:[^"\\]|\\.)*")/)
+    .map((part, i) => (i % 2 ? part : part.replace(/(?<=^|\s)(\d+(?:[.,]\d+)?)(?=\s|$)/g, '"$1"')))
+    .join('');
+}
+
+/**
+ * When `text` names an element without its type, such as `I click the "Save"`, how to add it.
+ * Otherwise undefined.
+ */
+export function elementTypeHint(text: string): string | undefined {
+  const untyped = /\bthe ("(?:[^"\\]|\\.)*")(?=$|\s+(?:in|to|with)\s+the\b)/g;
+  const typed = text.replace(untyped, 'the $1 button');
+  if (typed === text || findSteps(typed).length !== 1) return undefined;
+  return (
+    `After the name in quotes comes the type of the element, such as ${typed}. ` +
+    `The types: ${ELEMENT_TYPES.join(', ')}.`
+  );
+}
+
+/** Steps whose example is closest to the given text; core steps first when about as close. */
 export function suggestSteps(text: string, limit = 3): StepDefinition[] {
   const normalized = normalizeForSuggestion(text);
   return steps
@@ -314,7 +364,8 @@ export function suggestSteps(text: string, limit = 3): StepDefinition[] {
       step,
       distance:
         levenshtein(normalized, normalizeForSuggestion(step.example)) /
-        Math.max(normalized.length, 1),
+          Math.max(normalized.length, 1) +
+        (step.level === 'advanced' ? 0.05 : 0),
     }))
     .filter(({ distance }) => distance < 0.5)
     .sort((a, b) => a.distance - b.distance)

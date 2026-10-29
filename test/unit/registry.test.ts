@@ -7,6 +7,8 @@ import {
   rememberedName,
   suggestionFor,
   suggestSteps,
+  suggestionsFor,
+  elementTypeHint,
 } from '../../src/registry';
 import { CATEGORIES } from '../../src/steps/builtin';
 import { checkRememberName } from '../../src/values';
@@ -192,5 +194,31 @@ describe('suggestions', () => {
   it('use the example when the values do not fit', () => {
     const text = 'I see "a few" itmes in the "Cart" list';
     expect(suggestionFor(suggestSteps(text)[0], text)).toBe(suggestSteps(text)[0].example);
+  });
+  it('read the wordings of other tools as the Plainwright ones, with the same meaning', () => {
+    expect(suggestionsFor('I should see the text "Saved"')).toEqual(['I see the text "Saved"']);
+    expect(suggestionsFor('I should not see the "Close" button')).toEqual([
+      'I do not see the "Close" button',
+    ]);
+    expect(suggestionsFor('I click on the "Save" button')).toEqual(['I click the "Save" button']);
+    expect(suggestionsFor('I enter "x" in the "Name" field')).toEqual([
+      'I fill "x" in the "Name" field',
+    ]);
+  });
+
+  it('keep the values of the step, also a number without quotes', () => {
+    expect(suggestionsFor('I see 2 items in the "Todo items" list')[0]).toBe(
+      'I see "2" items in the "Todo items" list',
+    );
+  });
+
+  it('say when an element has no type', () => {
+    expect(elementTypeHint('I click the "Save"')).toMatch(
+      /^After the name in quotes comes the type of the element, such as I click the "Save" button\. The types: button, link, /,
+    );
+    expect(elementTypeHint('I click the "Delete" in the "Order 1001" row')).toContain(
+      'I click the "Delete" button in the "Order 1001" row',
+    );
+    expect(elementTypeHint('I click the "Save" button')).toBeUndefined();
   });
 });
