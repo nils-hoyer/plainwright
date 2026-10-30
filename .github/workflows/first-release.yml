@@ -102,8 +102,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.version.outputs.tag }}
-      # The highlights come first, then the pull requests since v0.2.0, grouped by
-      # .github/release.yml.
+      # The notes list the pull requests since v0.2.0, grouped by .github/release.yml.
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -112,7 +111,6 @@ jobs:
           gh release create "$TAG" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$TAG" \
-            --notes-file ".github/release-notes/$TAG.md" \
             --generate-notes \
             --verify-tag
 
