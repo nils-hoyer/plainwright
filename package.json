@@ -1,6 +1,6 @@
 {
   "name": "@codesurfer/plainwright",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Readable, keyword-driven tests built on Playwright and playwright-bdd.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
