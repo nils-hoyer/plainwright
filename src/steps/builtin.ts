@@ -13,7 +13,8 @@ export const CATEGORIES = [
   'Cookies and storage',
   'Screenshots',
   'Downloads',
-  'Test data and APIs',
+  'Remembering values',
+  'API requests',
 ] as const;
 
 export type Category = (typeof CATEGORIES)[number];

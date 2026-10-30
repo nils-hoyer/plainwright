@@ -172,20 +172,25 @@ For special cases. `lint` lists where they are used.
 | `I see the downloaded file "orders.csv"`        | Checks the file name of the last download, and waits for it after a click on a link or button.            |
 | `I see the text "Total" in the downloaded file` | Checks that the last download contains this text, with the same capitals, and waits for it after a click. |
 
-### Test data and APIs
+### Remembering values
 
-| Step                                                                       | What it does                                                                                                                       |
-| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `I remember "Coffee" as "item"`                                            | Keeps the value under the name for the rest of the test; later steps write it as "{name}".                                         |
-| `I remember the text of the "Order number" field as "order-number"`        | Keeps the text of the element, or the value of a field, under the name for the rest of the test.                                   |
-| `I remember the url as "order-page"`                                       | Keeps the address the browser shows, without the base URL when it is on the same website.                                          |
-| `I remember the number in "{confirmation}" as "order"`                     | Keeps the number in the text, such as 10234 in "Order #10234 was created.", as written; in an address the last number of its path. |
-| `I create "order" at "/api/orders" with "{new-order}"`                     | Sends the value as JSON in a POST request to the address, checks that it succeeded and remembers the answer under the name.        |
-| `I delete "/api/orders/{order.id}" after the test`                         | Sends a DELETE request to the address after the test, also when it failed. An address that is already gone counts as deleted.      |
-| `I send a "GET" request to "/api/orders"`                                  | Sends a request (GET, POST, PUT, PATCH or DELETE) to the address and remembers the answer as "{response}".                         |
-| `I send a "PATCH" request to "/api/orders/{order.id}" with "{paid-order}"` | Sends a request with the value as JSON to the address and remembers the answer as "{response}".                                    |
-| `I see the response status "201"`                                          | Checks the status code of the answer to the last request, e.g. "200" or "404".                                                     |
-| `I see the response field "status" with the value "paid"`                  | Checks a field in the answer to the last request; "items.0.name" is the name of the first item.                                    |
+| Step                                                                | What it does                                                                                                                       |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `I remember "Coffee" as "item"`                                     | Keeps the value under the name for the rest of the test; later steps write it as "{name}".                                         |
+| `I remember the text of the "Order number" field as "order-number"` | Keeps the text of the element, or the value of a field, under the name for the rest of the test.                                   |
+| `I remember the url as "order-page"`                                | Keeps the address the browser shows, without the base URL when it is on the same website.                                          |
+| `I remember the number in "{confirmation}" as "order"`              | Keeps the number in the text, such as 10234 in "Order #10234 was created.", as written; in an address the last number of its path. |
+
+### API requests
+
+| Step                                                                       | What it does                                                                                                                  |
+| -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `I create "order" at "/api/orders" with "{new-order}"`                     | Sends the value as JSON in a POST request to the address, checks that it succeeded and remembers the answer under the name.   |
+| `I delete "/api/orders/{order.id}" after the test`                         | Sends a DELETE request to the address after the test, also when it failed. An address that is already gone counts as deleted. |
+| `I send a "GET" request to "/api/orders"`                                  | Sends a request (GET, POST, PUT, PATCH or DELETE) to the address and remembers the answer as "{response}".                    |
+| `I send a "PATCH" request to "/api/orders/{order.id}" with "{paid-order}"` | Sends a request with the value as JSON to the address and remembers the answer as "{response}".                               |
+| `I see the response status "201"`                                          | Checks the status code of the answer to the last request, e.g. "200" or "404".                                                |
+| `I see the response field "status" with the value "paid"`                  | Checks a field in the answer to the last request; "items.0.name" is the name of the first item.                               |
 
 ## Steps Plainwright leaves out
 

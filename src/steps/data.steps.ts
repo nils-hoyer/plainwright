@@ -3,7 +3,8 @@ import type { ElementRef } from '../elements';
 import type { ApiResponse, World } from '../world';
 import { category } from './builtin';
 
-const step = category('Test data and APIs');
+const step = category('Remembering values');
+const apiStep = category('API requests');
 
 // Values written {name} in later steps. Data files and {env.NAME} need no step.
 
@@ -71,7 +72,7 @@ step({
 
 // Test data through the app's API. Requests use the browser's cookies and the base URL.
 
-step({
+apiStep({
   pattern: 'I create {string} at {string} with {string}',
   level: 'advanced',
   description:
@@ -88,7 +89,7 @@ step({
   },
 });
 
-step({
+apiStep({
   pattern: 'I delete {string} after the test',
   level: 'advanced',
   description:
@@ -106,7 +107,7 @@ step({
   },
 });
 
-step({
+apiStep({
   pattern: 'I send a {string} request to {string}',
   level: 'advanced',
   description:
@@ -118,7 +119,7 @@ step({
   },
 });
 
-step({
+apiStep({
   pattern: 'I send a {string} request to {string} with {string}',
   level: 'advanced',
   description:
@@ -131,7 +132,7 @@ step({
   },
 });
 
-step({
+apiStep({
   pattern: 'I see the response status {number}',
   level: 'advanced',
   description: 'Checks the status code of the answer to the last request, e.g. "200" or "404".',
@@ -142,7 +143,7 @@ step({
   },
 });
 
-step({
+apiStep({
   pattern: 'I see the response field {string} with the value {string}',
   level: 'advanced',
   description:

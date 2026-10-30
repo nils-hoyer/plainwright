@@ -183,6 +183,7 @@ test. How, and everything else about data, is in [test data](docs/test-data.md).
 - [Pages](docs/pages.md): named pages, and names for elements that have none.
 - [Test data](docs/test-data.md): data files, passwords, data created through your app's API.
 - [Keywords](docs/keywords.md): your own steps, made of existing steps.
+- [Logging in](docs/logging-in.md): start tests logged in.
 - [Organizing a suite](docs/organizing-tests.md): folders, titles, tags, and when to use a
   keyword, a page or a data file.
 - [Troubleshooting](docs/troubleshooting.md): an element is not found, a test fails now and
@@ -197,7 +198,6 @@ test. How, and everything else about data, is in [test data](docs/test-data.md).
 
 - [Setup](docs/setup.md): what `init` wrote, the configuration, other environments, other
   browsers and phones.
-- [Logging in](docs/logging-in.md): start tests logged in.
 - [Running in CI](docs/running-in-ci.md): a GitHub Actions workflow, screenshots for Linux, JUnit
   and Cucumber reports for Jenkins, GitLab, Azure DevOps and Jira.
 - [Commands](docs/commands.md): running tests, `lint`, `inspect`, `catalog` and more.
