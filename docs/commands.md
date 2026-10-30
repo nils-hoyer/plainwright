@@ -40,7 +40,7 @@ your app, AI instructions and editor settings, and adds the npm scripts. It neve
 file. Options and details are in [setup](setup.md).
 
 ```bash
-npx @nils.hoyer/plainwright@latest init
+npx @codesurfer/plainwright@latest init
 ```
 
 ### lint: check feature files before running them

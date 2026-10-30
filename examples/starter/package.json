@@ -13,6 +13,6 @@
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "playwright-bdd": "^9.2.1",
-    "@nils.hoyer/plainwright": "^0.2.0"
+    "@codesurfer/plainwright": "^0.2.0"
   }
 }

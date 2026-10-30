@@ -8,7 +8,7 @@ engineer. After that, people write tests in feature files without touching any o
 [Getting started](../README.md#getting-started) is one command, in an empty folder or in your
 project. It asks for the address of your app and which AI assistant you use, and then:
 
-- installs `@nils.hoyer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
+- installs `@codesurfer/plainwright`, `playwright-bdd`, `@playwright/test` and Chromium, with
   the package manager of the project (npm, pnpm, Yarn or Bun);
 - writes the files listed [below](#files-init-writes);
 - adds the scripts `test`, `report`, `lint` and `inspect` to `package.json` (see
@@ -21,10 +21,10 @@ skipped. In a project with its own Playwright configuration, it prints the lines
 
 ```bash
 # Set up the project, asking for the address and the assistant
-npx @nils.hoyer/plainwright@latest init
+npx @codesurfer/plainwright@latest init
 
 # The same without questions
-npx @nils.hoyer/plainwright init --yes --url http://localhost:3000 --ai agents
+npx @codesurfer/plainwright init --yes --url http://localhost:3000 --ai agents
 ```
 
 To try Plainwright with an example app first, the [starter](../examples/starter) is a complete
@@ -77,7 +77,7 @@ example `webServer` to start your app, as in the second example. The table lists
 `defineConfig()` adds.
 
 ```ts
-import { defineConfig } from '@nils.hoyer/plainwright/config';
+import { defineConfig } from '@codesurfer/plainwright/config';
 
 export default defineConfig({
   // The address of your app. "/login" in a test means http://localhost:3000/login
@@ -148,7 +148,7 @@ such as `@mobile`. The phone project runs only those (`grep`), and the others le
 
 ```ts
 import { devices } from '@playwright/test';
-import { defineConfig } from '@nils.hoyer/plainwright/config';
+import { defineConfig } from '@codesurfer/plainwright/config';
 
 export default defineConfig({
   baseURL: 'http://localhost:3000',
@@ -236,14 +236,14 @@ the packages and add `defineBddConfig()` as below. Then run the tests with
 own entry in `projects`, with its own `testDir`.
 
 ```bash
-npm install --save-dev @nils.hoyer/plainwright playwright-bdd @playwright/test
+npm install --save-dev @codesurfer/plainwright playwright-bdd @playwright/test
 npx playwright install chromium
 ```
 
 ```ts
 import { defineConfig } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
-import { aiFixPromptTemplate, steps } from '@nils.hoyer/plainwright';
+import { aiFixPromptTemplate, steps } from '@codesurfer/plainwright';
 
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',

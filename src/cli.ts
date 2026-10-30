@@ -30,7 +30,7 @@ pages/, data/ and keywords/ in the project folder load by themselves.
 plainwright <command> --help shows the options of one command.
 
 Examples:
-  npx @nils.hoyer/plainwright init
+  npx @codesurfer/plainwright init
   npx plainwright test features/login.feature --headed
   npx plainwright lint --features "features/**/*.feature"
   npx plainwright catalog --out steps.json

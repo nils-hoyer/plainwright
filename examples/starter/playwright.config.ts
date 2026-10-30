@@ -1,4 +1,4 @@
-import { defineConfig } from '@nils.hoyer/plainwright/config';
+import { defineConfig } from '@codesurfer/plainwright/config';
 
 // The example app in app/. To test your own app, set baseURL to it and remove webServer.
 const port = 3210;
