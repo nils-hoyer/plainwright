@@ -141,7 +141,7 @@ and the starter has it:
   "json.schemas": [
     {
       "fileMatch": ["**/pages/**/*.json"],
-      "url": "./node_modules/@nils.hoyer/plainwright/schema/page.json",
+      "url": "./node_modules/@codesurfer/plainwright/schema/page.json",
     },
   ],
 }

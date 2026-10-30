@@ -19,7 +19,7 @@ src/
                     last API response, actions after the test
   fixtures.ts       the Playwright `test` with the `world` fixture
   keywords.ts       defineKeywords: Scenario Outlines in .feature files become steps
-  config.ts         defineConfig() for playwright.config.ts (@nils.hoyer/plainwright/config)
+  config.ts         defineConfig() for playwright.config.ts (@codesurfer/plainwright/config)
   init.ts           plainwright init: sets up a project
   run.ts            plainwright test: bddgen, then playwright test
   lint.ts, catalog.ts, docs.ts, inspect.ts, stubs.ts, cli.ts   the command line

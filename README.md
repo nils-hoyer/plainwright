@@ -8,7 +8,7 @@
 <p align="center">Browser tests as plain English sentences</p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@nils.hoyer/plainwright"><img src="https://img.shields.io/npm/v/@nils.hoyer/plainwright" alt="npm"></a>
+  <a href="https://www.npmjs.com/package/@codesurfer/plainwright"><img src="https://img.shields.io/npm/v/@codesurfer/plainwright" alt="npm"></a>
   <a href="https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml"><img src="https://github.com/nils-hoyer/plainwright/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/sponsors/nils-hoyer"><img src="https://img.shields.io/github/sponsors/nils-hoyer?label=Sponsor&logo=GitHub" alt="Sponsor"></a>
 </p>
@@ -40,7 +40,7 @@ left out. To set everything up by hand, or to try an example project first, see
 
 ```bash
 # Set up the project
-npx @nils.hoyer/plainwright@latest init
+npx @codesurfer/plainwright@latest init
 
 # Run the tests
 npm test

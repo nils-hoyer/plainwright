@@ -86,7 +86,7 @@ Playwright empties that folder when a run starts, after the Cucumber reports hav
 files, so they would be gone.
 
 ```ts
-import { cucumberReporter, defineConfig } from '@nils.hoyer/plainwright/config';
+import { cucumberReporter, defineConfig } from '@codesurfer/plainwright/config';
 
 export default defineConfig({
   baseURL: 'http://localhost:3000',
@@ -102,7 +102,7 @@ export default defineConfig({
 });
 ```
 
-Take `cucumberReporter` from `@nils.hoyer/plainwright/config`, also with
+Take `cucumberReporter` from `@codesurfer/plainwright/config`, also with
 [your own Playwright configuration](setup.md#with-your-own-playwright-configuration).
 playwright-bdd's own finds none of the steps, because Plainwright reports each step at its line in
 the feature file; it would mark every step as skipped. `defineConfig()` puts Plainwright's in its

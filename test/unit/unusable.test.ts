@@ -27,7 +27,7 @@ describe('a step with a parameter type the registry does not know', () => {
       {
         step,
         message:
-          'The step "I pick the {colour} colour" uses the parameter type {colour}, which Plainwright does not know. Define it with defineParameterType() from @nils.hoyer/plainwright instead of playwright-bdd; until then, keywords and lint skip this step.',
+          'The step "I pick the {colour} colour" uses the parameter type {colour}, which Plainwright does not know. Define it with defineParameterType() from @codesurfer/plainwright instead of playwright-bdd; until then, keywords and lint skip this step.',
       },
     ]);
   });

@@ -27,7 +27,7 @@ jobs:
         run: |
           npm pack
           cd examples/starter
-          npm install --no-save ../../nils.hoyer-plainwright-*.tgz
+          npm install --no-save ../../codesurfer-plainwright-*.tgz
           npx playwright install chromium
           npm run lint
           npm test
@@ -36,7 +36,7 @@ jobs:
           PORT=3125 node test/server.mjs &
           mkdir "$RUNNER_TEMP/new-project" && cd "$RUNNER_TEMP/new-project"
           # The packed package instead of the one on npm; init installs the rest and Chromium.
-          npm install --save-dev "$GITHUB_WORKSPACE"/nils.hoyer-plainwright-*.tgz
+          npm install --save-dev "$GITHUB_WORKSPACE"/codesurfer-plainwright-*.tgz
           npx plainwright init --yes --url http://localhost:3125 --ai agents
           # The first test checks what the start page of the app shows.
           grep -F '* I see the "Plainwright test app" heading' features/example.feature

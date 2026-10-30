@@ -15,7 +15,7 @@ arrive already filled in: `"{users.admin.email}"` reaches `fn` as `admin@example
 ```ts
 // steps/cart.steps.ts
 import { expect } from '@playwright/test';
-import { defineStep } from '@nils.hoyer/plainwright';
+import { defineStep } from '@codesurfer/plainwright';
 
 defineStep({
   pattern: 'I see {string} in the cart',
@@ -43,7 +43,7 @@ name, so later steps may write `{initials}`:
 
 ```ts
 // steps/names.steps.ts
-import { defineStep } from '@nils.hoyer/plainwright';
+import { defineStep } from '@codesurfer/plainwright';
 
 defineStep({
   pattern: 'I remember the initials of {string} as {string}',
@@ -83,7 +83,7 @@ and `in the "…" row`, and lists what the page offers when it is missing.
 ```ts
 // steps/tooltip.steps.ts
 import { expect } from '@playwright/test';
-import { defineStep, type ElementRef } from '@nils.hoyer/plainwright';
+import { defineStep, type ElementRef } from '@codesurfer/plainwright';
 
 defineStep({
   pattern: 'I see the tooltip {string} on the {element}',
@@ -105,7 +105,7 @@ from its size. The example draws a line across it, as a signature.
 
 ```ts
 // steps/drawing.steps.ts
-import { defineStep, type ElementRef } from '@nils.hoyer/plainwright';
+import { defineStep, type ElementRef } from '@codesurfer/plainwright';
 
 defineStep({
   pattern: 'I draw a line across the {element}',
@@ -135,7 +135,7 @@ comes from the environment, so the code shows as `(hidden)` in the report.
 ```ts
 // steps/login.steps.ts
 import { TOTP } from 'otpauth';
-import { defineStep } from '@nils.hoyer/plainwright';
+import { defineStep } from '@codesurfer/plainwright';
 
 defineStep({
   pattern: 'I remember the authenticator code for {string} as {string}',
@@ -170,7 +170,7 @@ your fixtures cannot be used inside keywords, which only pass `page` and `world`
 
 ```ts
 // steps/fixtures.ts
-import { test as base, useTest, type StepFixtures } from '@nils.hoyer/plainwright';
+import { test as base, useTest, type StepFixtures } from '@codesurfer/plainwright';
 
 type ProjectFixtures = { order: { id: string } };
 export type Fixtures = StepFixtures & ProjectFixtures;
@@ -189,7 +189,7 @@ export const test = useTest(
 
 ```ts
 // steps/orders.steps.ts
-import { defineStep } from '@nils.hoyer/plainwright';
+import { defineStep } from '@codesurfer/plainwright';
 import type { Fixtures } from './fixtures';
 
 defineStep<Fixtures>({
@@ -210,7 +210,7 @@ possible, plus what JSON cannot say:
 
 ```ts
 // steps/pages.ts
-import { definePage, definePages, defineData, defineKeywords } from '@nils.hoyer/plainwright';
+import { definePage, definePages, defineData, defineKeywords } from '@codesurfer/plainwright';
 
 definePage('Order', { url: /\/orders\/\d+$/ }); // a RegExp is possible here
 definePage('Orders', {

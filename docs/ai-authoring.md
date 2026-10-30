@@ -6,10 +6,10 @@ fast feedback. The person needs readable tests and a clear report.
 
 ## Set up the assistant
 
-`npx @nils.hoyer/plainwright init` asks which assistant you use and writes its instructions.
+`npx @codesurfer/plainwright init` asks which assistant you use and writes its instructions.
 They tell the assistant the workflow below and the rules for steps. To copy them by hand, use
 the templates below; they are in the installed package too, in
-`node_modules/@nils.hoyer/plainwright/templates/`. Adjust the `features/` and `steps/` paths if
+`node_modules/@codesurfer/plainwright/templates/`. Adjust the `features/` and `steps/` paths if
 yours differ.
 
 | Assistant           | Template                                                                  | Copy to                               |
@@ -90,7 +90,7 @@ names, instead of changing step code.
 `I switch to tab "2"` it may show the wrong tab.
 
 ```ts
-import { aiFixPromptTemplate } from '@nils.hoyer/plainwright';
+import { aiFixPromptTemplate } from '@codesurfer/plainwright';
 
 defineBddConfig({
   // ...

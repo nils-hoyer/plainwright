@@ -1,5 +1,5 @@
 {
-  "name": "@nils.hoyer/plainwright",
+  "name": "@codesurfer/plainwright",
   "version": "0.2.0",
   "description": "Readable, keyword-driven tests built on Playwright and playwright-bdd.",
   "main": "dist/index.js",

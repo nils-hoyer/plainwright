@@ -76,7 +76,7 @@ export async function init(options: InitOptions = {}): Promise<number> {
   // A config that already runs feature files needs nothing; another one needs a few lines.
   const runsFeatures =
     configFound &&
-    /@nils\.hoyer\/plainwright|defineBddConfig/.test(
+    /@codesurfer\/plainwright|defineBddConfig/.test(
       fs.readFileSync(path.join(cwd, configFound), 'utf8'),
     );
   const existingConfig = runsFeatures ? undefined : configFound;
@@ -277,7 +277,7 @@ function scriptsFor(baseURL: string): Record<string, string> {
 }
 
 function configFile(baseURL: string) {
-  return `import { defineConfig } from '@nils.hoyer/plainwright/config';
+  return `import { defineConfig } from '@codesurfer/plainwright/config';
 
 // Tests are in features/, your own sentences in keywords/, named pages in pages/.
 // More options: https://github.com/nils-hoyer/plainwright/blob/main/docs/setup.md
@@ -293,7 +293,7 @@ function existingConfigHelp(file: string, baseURL: string) {
   return `${file} exists, so it was left as it is. To run feature files with it, add:
 
   import { defineBddConfig } from 'playwright-bdd';
-  import { aiFixPromptTemplate, steps } from '@nils.hoyer/plainwright';
+  import { aiFixPromptTemplate, steps } from '@codesurfer/plainwright';
 
   const testDir = defineBddConfig({
     features: 'features/**/*.feature',
@@ -335,7 +335,7 @@ const VSCODE_SETTINGS = `{
   "json.schemas": [
     {
       "fileMatch": ["**/pages/**/*.json"],
-      "url": "./node_modules/@nils.hoyer/plainwright/schema/page.json"
+      "url": "./node_modules/@codesurfer/plainwright/schema/page.json"
     }
   ]
 }

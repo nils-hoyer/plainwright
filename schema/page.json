@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://unpkg.com/@nils.hoyer/plainwright/schema/page.json",
+  "$id": "https://unpkg.com/@codesurfer/plainwright/schema/page.json",
   "title": "Plainwright page",
   "description": "One named page for feature files: I open the \"Login\" page. One file per page in pages/.",
   "type": "object",

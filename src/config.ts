@@ -29,7 +29,7 @@ export type PlainwrightConfig = PlaywrightTestConfig<KeywordsOptions> & {
  * The Playwright configuration for Plainwright tests, with the usual settings:
  *
  *   // playwright.config.ts
- *   import { defineConfig } from '@nils.hoyer/plainwright/config';
+ *   import { defineConfig } from '@codesurfer/plainwright/config';
  *
  *   export default defineConfig({ baseURL: 'http://localhost:3000' });
  *
