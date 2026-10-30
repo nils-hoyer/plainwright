@@ -11,8 +11,8 @@
     "inspect": "plainwright inspect"
   },
   "devDependencies": {
+    "@codesurfer/plainwright": "^0.3.0",
     "@playwright/test": "^1.63.0",
-    "playwright-bdd": "^9.2.1",
-    "@codesurfer/plainwright": "^0.2.0"
+    "playwright-bdd": "^9.2.1"
   }
 }
